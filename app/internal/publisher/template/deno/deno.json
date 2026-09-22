@@ -1,0 +1,10 @@
+{
+  "name": "${package_name}",
+  "version": "${kit_version}",
+  "exports": "./client.ts",
+  "tasks": {
+    "check": "deno check client.ts",
+    "fmt": "deno fmt client.ts"
+  },
+  "imports": {}
+}

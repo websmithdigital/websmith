@@ -1,0 +1,9 @@
+{
+  "name": "${package_name}",
+  "version": "${kit_version}",
+  "description": "SDK for ${product_name} — Bun runtime",
+  "module": "client.js",
+  "type": "module",
+  "license": "MIT",
+  "keywords": ["websmith", "license", "sdk", "bun"]
+}

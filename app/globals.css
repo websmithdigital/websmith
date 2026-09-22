@@ -1,0 +1,1169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #e8e8ed;
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-muted: #6b6b70;
+  --border-color: #e8e8ed;
+  --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  /* Full-width shell; use for readable text columns where needed */
+  --content-readable-max: 72rem;
+  --content-max-width: 100%;
+  --space-page: clamp(12px, 1.6vw, 22px);
+  --space-page-x: clamp(16px, 3.5vw, 40px);
+  --space-page-y: clamp(12px, 1.6vw, 24px);
+  --font-sans: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-heading), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --text-body: 15px;
+  --text-body-sm: 14px;
+  --text-body-lg: 16px;
+  --text-title-page: clamp(26px, 4vw, 34px);
+  --leading-normal: 1.5;
+  --leading-tight: 1.25;
+  --leading-snug: 1.35;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ============================================================
+     API CENTER BRAND COLORS - Light Theme
+     ============================================================ */
+  --api-blue-500: #3b82f6;
+  --api-blue-400: #60a5fa;
+  --api-blue-500-5: rgba(59, 130, 246, 0.05);
+  --api-blue-500-10: rgba(59, 130, 246, 0.10);
+  --api-blue-500-20: rgba(59, 130, 246, 0.20);
+  --api-blue-500-30: rgba(59, 130, 246, 0.30);
+  
+  --api-green-500: #22c55e;
+  --api-green-400: #4ade80;
+  --api-green-500-5: rgba(34, 197, 94, 0.05);
+  --api-green-500-10: rgba(34, 197, 94, 0.10);
+  --api-green-500-20: rgba(34, 197, 94, 0.20);
+  
+  --api-purple-500: #a855f7;
+  --api-purple-400: #c084fc;
+  --api-purple-500-5: rgba(168, 85, 247, 0.05);
+  --api-purple-500-10: rgba(168, 85, 247, 0.10);
+  --api-purple-500-20: rgba(168, 85, 247, 0.20);
+  
+  --api-cyan-500: #06b6d4;
+  --api-cyan-400: #22d3ee;
+  --api-cyan-500-5: rgba(6, 182, 212, 0.05);
+  --api-cyan-500-10: rgba(6, 182, 212, 0.10);
+  --api-cyan-500-20: rgba(6, 182, 212, 0.20);
+  
+  --api-amber-500: #f59e0b;
+  --api-amber-400: #fbbf24;
+  --api-amber-500-5: rgba(245, 158, 11, 0.05);
+  --api-amber-500-10: rgba(245, 158, 11, 0.10);
+  --api-amber-500-20: rgba(245, 158, 11, 0.20);
+  
+  --api-red-500: #ef4444;
+  --api-red-400: #f87171;
+  --api-red-500-5: rgba(239, 68, 68, 0.05);
+  --api-red-500-10: rgba(239, 68, 68, 0.10);
+  --api-red-500-20: rgba(239, 68, 68, 0.20);
+  
+  --api-pink-500: #ec4899;
+  --api-pink-400: #f472b6;
+  --api-pink-500-5: rgba(236, 72, 153, 0.05);
+  --api-pink-500-10: rgba(236, 72, 153, 0.10);
+  --api-pink-500-20: rgba(236, 72, 153, 0.20);
+  
+  --api-indigo-500: #6366f1;
+  --api-indigo-400: #818cf8;
+  --api-indigo-500-5: rgba(99, 102, 241, 0.05);
+  --api-indigo-500-10: rgba(99, 102, 241, 0.10);
+  --api-indigo-500-20: rgba(99, 102, 241, 0.20);
+}
+
+/* Light Theme Variables */
+.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #e8e8ed;
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-muted: #6b6b70;
+  --border-color: #e8e8ed;
+  --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  color-scheme: light;
+}
+
+/* Dark Theme Variables */
+.dark-theme {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --card-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+
+  /* API CENTER BRAND COLORS - Dark Theme */
+  --api-blue-500-5: rgba(59, 130, 246, 0.08);
+  --api-blue-500-10: rgba(59, 130, 246, 0.15);
+  --api-blue-500-20: rgba(59, 130, 246, 0.25);
+  --api-blue-500-30: rgba(59, 130, 246, 0.35);
+  
+  --api-green-500-5: rgba(34, 197, 94, 0.08);
+  --api-green-500-10: rgba(34, 197, 94, 0.15);
+  --api-green-500-20: rgba(34, 197, 94, 0.25);
+  
+  --api-purple-500-5: rgba(168, 85, 247, 0.08);
+  --api-purple-500-10: rgba(168, 85, 247, 0.15);
+  --api-purple-500-20: rgba(168, 85, 247, 0.25);
+  
+  --api-cyan-500-5: rgba(6, 182, 212, 0.08);
+  --api-cyan-500-10: rgba(6, 182, 212, 0.15);
+  --api-cyan-500-20: rgba(6, 182, 212, 0.25);
+  
+  --api-amber-500-5: rgba(245, 158, 11, 0.08);
+  --api-amber-500-10: rgba(245, 158, 11, 0.15);
+  --api-amber-500-20: rgba(245, 158, 11, 0.25);
+  
+  --api-red-500-5: rgba(239, 68, 68, 0.08);
+  --api-red-500-10: rgba(239, 68, 68, 0.15);
+  --api-red-500-20: rgba(239, 68, 68, 0.25);
+  
+  --api-pink-500-5: rgba(236, 72, 153, 0.08);
+  --api-pink-500-10: rgba(236, 72, 153, 0.15);
+  --api-pink-500-20: rgba(236, 72, 153, 0.25);
+  
+  --api-indigo-500-5: rgba(99, 102, 241, 0.08);
+  --api-indigo-500-10: rgba(99, 102, 241, 0.15);
+  --api-indigo-500-20: rgba(99, 102, 241, 0.25);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+img,
+video,
+svg,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+#__next,
+body > div:first-child {
+  min-height: 100vh;
+}
+
+/* ============================================================
+   DARK THEME FIXES FOR DROPDOWNS, INPUTS, TEXTAREAS
+   ✅ FIXED: Using CSS variables instead of hardcoded hex colors
+   ============================================================ */
+
+/* Dark theme - all form elements */
+.dark-theme select,
+.dark-theme select option,
+.dark-theme input,
+.dark-theme textarea {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme select:focus,
+.dark-theme input:focus,
+.dark-theme textarea:focus {
+  border-color: var(--api-blue-500) !important;
+  outline: none !important;
+}
+
+.dark-theme select option {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Light theme - all form elements */
+html:not(.dark-theme) select,
+html:not(.dark-theme) select option,
+html:not(.dark-theme) input,
+html:not(.dark-theme) textarea {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html:not(.dark-theme) select:focus,
+html:not(.dark-theme) input:focus,
+html:not(.dark-theme) textarea:focus {
+  border-color: var(--api-blue-500) !important;
+  outline: none !important;
+}
+
+html:not(.dark-theme) select option {
+  background-color: var(--bg-primary) !important;
+}
+
+html:not(.dark-theme) input::placeholder,
+html:not(.dark-theme) textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+.wsd-page {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: var(--space-page-y) var(--space-page-x);
+  box-sizing: border-box;
+}
+
+/* Authenticated panels (sidebar routes): consistent inner spacing — not applied to public marketing shell */
+main.app-main-shell[data-shell="panel"] {
+  --space-page-x: clamp(18px, 2.5vw, 34px);
+  --space-page-y: clamp(14px, 1.6vw, 24px);
+}
+
+main.app-main-shell[data-shell="panel"] .app-main-scroll {
+  padding: var(--space-page-y) var(--space-page-x);
+  box-sizing: border-box;
+}
+
+/* Optional inner wrapper when long lines should not span the full viewport */
+.wsd-readable {
+  width: 100%;
+  max-width: var(--content-readable-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wsd-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.wsd-page-actions,
+.wsd-toolbar,
+.wsd-filter-row,
+.wsd-chip-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.wsd-search-box {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.wsd-grid-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+.wsd-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+.wsd-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 20px;
+  min-width: 0;
+}
+
+.wsd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wsd-list-row {
+  display: grid;
+  gap: 16px;
+  align-items: center;
+  min-width: 0;
+}
+
+.wsd-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wsd-table-scroll table {
+  min-width: 760px;
+}
+
+.wsd-responsive-modal {
+  width: min(100%, 720px);
+  max-height: min(90vh, 900px);
+}
+
+.wsd-form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.wsd-form-row > * {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.wsd-hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.wsd-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .wsd-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .wsd-page-header {
+    align-items: stretch;
+  }
+
+  .wsd-page-header > *,
+  .wsd-page-actions,
+  .wsd-toolbar,
+  .wsd-filter-row,
+  .wsd-chip-row,
+  .wsd-search-box {
+    width: 100%;
+  }
+
+  .wsd-page-actions > *,
+  .wsd-toolbar > *,
+  .wsd-filter-row > * {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .wsd-card-grid,
+  .wsd-grid-tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .wsd-list-row {
+    grid-template-columns: 1fr !important;
+    align-items: flex-start;
+  }
+
+  .wsd-responsive-modal {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  .wsd-table-scroll table {
+    min-width: 680px;
+  }
+}
+
+/* Animations for Login Page */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+/* ============================================================
+   INTERNAL API SIDEBAR — premium navigation cards (reusable)
+   Builds on the API Center brand variables (--api-*, --bg-*,
+   --text-*) so it adapts automatically to light/dark themes.
+   Transitions follow the 260–300ms easing used across the UI.
+   ============================================================ */
+
+.ia-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.ia-sidebar-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 8px 12px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+.ia-sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.ia-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 9999px;
+}
+.ia-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- Main navigation card ---------- */
+.ia-nav-section {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-secondary) 62%, transparent),
+    color-mix(in srgb, var(--bg-secondary) 16%, transparent)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 5%, transparent),
+    0 10px 26px -18px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+.ia-nav-section:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--api-indigo-500) 30%, var(--border-color));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent),
+    0 16px 34px -20px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--api-indigo-500-10);
+}
+.ia-nav-section--active {
+  border-color: color-mix(in srgb, var(--api-indigo-500) 24%, var(--border-color));
+}
+
+/* ---------- Section header (static) ---------- */
+.ia-nav-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ia-nav-section-title .ia-nav-icon {
+  color: var(--text-muted);
+}
+
+/* ---------- Accordion header (expandable parent) ---------- */
+.ia-nav-accordion-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+  transition:
+    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 260ms ease,
+    color 260ms ease,
+    box-shadow 260ms ease;
+}
+.ia-nav-accordion-header:hover {
+  transform: translateY(-1px);
+  background-color: color-mix(in srgb, var(--bg-tertiary) 45%, transparent);
+}
+.ia-nav-accordion--active .ia-nav-accordion-header {
+  background: linear-gradient(135deg, var(--api-indigo-500-20), var(--api-purple-500-10));
+  box-shadow: 0 8px 18px -12px var(--api-indigo-500-20);
+}
+.ia-nav-accordion--active .ia-nav-accordion-header .ia-nav-icon {
+  color: var(--api-indigo-400);
+}
+
+/* ---------- Accordion body (smooth 0fr → 1fr height animation) ---------- */
+.ia-nav-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ia-nav-collapse--open {
+  grid-template-rows: 1fr;
+}
+.ia-nav-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ---------- Nav item row ---------- */
+.ia-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-secondary);
+  text-align: left;
+  transition:
+    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 260ms ease,
+    color 260ms ease,
+    box-shadow 260ms ease;
+}
+.ia-nav-item:hover {
+  transform: translateY(-1px);
+  color: var(--text-primary);
+  background-color: color-mix(in srgb, var(--bg-tertiary) 45%, transparent);
+  box-shadow: 0 4px 12px -8px rgba(0, 0, 0, 0.3);
+}
+.ia-nav-item:hover .ia-nav-icon {
+  color: var(--api-blue-400);
+}
+
+.ia-nav-item--active,
+.ia-nav-item--active:hover {
+  transform: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--api-indigo-500-20), var(--api-purple-500-10));
+  box-shadow: 0 8px 18px -12px var(--api-indigo-500-20);
+}
+.ia-nav-item--active .ia-nav-icon {
+  color: var(--api-indigo-400);
+}
+
+/* Active left accent bar (animated on appear) */
+.ia-nav-accent {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 62%;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--api-blue-400), var(--api-purple-500));
+  box-shadow: 0 0 10px var(--api-blue-500-30);
+  transform: translateY(-50%);
+  transform-origin: center;
+  animation: iaNavAccentIn 320ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes iaNavAccentIn {
+  from {
+    transform: translateY(-50%) scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- Nested subgroups ---------- */
+.ia-nav-subgroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 8px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ia-nav-subgroup::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  margin-left: 4px;
+  background: linear-gradient(90deg, var(--border-color), transparent);
+}
+
+.ia-nav-children {
+  position: relative;
+  margin: 2px 0 2px 4px;
+  padding: 2px 0 2px 14px;
+}
+.ia-nav-children::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--border-color), transparent);
+}
+.ia-nav-children .ia-nav-item {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+/* ---------- Expand / collapse chevron ---------- */
+.ia-nav-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1), color 260ms ease;
+}
+.ia-nav-accordion--open .ia-nav-chevron {
+  transform: rotate(90deg);
+  color: var(--api-blue-400);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ia-nav-section,
+  .ia-nav-section-title,
+  .ia-nav-accordion-header,
+  .ia-nav-item,
+  .ia-nav-collapse,
+  .ia-nav-chevron,
+  .ia-nav-accent {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ============================================================
+   UIVERSE REFERENCE DESIGN SYSTEM (docs/UI.MD)
+   Visual references from https://uiverse.io — re-published under
+   the uv- prefix so they never clash with the existing design
+   system. Keep in sync with docs/UI.md.
+   ============================================================ */
+
+/* ---------- 1. Button design (reference: Navarog21) ---------- */
+.uv-button {
+  width: 10em;
+  position: relative;
+  height: 3.5em;
+  border: 3px ridge #149CEA;
+  outline: none;
+  background-color: transparent;
+  color: white;
+  transition: 1s;
+  border-radius: 0.3em;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.uv-button::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 3%;
+  width: 95%;
+  height: 40%;
+  background-color: #212121;
+  transition: 0.5s;
+  transform-origin: center;
+}
+
+.uv-button::before {
+  content: "";
+  transform-origin: center;
+  position: absolute;
+  top: 80%;
+  left: 3%;
+  width: 95%;
+  height: 40%;
+  background-color: #212121;
+  transition: 0.5s;
+}
+
+.uv-button:hover::before,
+.uv-button:hover::after {
+  transform: scale(0);
+}
+
+.uv-button:hover {
+  box-shadow: inset 0px 0px 25px #1479EA;
+}
+
+/* ---------- 2 · Textbox / input design (alexruix) ---------- */
+.uv-input {
+  max-width: 190px;
+  height: 44px;
+  background-color: #05060f0a;
+  border-radius: 0.5rem;
+  padding: 0 1rem;
+  border: 2px solid transparent;
+  font-size: 1rem;
+  transition:
+    border-color 0.3s cubic-bezier(0.25, 0.01, 0.25, 1) 0s,
+    color 0.3s cubic-bezier(0.25, 0.01, 0.25, 1) 0s,
+    background 0.2s cubic-bezier(0.25, 0.01, 0.25, 1) 0s;
+}
+
+.uv-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #05060f99;
+  transition: color 0.3s cubic-bezier(0.25, 0.01, 0.25, 1) 0s;
+}
+
+.uv-input:hover,
+.uv-input:focus,
+.uv-input-group:hover .uv-input {
+  outline: none;
+  border-color: #05060f;
+}
+
+.uv-input-group:hover .uv-label,
+.uv-input:focus {
+  color: #05060fc2;
+}
+
+/* ---------- 3 · Card design (05akalan57) ---------- */
+.uv-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background-color: #3d3c3d;
+  box-shadow: 0 15px 35px -15px rgba(0, 0, 0, 0.55);
+}
+
+.uv-card-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  opacity: 0.9;
+  border-radius: 0.75rem;
+  background-color: #323132;
+  color: #ffffff;
+}
+
+.uv-card-glow {
+  position: absolute;
+  left: -50%;
+  top: -50%;
+  width: 60%;
+  height: 40%;
+  background: rgba(255, 255, 255, 0.35);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+/* ---------- 4 · Form design (Smit-Prajapati) ---------- */
+.uv-form-container {
+  max-width: 350px;
+  background: #f8f9fd;
+  background: linear-gradient(
+    0deg,
+    rgb(255, 255, 255) 0%,
+    rgb(244, 247, 251) 100%
+  );
+  border-radius: 40px;
+  padding: 25px 35px;
+  border: 5px solid rgb(255, 255, 255);
+  box-shadow:
+    rgba(133, 189, 215, 0.8784313725) 0px 30px 30px -20px;
+  margin: 20px;
+}
+
+.uv-heading {
+  text-align: center;
+  font-weight: 900;
+  font-size: 30px;
+  color: rgb(16, 137, 211);
+}
+
+.uv-form {
+  margin-top: 20px;
+}
+
+.uv-form .uv-input {
+  width: 100%;
+  max-width: none;
+  background: white;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-shadow: #cff0ff 0px 10px 10px -5px;
+  border-inline: 2px solid transparent;
+}
+
+.uv-form .uv-input:hover {
+  border-color: transparent;
+}
+
+.uv-form .uv-input:focus {
+  outline: none;
+  border-inline: 2px solid #12b1d1;
+  border-color: #12b1d1;
+}
+
+.uv-login-button {
+  display: block;
+  width: 100%;
+  font-weight: bold;
+  background: linear-gradient(
+    45deg,
+    rgb(16, 137, 211) 0%,
+    rgb(18, 177, 209) 100%
+  );
+  color: white;
+  padding-block: 15px;
+  margin: 20px auto;
+  border-radius: 20px;
+  border: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.uv-login-button:hover {
+  transform: scale(1.03);
+}
+
+.uv-login-button:active {
+  transform: scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uv-button,
+  .uv-input,
+  .uv-label,
+  .uv-login-button {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   MANAGE MAILS (app/internal/api/communications/manage-mails)
+   Scoped UI — EVERYTHING lives under .manage-mails-ui, never a
+   global selector. The .mail-action-button is the Navarog21
+   ridge/glow button (see .uv-button above) re-scoped with the
+   platform accent (#149CEA → #1479EA). Keep in sync with the
+   master implementation doc.
+   ============================================================ */
+.manage-mails-ui {
+  --mail-accent: #149CEA;
+  --mail-accent-strong: #1479EA;
+  --mail-accent-soft: rgba(20, 156, 234, 0.12);
+  --mail-boundary: rgba(20, 121, 234, 0.45);
+}
+
+/* Action button (Uiverse Navarog21, re-scoped) */
+.manage-mails-ui .mail-action-button {
+  position: relative;
+  border: 2px ridge var(--mail-accent);
+  outline: none;
+  background-color: transparent;
+  color: #ffffff;
+  transition: 0.5s;
+  border-radius: 0.35em;
+  cursor: pointer;
+}
+
+.manage-mails-ui .mail-action-button::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 3%;
+  width: 95%;
+  height: 40%;
+  background-color: var(--bg-primary, #212121);
+  transition: 0.5s;
+  transform-origin: center;
+  z-index: -1;
+}
+
+.manage-mails-ui .mail-action-button::before {
+  content: "";
+  transform-origin: center;
+  position: absolute;
+  top: 78%;
+  left: 3%;
+  width: 95%;
+  height: 40%;
+  background-color: var(--bg-primary, #212121);
+  transition: 0.5s;
+  z-index: -1;
+}
+
+.manage-mails-ui .mail-action-button:hover::before,
+.manage-mails-ui .mail-action-button:hover::after {
+  transform: scale(0);
+}
+
+.manage-mails-ui .mail-action-button:hover {
+  box-shadow: inset 0px 0px 25px var(--mail-accent-strong);
+}
+
+.manage-mails-ui .mail-action-button:focus-visible {
+  outline: 2px solid var(--mail-accent);
+  outline-offset: 2px;
+}
+
+.manage-mails-ui .mail-action-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Accent boundary helper for account cards / panels */
+.manage-mails-ui .mail-boundary {
+  border: 1px solid var(--mail-boundary);
+  border-radius: 0.6rem;
+  background: linear-gradient(
+    180deg,
+    var(--mail-accent-soft),
+    rgba(20, 121, 234, 0.03)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manage-mails-ui .mail-action-button,
+  .manage-mails-ui .mail-action-button::after,
+  .manage-mails-ui .mail-action-button::before {
+    transition: none;
+  }
+}
+
+/* Admin Query Inbox (app/admin/messages) — scoped spinner utility only; never a
+   global button/text selector. */
+.admin-messages-spin {
+  animation: adminMessagesSpin 0.8s linear infinite;
+}
+
+@keyframes adminMessagesSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-messages-spin {
+    animation: none;
+  }
+}
+
+/* Admin Query Inbox (Phase 16 chat redesign) — scoped component styles */
+.query-inbox-shell {
+  display: grid;
+  grid-template-columns: 385px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  min-height: calc(100vh - 48px);
+}
+
+@media (max-width: 899px) {
+  .query-inbox-shell {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+    min-height: calc(100vh - 24px);
+  }
+  .query-inbox-shell.query-has-thread .query-inbox-sidebar {
+    display: none;
+  }
+  .query-inbox-shell:not(.query-has-thread) .query-inbox-thread {
+    display: none;
+  }
+}
+
+.query-inbox-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  max-height: calc(100vh - 48px);
+}
+
+.query-inbox-thread {
+  height: calc(100vh - 48px);
+}
+
+@media (max-width: 899px) {
+  .query-inbox-shell.query-has-thread .query-inbox-thread {
+    height: calc(100vh - 24px);
+  }
+}
+
+/* Phase 1 redesign — exact 385px inbox, card states, scoped control polish */
+.query-inbox-sidebar {
+  min-width: 385px;
+  max-width: 385px;
+}
+
+.query-ticket-row {
+  transition:
+    border-color 0.18s ease-out,
+    background-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
+}
+.query-ticket-row:hover {
+  border-color: #007aff55;
+  background-color: rgba(0, 122, 255, 0.04);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+.query-ticket-row:focus-visible {
+  outline: 2px solid #007aff;
+  outline-offset: 2px;
+}
+.query-ticket-row.query-ticket-active {
+  border-color: #007aff;
+  background-color: rgba(0, 122, 255, 0.08);
+  box-shadow: 0 0 0 1px #007aff33;
+}
+.query-ticket-row.query-ticket-active:hover {
+  background-color: rgba(0, 122, 255, 0.12);
+}
+
+/* Scoped workspace control states — consistent hover/focus/disabled */
+.query-inbox-shell button,
+.query-inbox-shell select,
+.query-inbox-shell textarea,
+.query-inbox-shell input {
+  transition:
+    background-color 0.18s ease-out,
+    border-color 0.18s ease-out,
+    color 0.18s ease-out,
+    box-shadow 0.18s ease-out,
+    filter 0.18s ease-out;
+}
+.query-inbox-shell button:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+.query-inbox-shell button:focus-visible,
+.query-inbox-shell select:focus-visible,
+.query-inbox-shell textarea:focus-visible,
+.query-inbox-shell input:focus-visible {
+  outline: 2px solid #007aff;
+  outline-offset: 2px;
+}
+.query-inbox-shell button:disabled,
+.query-inbox-shell select:disabled,
+.query-inbox-shell textarea:disabled,
+.query-inbox-shell input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 899px) {
+  .query-inbox-sidebar {
+    min-width: 0;
+    max-width: none;
+  }
+}

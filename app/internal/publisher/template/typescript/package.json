@@ -1,0 +1,16 @@
+{
+  "name": "{{PACKAGE_NAME}}",
+  "version": "{{SDK_VERSION}}",
+  "description": "{{PRODUCT_DESCRIPTION}}",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "tsc"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "license": "MIT",
+  "private": false
+}

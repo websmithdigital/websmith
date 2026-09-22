@@ -1,0 +1,25 @@
+{
+  "name": "websmith/${package_name}-sdk",
+  "description": "SDK for ${product_name}",
+  "version": "${kit_version}",
+  "type": "library",
+  "require": {
+    "php": ">=7.4",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "WebsmithSDK\\": "src/"
+    }
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Websmith",
+      "email": "${support_email}"
+    }
+  ],
+  "minimum-stability": "stable"
+}

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.14)
+project(${cmake_project}-sdk VERSION ${kit_version})
+find_package(CURL REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(OpenSSL REQUIRED)
+add_library(websmith_sdk INTERFACE)
+target_include_directories(websmith_sdk INTERFACE include)
+target_link_libraries(websmith_sdk INTERFACE CURL::libcurl nlohmann_json::nlohmann_json OpenSSL::SSL OpenSSL::Crypto)

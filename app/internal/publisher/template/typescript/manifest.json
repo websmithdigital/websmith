@@ -1,0 +1,8 @@
+{
+  "kit_version": "{{SDK_VERSION}}",
+  "api_version": "v1",
+  "runtime": "{{RUNTIME_TYPE}}",
+  "generated_at": "{{GENERATED_AT}}",
+  "product_id": "{{PRODUCT_ID}}",
+  "product_name": "{{PRODUCT_NAME}}"
+}
