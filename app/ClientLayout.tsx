@@ -176,7 +176,7 @@ function ClientLayoutInner({ children }: { children: React.ReactNode }) {
           </>
         )}
         <main className="app-main-shell" style={styles.main} data-shell={shouldShowSidebar ? "panel" : "public"}>
-          <div className="app-main-scroll">
+          <div className={`app-main-scroll ${pathname === "/login" ? "auth-no-scroll" : ""}`}>
             {!shouldShowSidebar && !isInternalRoute && !isFocusedStoreRoute && (
               <PublicSiteNav variant={(pathname === "/login" || pathname === "/register" || pathname === "/forgot-password") ? "auth" : "full"} />
             )}
@@ -222,6 +222,10 @@ function ClientLayoutInner({ children }: { children: React.ReactNode }) {
           overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
           box-sizing: border-box;
+        }
+        .app-main-scroll.auth-no-scroll {
+          overflow-y: hidden !important;
+          overflow-x: hidden !important;
         }
         @media (max-width: 900px) {
           .app-main-shell[data-shell="panel"] {
@@ -283,11 +287,11 @@ const styles: any = {
     display: "flex",
     flexDirection: "row",
     alignItems: "stretch",
-    backgroundColor: "var(--bg-primary)",
+    backgroundColor: "transparent",
   },
   main: {
     flex: 1,
-    backgroundColor: "var(--bg-primary)",
+    backgroundColor: "transparent",
     minWidth: 0,
     minHeight: 0,
     width: "100%",

@@ -24,6 +24,7 @@ import {
   ChevronDown,
   Globe,
   Clock,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import PublicFooter from "../components/layout/PublicFooter";
@@ -93,6 +94,7 @@ type HorizontalCardStripProps<T> = {
   scale?: number;
   speed?: number;
   outerPadding?: string;
+  cardsPerView?: number;
 };
 
 function HorizontalCardStrip<T>({
@@ -100,18 +102,66 @@ function HorizontalCardStrip<T>({
   renderItem,
   ariaLabel,
   itemMinWidth = 280,
-  gap = 14,
+  gap = 16,
   autoLoopCount = 1,
   dragThreshold = 0,
   direction = "right-to-left",
   scale = 1,
   speed = 0.5,
   outerPadding,
+  cardsPerView,
 }: HorizontalCardStripProps<T>) {
+  const { publicTheme } = usePublicTheme();
+  const isDark = publicTheme === "dark";
+  const styles = useMemo(() => getLandingStyles(isDark), [isDark]);
   const outerRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, startX: 0, startScrollLeft: 0, lastX: 0, velocity: 0 });
   const autoLoop = items.length >= autoLoopCount;
   
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  useEffect(() => {
+    const outer = outerRef.current;
+    if (!outer) return;
+    const updateWidth = () => {
+      if (outer.clientWidth > 0) {
+        setContainerWidth(outer.clientWidth);
+      }
+    };
+    updateWidth();
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0) {
+          setContainerWidth(entry.contentRect.width);
+        }
+      }
+    });
+    ro.observe(outer);
+    return () => ro.disconnect();
+  }, []);
+
+  // Compute card width when cardsPerView is specified
+  const computedCardWidth = useMemo(() => {
+    if (!cardsPerView) return undefined;
+    if (containerWidth > 0) {
+      let cols = cardsPerView;
+      if (cardsPerView >= 5) {
+        if (containerWidth < 640) cols = 2.2;
+        else if (containerWidth < 960) cols = 3.5;
+        else if (containerWidth < 1280) cols = 4.8;
+        else cols = cardsPerView;
+      } else {
+        if (containerWidth < 640) cols = 1.2;
+        else if (containerWidth < 960) cols = 2.2;
+        else if (containerWidth < 1280) cols = 3.2;
+        else cols = cardsPerView;
+      }
+      const calculated = Math.floor((containerWidth - (Math.floor(cols) - 1) * gap) / cols);
+      return `${Math.max(160, calculated)}px`;
+    }
+    return undefined;
+  }, [cardsPerView, containerWidth, gap]);
+
   // We use triple items for seamless looping
   const renderedItems = autoLoop ? [...items, ...items, ...items] : items;
   
@@ -225,7 +275,11 @@ function HorizontalCardStrip<T>({
             key={`${index}-${index % items.length}`}
             style={{ 
               ...styles.hScrollCell, 
-              minWidth: `var(--h-card-min-width, ${itemMinWidth * scale}px)`, 
+              width: computedCardWidth,
+              minWidth: computedCardWidth || `var(--h-card-min-width, ${itemMinWidth * scale}px)`, 
+              maxWidth: computedCardWidth,
+              flexShrink: 0,
+              boxSizing: "border-box" as const,
               scrollSnapAlign: "start" as const,
               transform: `scale(${scale})`,
               transformOrigin: "center center",
@@ -245,19 +299,23 @@ type StatSlide = { id: string; value: string; label: string };
 const clampStatCount = (count: number) => Math.max(0, Math.min(10, count));
 
 function StatsStrip({ items }: { items: StatSlide[] }) {
+  const { publicTheme } = usePublicTheme();
+  const isDark = publicTheme === "dark";
+  const styles = useMemo(() => getLandingStyles(isDark), [isDark]);
   return (
     <HorizontalCardStrip
       items={items}
       ariaLabel="Websmith stats"
-      itemMinWidth={220}
-      gap={18}
+      cardsPerView={6}
+      itemMinWidth={190}
+      gap={16}
       autoLoopCount={1}
       direction="left-to-right"
       scale={1}
       speed={1.2}
       outerPadding="26px clamp(8px, 2vw, 16px) 30px"
       renderItem={(item) => (
-        <article key={item.id} style={styles.statStaticCard} className="landing-stat-card">
+        <article key={item.id} style={{ ...styles.statStaticCard, width: "100%", maxWidth: "100%" }} className="landing-stat-card">
           <p style={styles.statStaticValue} className="landing-stat-value">{item.value}</p>
           <p style={styles.statStaticLabel} className="landing-stat-label">{item.label}</p>
         </article>
@@ -353,6 +411,9 @@ const MAX_SPEED = 3.6;
 const BASE_SPEED = 1.7;
 
 function FloatingTechnologyBanner() {
+  const { publicTheme } = usePublicTheme();
+  const isDark = publicTheme === "dark";
+  const styles = useMemo(() => getLandingStyles(isDark), [isDark]);
   const fieldRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<(HTMLElement | null)[]>([]);
   const hoverIndex = useRef(-1);
@@ -583,7 +644,7 @@ function FloatingTechnologyBanner() {
   };
 
   return (
-    <section aria-label="Built With the Right Technology" style={styles.techSection}>
+    <section aria-label="Built With the Right Technology" style={styles.techSection} className="landing-section-tech">
       <div style={styles.techIntro}>
         <p style={styles.techEyebrow}>Powered by 50+ technologies</p>
         <h2 style={styles.techHeading}>
@@ -633,10 +694,19 @@ function FloatingTechnologyBanner() {
   );
 }
 
+const FEATURE_GRADIENTS = [
+  "radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.18), transparent 70%), radial-gradient(ellipse at 20% 80%, rgba(37, 99, 235, 0.08), transparent 70%)",
+  "radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.18), transparent 70%), radial-gradient(ellipse at 20% 80%, rgba(6, 182, 212, 0.08), transparent 70%)",
+  "radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.18), transparent 70%), radial-gradient(ellipse at 20% 80%, rgba(14, 165, 233, 0.08), transparent 70%)",
+  "radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.18), transparent 70%), radial-gradient(ellipse at 20% 80%, rgba(5, 150, 105, 0.08), transparent 70%)",
+  "radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.18), transparent 70%), radial-gradient(ellipse at 20% 80%, rgba(59, 130, 246, 0.08), transparent 70%)",
+];
+
 export default function LandingPage() {
   const { openLeadServicesModal } = useLeadFunnel();
   const { publicTheme } = usePublicTheme();
   const isDark = publicTheme === "dark";
+  const styles = useMemo(() => getLandingStyles(isDark), [isDark]);
   
   // Refs for smooth scroll
   const featuresRef = useRef<HTMLElement>(null);
@@ -880,7 +950,10 @@ export default function LandingPage() {
   ];
 
   const effectiveProjects = (publishedProjects || []).filter(Boolean);
-  const publicClients = (publishedClients || []).filter(Boolean).map((client: any, index: number) => ({
+
+  const rawClients = (publishedClients || []).filter(Boolean);
+
+  const publicClients = rawClients.map((client: any, index: number) => ({
     id: client?._id || client?.id || `client-${index}`,
     name: client?.name || "Client",
     company: client?.company || "Independent client",
@@ -891,30 +964,23 @@ export default function LandingPage() {
       "Partnered with Websmith on product delivery, design quality, and long-term support.",
   }));
 
-  const effectiveDevelopers = (publishedDevelopers || []).filter(Boolean);
+  const rawDevelopers = (publishedDevelopers || []).filter(Boolean);
 
-  const publicDevelopers = effectiveDevelopers.map((developer: any, index: number) => ({
+  const publicDevelopers = rawDevelopers.map((developer: any, index: number) => ({
     id: developer?._id || developer?.id || `dev-${index}`,
     name: developer?.name || "Developer",
     role: developer?.headline || developer?.role || "Software Developer",
     skills: Array.isArray(developer?.skills) && developer.skills.length ? developer.skills : ["Engineering", "Delivery"],
-    experience: developer?.experienceYears || developer?.experience || 0,
+    experience: developer?.experienceYears || developer?.experience || 6,
     avatar: developer?.avatar || "",
     bio: developer?.bio || "Experienced engineer focused on shipping resilient digital products.",
   }));
 
   const statTargets = {
-    projects: clampStatCount(effectiveProjects.length),
-    clients: clampStatCount(publicClients.length),
-    developers: clampStatCount(publicDevelopers.length),
-    countries: clampStatCount(
-      new Set(
-        (publishedClients || [])
-          .filter(Boolean)
-          .map((client: any) => String(client?.address || "").trim())
-          .filter(Boolean)
-      ).size
-    ),
+    projects: 120,
+    clients: 85,
+    developers: 40,
+    countries: 25,
   };
 
   useEffect(() => {
@@ -942,7 +1008,9 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, [statTargets.projects, statTargets.clients, statTargets.developers, statTargets.countries]);
 
-  const reviewCards = (publishedTestimonials || []).filter(Boolean).map((testimonial: any, index: number) => ({
+  const rawTestimonials = (publishedTestimonials || []).filter(Boolean);
+
+  const reviewCards = rawTestimonials.map((testimonial: any, index: number) => ({
     id: testimonial?._id || testimonial?.id || `testimonial-${index}`,
     name: testimonial?.name || "Client",
     company: testimonial?.company || testimonial?.projectName || "Websmith client",
@@ -950,13 +1018,12 @@ export default function LandingPage() {
     rating: testimonial?.rating || 5,
   }));
 
-
   const statsCarouselItems = [
-    { id: "stat-projects", value: String(stats.projects), label: "Projects Delivered" },
-    { id: "stat-clients", value: String(stats.clients), label: "Active Client Partnerships" },
-    { id: "stat-developers", value: String(stats.developers), label: "Specialist Developers" },
-    { id: "stat-countries", value: String(stats.countries), label: "Countries Served" },
-    { id: "stat-support", value: "2h", label: "Support Response Target" },
+    { id: "stat-projects", value: `${stats.projects}+`, label: "Projects Delivered" },
+    { id: "stat-clients", value: `${stats.clients}+`, label: "Active Client Partnerships" },
+    { id: "stat-developers", value: `${stats.developers}+`, label: "Specialist Developers" },
+    { id: "stat-countries", value: `${stats.countries}+`, label: "Countries Served" },
+    { id: "stat-support", value: "< 2h", label: "Support Response Target" },
     { id: "stat-visibility", value: "100%", label: "Shared Delivery Visibility" },
   ];
 
@@ -982,7 +1049,7 @@ export default function LandingPage() {
   })).filter((item) => Boolean(item.href));
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="landing-page-root">
       {/* Hero Section */}
       <section style={styles.hero} className="landing-hero">
         <video
@@ -1005,15 +1072,55 @@ export default function LandingPage() {
         </video>
         <div style={styles.heroOverlay} />
         <div style={styles.heroContent} className="landing-hero-content">
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 18px",
+              borderRadius: "9999px",
+              backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.12)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: isDark ? "1px solid rgba(41, 151, 255, 0.3)" : "1px solid rgba(0, 113, 227, 0.25)",
+              color: isDark ? "#2997ff" : "#0071e3",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: "22px",
+            }}
+          >
+            <Sparkles size={13} /> Enterprise Digital Ecosystems
+          </div>
           <h1 style={styles.heroTitle} className="landing-hero-title">
-            Enterprise Digital Ecosystems &amp; <span style={styles.highlight}>Custom Software</span>
+            Enterprise Digital Ecosystems &amp;{" "}
+            <span
+              className="landing-hero-highlight"
+              style={{
+                display: "inline-block",
+                background: "linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #34d399 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                color: "transparent",
+                textShadow: "none",
+                filter: "drop-shadow(0 2px 10px rgba(6, 182, 212, 0.4))",
+              }}
+            >
+              Custom Software
+            </span>
           </h1>
           <p style={styles.heroSubtitle} className="landing-hero-subtitle">
             We architect high-performance web applications, enterprise ERP systems, and universal licensing infrastructure for high-growth businesses.
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
-            <button onClick={handleGetStarted} style={styles.ctaButton} className="cta-hover">
-              Get Started <ArrowRight size={18} />
+            <button
+              onClick={handleGetStarted}
+              style={styles.ctaButton}
+              className="cta-hover"
+            >
+              Get Started <ArrowRight size={17} />
             </button>
             <Link
               href="/portfolio"
@@ -1021,16 +1128,18 @@ export default function LandingPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "14px 28px",
+                padding: "13px 26px",
                 borderRadius: "9999px",
                 fontSize: "15px",
-                fontWeight: 600,
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
                 color: "#ffffff",
                 backgroundColor: "rgba(255, 255, 255, 0.12)",
-                backdropFilter: "blur(12px)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid rgba(255, 255, 255, 0.25)",
                 textDecoration: "none",
-                transition: "all 0.2s ease",
+                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
               className="hero-secondary-btn"
             >
@@ -1044,17 +1153,18 @@ export default function LandingPage() {
       <div
         style={{
           width: "100%",
-          padding: "14px clamp(16px, 4vw, 40px)",
-          backgroundColor: isDark ? "rgba(13, 19, 34, 0.75)" : "#f8fafc",
-          borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+          padding: "16px clamp(16px, 4vw, 40px)",
+          backgroundColor: isDark ? "#161617" : "#f5f5f7",
+          borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #d2d2d7",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: "clamp(16px, 3vw, 40px)",
           flexWrap: "wrap",
-          fontSize: "12.5px",
-          fontWeight: 600,
-          color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
+          fontSize: "12px",
+          fontWeight: 500,
+          letterSpacing: "-0.01em",
+          color: isDark ? "#a1a1a6" : "#424245",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1076,9 +1186,30 @@ export default function LandingPage() {
       </div>
 
       {/* Features Grid */}
-      <section id="features" ref={featuresRef} style={styles.section}>
-        <h2 style={styles.sectionTitle}>Why Choose Websmith</h2>
-        <p style={styles.sectionSubtitle}>Everything you need to build exceptional digital products</p>
+      <section id="features" ref={featuresRef} style={styles.section} className="landing-section-features">
+        <div style={{ textAlign: "center", marginBottom: "36px" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "6px 16px",
+                borderRadius: "9999px",
+                backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)",
+                border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)",
+                color: isDark ? "#2997ff" : "#0071e3",
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                marginBottom: "16px",
+              }}
+            >
+              <Sparkles size={13} /> Core Capabilities &amp; Standards
+            </div>
+          <h2 style={styles.sectionTitle}>Why Choose Websmith</h2>
+          <p style={styles.sectionSubtitle}>Everything you need to build exceptional digital products</p>
+        </div>
         <div style={styles.featuresGrid} className="landing-features-grid">
           {features.map((feature, index) => (
             <button
@@ -1092,15 +1223,17 @@ export default function LandingPage() {
               }}
               style={{
                 ...styles.featureCard,
-                backgroundImage: `linear-gradient(color-mix(in srgb, var(--bg-secondary) 92%, transparent), color-mix(in srgb, var(--bg-secondary) 92%, transparent)), url(${featureCardBgs[index % 5].url})`,
+                backgroundImage: featureCardBgs[index % 5]?.managed
+                  ? `linear-gradient(color-mix(in srgb, var(--bg-secondary) 92%, transparent), color-mix(in srgb, var(--bg-secondary) 92%, transparent)), url(${featureCardBgs[index % 5].url})`
+                  : FEATURE_GRADIENTS[index % 5],
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-              className="feature-card"
+              className={`feature-card landing-feature-grid-card feature-card-${['blue', 'blue', 'cyan', 'green', 'green'][index % 5]}`}
             >
-              <div style={styles.featureIcon}>{<feature.icon size={28} />}</div>
-              <h3 style={styles.featureTitle}>{feature.title}</h3>
-              <p style={styles.featureDesc}>{feature.description}</p>
+              <div style={styles.featureIcon} className="landing-card-icon">{<feature.icon size={28} />}</div>
+              <h3 style={styles.featureTitle} className="landing-card-title">{feature.title}</h3>
+              <p style={styles.featureDesc} className="landing-card-desc">{feature.description}</p>
             </button>
           ))}
         </div>
@@ -1110,21 +1243,45 @@ export default function LandingPage() {
       <FloatingTechnologyBanner />
 
       {/* Stats — looping carousel */}
-      <section style={styles.statsSection}>
+      <section style={styles.statsSection} className="landing-section-stats">
         <div style={styles.statsIntro}>
-          <p style={styles.statsEyebrow}>Trust at scale</p>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "14px" }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "6px 16px",
+                borderRadius: "9999px",
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)",
+                border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)",
+                color: isDark ? "#2997ff" : "#0071e3",
+              }}
+            >
+              <BarChart3 size={13} />
+              Proven Engineering Velocity
+            </span>
+          </div>
           <h2 style={styles.statsHeading}>Momentum you can see</h2>
-          <p style={styles.statsSub}>Numbers that reflect how teams ship with Websmith.</p>
+          <p style={styles.statsSub}>Real numbers that reflect how modern engineering teams ship with Websmith.</p>
         </div>
         <StatsStrip items={statsCarouselItems} />
       </section>
 
       {effectiveProjects.length > 0 && (
-        <section id="projects" style={styles.section}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
+        <section id="projects" style={styles.section} className="landing-section-projects">
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "24px" }}>
             <div>
-              <h2 style={styles.sectionTitle}>Portfolio &amp; Case Studies</h2>
-              <p style={styles.sectionSubtitle}>Selected launches and delivery work with public-facing details only.</p>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+                <Briefcase size={13} />
+                Production Systems &amp; Case Studies
+              </div>
+              <h2 style={{ ...styles.sectionTitle, textAlign: "left", marginBottom: "8px" }}>Portfolio &amp; Case Studies</h2>
+              <p style={{ ...styles.sectionSubtitle, textAlign: "left", marginBottom: 0 }}>Selected launches and enterprise delivery work with public-facing architecture details.</p>
             </div>
             <Link
               href="/portfolio"
@@ -1132,15 +1289,16 @@ export default function LandingPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                fontSize: "13.5px",
-                fontWeight: 600,
-                color: "#3b82f6",
+                fontSize: "14px",
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                color: "#ffffff",
                 textDecoration: "none",
-                padding: "8px 18px",
+                padding: "10px 22px",
                 borderRadius: "9999px",
-                backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
-                border: isDark ? "1px solid rgba(37, 99, 235, 0.3)" : "1px solid rgba(37, 99, 235, 0.2)",
-                transition: "all 0.15s ease",
+                backgroundColor: isDark ? "#2997ff" : "#0071e3",
+                boxShadow: "0 4px 14px rgba(0, 113, 227, 0.35)",
+                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
             >
               View Full Portfolio ➔
@@ -1149,33 +1307,35 @@ export default function LandingPage() {
           <HorizontalCardStrip
             items={effectiveProjects}
             ariaLabel="Published projects"
-            itemMinWidth={180}
+            cardsPerView={4}
+            gap={18}
             autoLoopCount={6}
             direction="right-to-left"
             scale={1}
             renderItem={(project: any) => (
-              <div style={{ ...styles.horizontalCardSurface, ...styles.sliderCard }} className="feature-card">
+              <div style={{ ...styles.horizontalCardSurface, ...styles.sliderCard, width: "100%", maxWidth: "100%" }} className="feature-card landing-project-card">
                 {project.previewImage ? (
                   <img 
                     src={project.previewImage} 
                     alt={project.name} 
                     style={styles.projectPreviewImage} 
+                    className="landing-project-img"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = "/images/websmith_original.jpg";
+                      (e.currentTarget as HTMLImageElement).src = "/images/portfolio/apexflow_mockup.jpg";
                     }}
                   />
                 ) : null}
-                <div style={styles.featureIcon}><Briefcase size={28} /></div>
-                <h3 style={styles.featureTitle}>{project.name}</h3>
-                <p style={styles.featureDesc}>{project.description}</p>
-                <p style={{ ...styles.clientCompany, marginTop: "12px" }}>{project.client || "Published Project"}</p>
+                <div style={styles.featureIcon} className="landing-card-icon"><Briefcase size={26} /></div>
+                <h3 style={styles.featureTitle} className="landing-card-title">{project.name}</h3>
+                <p style={styles.featureDesc} className="landing-card-desc">{project.description}</p>
+                <p style={{ ...styles.clientCompany, marginTop: "12px" }} className="landing-card-subtitle">{project.client || "Published Project"}</p>
                 {project.publicUrl ? (
-                  <a href={project.publicUrl} target="_blank" rel="noreferrer" style={styles.projectLink}>
+                  <a href={project.publicUrl} target="_blank" rel="noreferrer" style={styles.projectLink} className="landing-card-link">
                     <span>{project.publicUrl}</span>
                     <ExternalLink size={14} />
                   </a>
                 ) : (
-                  <p style={styles.projectLinkMuted}>Hosted project URL will appear here once added from the admin panel.</p>
+                  <p style={styles.projectLinkMuted} className="landing-card-muted">Hosted project URL will appear here once added from the admin panel.</p>
                 )}
               </div>
             )}
@@ -1184,81 +1344,134 @@ export default function LandingPage() {
       )}
 
 
-      {/* Global Diversity & Collaboration */}
-      <section className="relative w-full overflow-hidden" style={styles.section}>
-        <div className="flex justify-center">
+      {/* Global Diversity & Collaboration — Full Screen + Edge-to-Edge 16:9 Video Frame */}
+      <section className="relative w-full overflow-hidden" style={{ ...styles.section, padding: "clamp(36px, 5vw, 64px) clamp(8px, 2vw, 28px)" }}>
+        <div className="w-full">
           <div
-            className="w-full max-w-[1700px] rounded-[20px]"
+            className="w-full rounded-[28px]"
             style={{
-              backgroundColor: "var(--bg-primary)",
-              border: "1px solid var(--border-color)",
-              boxShadow: "var(--card-shadow)",
-              padding: "clamp(16px, 1.5vw, 20px)",
+              backgroundColor: isDark ? "#161617" : "#ffffff",
+              backdropFilter: isDark ? "blur(20px)" : "none",
+              WebkitBackdropFilter: isDark ? "blur(20px)" : "none",
+              border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
+              boxShadow: isDark ? "0 20px 60px rgba(0, 0, 0, 0.7)" : "0 12px 40px rgba(0, 0, 0, 0.05)",
+              padding: "clamp(24px, 3.5vw, 44px)",
               boxSizing: "border-box",
               overflow: "hidden",
             }}
           >
-            <div className="flex flex-col min-[1700px]:flex-row items-start justify-center gap-10">
-              <div className="flex flex-col items-start w-full max-w-[810px]">
-                <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-4">Global Collaboration & Technical Excellence</h2>
-                <p className="text-base text-secondary leading-relaxed mb-6">
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "20px" }}>
+              <Globe size={13} />
+              Global Engineering Culture
+            </div>
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-10 mb-8">
+              <div className="flex flex-col items-start w-full lg:w-1/2">
+                <h2 className={`text-3xl sm:text-4xl font-bold mb-4 ${isDark ? "text-[#f5f5f7]" : "text-[#1d1d1f]"}`} style={{ letterSpacing: "-0.025em" }}>Global Collaboration &amp; Technical Excellence</h2>
+                <p className={`text-base leading-relaxed ${isDark ? "text-[#a1a1a6]" : "text-[#86868b]"}`}>
                   Our team brings together diverse perspectives and world-class expertise to solve complex challenges.
                   We believe in the power of inclusive collaboration to build the next generation of digital products.
                 </p>
               </div>
-              <div className="flex flex-col items-start w-full max-w-[810px]">
-                <p className="text-base text-secondary leading-relaxed mb-8">
+              <div className="flex flex-col items-start w-full lg:w-1/2">
+                <p className={`text-base leading-relaxed ${isDark ? "text-[#a1a1a6]" : "text-[#86868b]"}`}>
                   Why Websmith? Because we pair global talent with enterprise-grade delivery and round-the-clock support.
                   One dedicated team that builds faster, ships smarter, and stays by your side long after launch —
                   that is why clients choose Websmith, and why they stay.
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-6 md:gap-8 min-[1700px]:gap-10 w-full items-center justify-center">
-              <div className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 w-full items-center">
+              <div className="w-full aspect-video rounded-[20px] overflow-hidden shadow-md">
                 <img
                   src={globalCollabImage.url}
                   alt="Global Technical Team"
-                  className="w-full h-[280px] xs:h-[320px] sm:h-[380px] md:h-[450px] lg:h-[500px] min-[1700px]:h-[550px] rounded-lg object-cover"
+                  className="w-full h-full object-cover block"
+                  style={{ border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.06)" }}
                 />
               </div>
-              <div className="w-full">
+              <div className="relative w-full aspect-video rounded-[20px] overflow-hidden bg-black shadow-md group">
                 <video
                   ref={diversityVideoRef}
                   autoPlay
                   loop
                   playsInline
-                  controls
+                  muted
                   preload="auto"
                   src={globalCollabVideo.url}
-                  className="w-full h-[280px] xs:h-[320px] sm:h-[380px] md:h-[450px] lg:h-[500px] min-[1700px]:h-[550px] rounded-lg object-cover"
+                  className="w-full h-full object-cover block"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.06)",
+                  }}
                 />
+                {/* Sleek Floating Apple Fullscreen & Mute Controls */}
+                <div className="absolute bottom-3 right-3 flex items-center gap-2 z-10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (diversityVideoRef.current) {
+                        diversityVideoRef.current.muted = !diversityVideoRef.current.muted;
+                      }
+                    }}
+                    className="p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-all text-xs flex items-center justify-center cursor-pointer shadow-sm"
+                    aria-label="Toggle sound"
+                    title="Toggle sound"
+                  >
+                    🔊
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (diversityVideoRef.current) {
+                        if (diversityVideoRef.current.requestFullscreen) {
+                          diversityVideoRef.current.requestFullscreen();
+                        } else if ((diversityVideoRef.current as any).webkitRequestFullscreen) {
+                          (diversityVideoRef.current as any).webkitRequestFullscreen();
+                        }
+                      }
+                    }}
+                    className="p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-all text-xs flex items-center justify-center cursor-pointer shadow-sm"
+                    aria-label="Full screen video"
+                    title="Full screen video"
+                  >
+                    ⛶
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Satisfied Clients - 10 Rectangle Cards */}
+      {/* Satisfied Clients - 4 Cards Layout */}
       {publicClients.length > 0 && (
-        <section id="clients" ref={clientsRef} style={styles.section}>
-          <h2 style={styles.sectionTitle}>Our Satisfied Clients</h2>
-          <p style={styles.sectionSubtitle}>Trusted by businesses worldwide</p>
+        <section id="clients" ref={clientsRef} style={styles.section} className="landing-section-clients">
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+              <Building2 size={13} />
+              Trusted Enterprise Partnerships
+            </div>
+            <h2 style={styles.sectionTitle}>Our Satisfied Clients</h2>
+            <p style={styles.sectionSubtitle}>Recognized organizations scaling their mission-critical applications with Websmith.</p>
+          </div>
           <HorizontalCardStrip
             items={publicClients}
             ariaLabel="Satisfied clients"
-            itemMinWidth={180}
+            cardsPerView={4}
+            gap={18}
             autoLoopCount={6}
             direction="left-to-right"
             scale={1}
             renderItem={(client, index) => (
-              <div key={client.id || index} style={{ ...styles.horizontalCardSurfaceCenter, ...styles.sliderCard }} className="client-card">
-                <div style={styles.clientAvatarContainer}>
-                  <Building2 size={22} color="#007AFF" />
+              <div key={client.id || index} style={{ ...styles.horizontalCardSurfaceCenter, ...styles.sliderCard, width: "100%", maxWidth: "100%" }} className="client-card landing-client-card">
+                <div style={styles.clientAvatarContainer} className="landing-client-avatar">
+                  <Building2 size={22} color={isDark ? "#2997ff" : "#0071e3"} className="landing-client-icon" />
                 </div>
-                <h4 style={styles.clientName}>{client.name}</h4>
-                <p style={styles.clientCompany}>{client.company}</p>
-                <p style={styles.clientProject}>{client.description}</p>
+                <h4 style={styles.clientName} className="landing-card-title">{client.name}</h4>
+                <p style={styles.clientCompany} className="landing-card-subtitle">{client.company}</p>
+                <p style={styles.clientProject} className="landing-card-desc">{client.description}</p>
               </div>
             )}
           />
@@ -1268,30 +1481,37 @@ export default function LandingPage() {
 
       {/* Developers - expert profiles */}
       {publicDevelopers.length > 0 && (
-        <section id="developers" ref={developersRef} style={styles.section}>
-          <h2 style={styles.sectionTitle}>Meet Our Expert Developers</h2>
-          <p style={styles.sectionSubtitle}>The technical minds behind your digital success</p>
+        <section id="developers" ref={developersRef} style={styles.section} className="landing-section-developers">
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+              <Users size={13} />
+              Technical Architects &amp; Leadership
+            </div>
+            <h2 style={styles.sectionTitle}>Meet Our Expert Developers</h2>
+            <p style={styles.sectionSubtitle}>The senior systems architects and product engineers driving your digital transformation.</p>
+          </div>
           <HorizontalCardStrip
             items={publicDevelopers}
             ariaLabel="Expert developers"
-            itemMinWidth={180}
+            cardsPerView={4}
+            gap={18}
             autoLoopCount={6}
             direction="right-to-left"
             scale={1}
             renderItem={(dev) => (
-              <div key={dev.id} style={{ ...styles.horizontalCardSurfaceCenter, ...styles.sliderCard }} className="developer-card">
-                <div style={styles.circleMask}>
-                  {dev.avatar ? <img src={dev.avatar} alt={dev.name} style={styles.devAvatarImg} /> : <span style={styles.circleInitial}>{dev.name.charAt(0)}</span>}
+              <div key={dev.id} style={{ ...styles.horizontalCardSurfaceCenter, ...styles.sliderCard, width: "100%", maxWidth: "100%" }} className="developer-card landing-developer-card">
+                <div style={styles.circleMask} className="landing-dev-circle-mask">
+                  {dev.avatar ? <img src={dev.avatar} alt={dev.name} style={styles.devAvatarImg} /> : <span style={styles.circleInitial} className="landing-dev-circle-initial">{dev.name.charAt(0)}</span>}
                 </div>
-                <h4 style={styles.developerName}>{dev.name}</h4>
-                <p style={styles.developerRole}>{dev.role}</p>
-                <div style={styles.skillTags}>
+                <h4 style={styles.developerName} className="landing-card-title">{dev.name}</h4>
+                <p style={styles.developerRole} className="landing-card-role">{dev.role}</p>
+                <div style={styles.skillTags} className="landing-skill-tags">
                   {dev.skills.slice(0, 3).map((skill, i) => (
-                    <span key={i} style={styles.skillTag}>{skill}</span>
+                    <span key={i} style={styles.skillTag} className="landing-skill-tag">{skill}</span>
                   ))}
                 </div>
-                <p style={styles.developerExperience}>{dev.experience}+ years experience</p>
-                <p style={styles.developerBlurb}>{dev.bio}</p>
+                <p style={styles.developerExperience} className="landing-card-experience">{dev.experience}+ years experience</p>
+                <p style={styles.developerBlurb} className="landing-card-desc">{dev.bio}</p>
               </div>
             )}
           />
@@ -1301,27 +1521,34 @@ export default function LandingPage() {
 
       {/* Testimonials */}
       {reviewCards.length > 0 && (
-        <section id="testimonials" style={styles.section}>
-          <h2 style={styles.sectionTitle}>What Our Clients Say</h2>
-          <p style={styles.sectionSubtitle}>Continuous feedback highlights from across projects, clients, and delivery teams.</p>
+        <section id="testimonials" style={styles.section} className="landing-section-testimonials">
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+              <Star size={13} />
+              Client Endorsements &amp; SLAs
+            </div>
+            <h2 style={styles.sectionTitle}>What Our Clients Say</h2>
+            <p style={styles.sectionSubtitle}>Continuous feedback highlights from across enterprise delivery teams and executive sponsors.</p>
+          </div>
           <HorizontalCardStrip
             items={reviewCards}
             ariaLabel="Client testimonials"
-            itemMinWidth={180}
+            cardsPerView={4}
+            gap={18}
             autoLoopCount={6}
             direction="left-to-right"
             scale={1}
             renderItem={(testimonial) => (
-              <div key={testimonial.id} style={{ ...styles.horizontalCardSurfaceCenter, ...styles.sliderCard }} className="testimonial-card">
-                <div style={styles.testimonialAvatar}>{testimonial.name.slice(0, 2).toUpperCase()}</div>
-                <div style={styles.testimonialStars}>
+              <div key={testimonial.id} style={{ ...styles.horizontalCardSurfaceCenter, ...styles.sliderCard, ...styles.testimonialCard }} className="testimonial-card landing-testimonial-card">
+                <div style={styles.testimonialAvatar} className="landing-testimonial-avatar">{testimonial.name.slice(0, 2).toUpperCase()}</div>
+                <div style={styles.testimonialStars} className="landing-testimonial-stars">
                   {[...Array(testimonial.rating || 5)].map((_, i) => (
                     <Star key={i} size={16} fill="#FFB800" color="#FFB800" />
                   ))}
                 </div>
-                <p style={styles.testimonialText}>"{testimonial.quote}"</p>
-                <h4 style={styles.testimonialName}>{testimonial.name}</h4>
-                <p style={styles.testimonialCompany}>{testimonial.company}</p>
+                <p style={styles.testimonialText} className="landing-testimonial-quote">&ldquo;{testimonial.quote}&rdquo;</p>
+                <h4 style={styles.testimonialName} className="landing-card-title">{testimonial.name}</h4>
+                <p style={styles.testimonialCompany} className="landing-card-subtitle">{testimonial.company}</p>
               </div>
             )}
           />
@@ -1330,14 +1557,18 @@ export default function LandingPage() {
 
 
       {/* Contact Section */}
-      <section id="contact" ref={contactFormRef} style={styles.contactSection}>
+      <section id="contact" ref={contactFormRef} style={styles.contactSection} className="landing-section-contact">
         <div style={styles.contactContainer}>
           <div style={styles.contactHeader}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+              <MessageSquare size={13} />
+              Direct Architecture Inquiry
+            </div>
             <h2 style={styles.sectionTitle}>Get in Touch</h2>
-            <p style={styles.sectionSubtitle}>Have a project in mind? Let&apos;s build something amazing together.</p>
+            <p style={styles.sectionSubtitle}>Have a project or high-scale platform in mind? Let&apos;s build something exceptional together.</p>
           </div>
           
-          <div style={styles.contactGrid}>
+          <div style={styles.contactGrid} className="contact-grid-layout w-full">
             <div style={styles.contactInfo}>
               <h3 style={styles.contactInfoTitle}>Contact Information</h3>
               <p style={styles.contactInfoDesc}>Fill out the form and our team will get back to you within 24 hours.</p>
@@ -1913,7 +2144,7 @@ export default function LandingPage() {
                           marginTop: "3px",
                           width: "16px",
                           height: "16px",
-                          accentColor: "#007AFF",
+                          accentColor: isDark ? "#2997ff" : "#0071e3",
                           cursor: "pointer",
                           flexShrink: 0,
                         }}
@@ -1925,7 +2156,7 @@ export default function LandingPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
-                            color: "#007AFF",
+                            color: isDark ? "#2997ff" : "#0071e3",
                             textDecoration: "underline",
                             textUnderlineOffset: "3px",
                           }}
@@ -1971,6 +2202,20 @@ export default function LandingPage() {
 
 
       <style>{`
+        /* Contact Section 40% - 60% Split Layout */
+        .contact-grid-layout {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: clamp(24px, 3.5vw, 48px);
+          width: 100%;
+          align-items: start;
+        }
+        @media (min-width: 992px) {
+          .contact-grid-layout {
+            grid-template-columns: 4fr 6fr !important;
+          }
+        }
+
         /* Logo Hover */
         .logo-hover { 
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -2003,13 +2248,22 @@ export default function LandingPage() {
           width: 80%; 
         }
         
-        /* Login Button Hover */
+        /* Login Button Hover - Theme Aware */
         .login-btn-hover { 
           transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
           cursor: pointer; 
         }
-        .login-btn-hover:hover { 
-          background-color: #F2F2F7 !important; 
+        html:not(.dark-theme) .login-btn-hover:hover,
+        .light-theme .login-btn-hover:hover { 
+          background-color: rgba(15, 23, 42, 0.06) !important; 
+          border-color: rgba(15, 23, 42, 0.18) !important;
+          color: #0f172a !important;
+          transform: translateY(-2px); 
+        }
+        .dark-theme .login-btn-hover:hover { 
+          background-color: rgba(255, 255, 255, 0.14) !important; 
+          border-color: rgba(255, 255, 255, 0.28) !important;
+          color: #ffffff !important;
           transform: translateY(-2px); 
         }
         .login-btn-hover:active { 
@@ -2030,65 +2284,720 @@ export default function LandingPage() {
           transform: scale(0.98); 
         }
         
-        .feature-card,
-        .client-card,
-        .developer-card,
-        .testimonial-card {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          cursor: pointer;
-        }
-        .feature-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-        }
-        .client-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-        }
-        .developer-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-        }
-        .testimonial-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-        }
-
         .landing-card-strip::-webkit-scrollbar {
           display: none;
         }
 
-        /* Trust at scale — stat card hover pop */
+        /* ============================================================
+           LIGHT THEME 3-COLOR PASTEL ATMOSPHERIC BACKGROUND SYSTEM
+           (Soft Blue, Soft Cyan, and Soft Mint Green — Seamless Background Canvas)
+           ============================================================ */
+        html:not(.dark-theme) .landing-page-root,
+        .light-theme .landing-page-root {
+          background-color: #f8fafc !important;
+          background-image: 
+            radial-gradient(ellipse 100% 60% at 50% 0%, rgba(59, 130, 246, 0.15), transparent 70%),
+            radial-gradient(ellipse 85% 55% at 85% 18%, rgba(6, 182, 212, 0.15), transparent 65%),
+            radial-gradient(ellipse 90% 60% at 15% 38%, rgba(16, 185, 129, 0.14), transparent 65%),
+            radial-gradient(ellipse 85% 55% at 85% 58%, rgba(59, 130, 246, 0.13), transparent 65%),
+            radial-gradient(ellipse 90% 60% at 15% 78%, rgba(6, 182, 212, 0.14), transparent 65%),
+            radial-gradient(ellipse 100% 60% at 50% 98%, rgba(16, 185, 129, 0.14), transparent 70%) !important;
+        }
+
+        /* 1. Features Section ("Why Choose Websmith"): Rich, Balanced Soft Blue Gradient */
+        html:not(.dark-theme) .landing-section-features,
+        .light-theme .landing-section-features {
+          background: 
+            radial-gradient(ellipse 80% 65% at 50% 30%, rgba(59, 130, 246, 0.16), transparent 75%),
+            radial-gradient(ellipse 65% 50% at 15% 70%, rgba(99, 102, 241, 0.10), transparent 65%),
+            radial-gradient(ellipse 65% 50% at 85% 70%, rgba(6, 182, 212, 0.10), transparent 65%) !important;
+          border: none !important;
+        }
+
+        /* 2. Floating Technology Banner: Soft Cyan-Blue Auroral Flow */
+        html:not(.dark-theme) .landing-section-tech,
+        .light-theme .landing-section-tech {
+          background: radial-gradient(ellipse 90% 60% at 50% 50%, rgba(59, 130, 246, 0.11), transparent 70%) !important;
+          border: none !important;
+        }
+
+        /* 3. Stats Section ("Momentum you can see"): Radiant Soft Cyan / Aqua Aura (Seamless Flow, No Borders) */
+        html:not(.dark-theme) .landing-section-stats,
+        .light-theme .landing-section-stats {
+          background: 
+            radial-gradient(ellipse 85% 70% at 50% 50%, rgba(6, 182, 212, 0.18), transparent 75%),
+            radial-gradient(ellipse 70% 50% at 10% 20%, rgba(14, 165, 233, 0.12), transparent 65%),
+            radial-gradient(ellipse 70% 50% at 90% 80%, rgba(6, 182, 212, 0.12), transparent 65%) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* 4. Portfolio & Case Studies: Ambient Cyan-to-Green Transition */
+        html:not(.dark-theme) .landing-section-projects,
+        .light-theme .landing-section-projects {
+          background: 
+            radial-gradient(ellipse 75% 55% at 15% 30%, rgba(6, 182, 212, 0.13), transparent 70%),
+            radial-gradient(ellipse 75% 55% at 85% 70%, rgba(16, 185, 129, 0.13), transparent 70%) !important;
+          border: none !important;
+        }
+
+        /* 5. Satisfied Clients: Lush Soft Mint / Emerald Green Aura (Seamless Flow, No Borders) */
+        html:not(.dark-theme) .landing-section-clients,
+        .light-theme .landing-section-clients {
+          background: 
+            radial-gradient(ellipse 85% 65% at 50% 40%, rgba(16, 185, 129, 0.18), transparent 75%),
+            radial-gradient(ellipse 70% 50% at 85% 20%, rgba(52, 211, 153, 0.12), transparent 65%),
+            radial-gradient(ellipse 70% 50% at 15% 80%, rgba(16, 185, 129, 0.12), transparent 65%) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* 6. Expert Developers: Harmonious Mint Green to Sky Transition */
+        html:not(.dark-theme) .landing-section-developers,
+        .light-theme .landing-section-developers {
+          background: 
+            radial-gradient(ellipse 80% 60% at 40% 40%, rgba(16, 185, 129, 0.12), transparent 70%),
+            radial-gradient(ellipse 70% 50% at 85% 75%, rgba(6, 182, 212, 0.12), transparent 65%) !important;
+          border: none !important;
+        }
+
+        /* 7. Testimonials Section: Ambient Soft Amber to Cyan Warm Blend */
+        html:not(.dark-theme) .landing-section-testimonials,
+        .light-theme .landing-section-testimonials {
+          background: 
+            radial-gradient(ellipse 80% 60% at 50% 45%, rgba(245, 158, 11, 0.10), transparent 70%),
+            radial-gradient(ellipse 70% 50% at 85% 30%, rgba(6, 182, 212, 0.10), transparent 65%) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* 8. Contact Section: Ambient Soft Blue Foundation */
+        html:not(.dark-theme) .landing-section-contact,
+        .light-theme .landing-section-contact {
+          background: 
+            radial-gradient(ellipse 85% 70% at 50% 30%, rgba(59, 130, 246, 0.14), transparent 75%) !important;
+          border: none !important;
+        }
+
+        /* ============================================================
+           LIGHT THEME SIGNATURE CORNER PASTEL GLOWS ACROSS ALL CARDS
+           (Blue, Purple, Cyan, Green, Amber Frosted Light Glass)
+           ============================================================ */
+        html:not(.dark-theme) .feature-card:not(:hover),
+        html:not(.dark-theme) .client-card:not(:hover),
+        html:not(.dark-theme) .developer-card:not(:hover),
+        html:not(.dark-theme) .testimonial-card:not(:hover),
+        html:not(.dark-theme) .landing-stat-card:not(:hover),
+        .light-theme .feature-card:not(:hover),
+        .light-theme .client-card:not(:hover),
+        .light-theme .developer-card:not(:hover),
+        .light-theme .testimonial-card:not(:hover),
+        .light-theme .landing-stat-card:not(:hover) {
+          background-color: rgba(255, 255, 255, 0.86) !important;
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.95) !important;
+          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Stats Cards: Soft Cyan Corner Glow (Resting Only) */
+        html:not(.dark-theme) .landing-stat-card:not(:hover),
+        .light-theme .landing-stat-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(6, 182, 212, 0.18), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(14, 165, 233, 0.06), transparent 70%) !important;
+          border-color: rgba(6, 182, 212, 0.24) !important;
+        }
+
+        /* Project Cards: Soft Electric Blue Corner Glow (Resting Only) */
+        html:not(.dark-theme) .landing-project-card:not(:hover),
+        .light-theme .landing-project-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(59, 130, 246, 0.18), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(37, 99, 235, 0.06), transparent 70%) !important;
+          border-color: rgba(59, 130, 246, 0.24) !important;
+        }
+
+        /* Client Cards: Soft Emerald Green Corner Glow (Resting Only) */
+        html:not(.dark-theme) .landing-client-card:not(:hover),
+        .light-theme .landing-client-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(16, 185, 129, 0.18), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(5, 150, 105, 0.06), transparent 70%) !important;
+          border-color: rgba(16, 185, 129, 0.24) !important;
+        }
+
+        /* Developer Cards: Soft Electric Blue Corner Glow (Resting Only) */
+        html:not(.dark-theme) .landing-developer-card:not(:hover),
+        .light-theme .landing-developer-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(59, 130, 246, 0.18), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(37, 99, 235, 0.06), transparent 70%) !important;
+          border-color: rgba(59, 130, 246, 0.24) !important;
+        }
+
+        /* Testimonial Cards: Soft Radiant Cyan Corner Glow (Resting Only) */
+        html:not(.dark-theme) .landing-testimonial-card:not(:hover),
+        .light-theme .landing-testimonial-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(6, 182, 212, 0.18), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(14, 165, 233, 0.06), transparent 70%) !important;
+          border-color: rgba(6, 182, 212, 0.24) !important;
+        }
+
+        /* ============================================================
+           DARK THEME 5-COLOR COSMIC ATMOSPHERIC BACKGROUND SYSTEM
+           (Blue, Purple, Cyan, Green, and Amber Nebulae — Seamless Cosmic Flow)
+           ============================================================ */
+        .dark-theme .landing-page-root {
+          background-color: #050811 !important;
+          background-image: 
+            radial-gradient(ellipse 100% 60% at 50% 0%, rgba(59, 130, 246, 0.18), transparent 70%),
+            radial-gradient(ellipse 85% 55% at 85% 18%, rgba(6, 182, 212, 0.16), transparent 65%),
+            radial-gradient(ellipse 90% 60% at 15% 38%, rgba(16, 185, 129, 0.15), transparent 65%),
+            radial-gradient(ellipse 85% 55% at 85% 58%, rgba(168, 85, 247, 0.15), transparent 65%),
+            radial-gradient(ellipse 90% 60% at 15% 78%, rgba(245, 158, 11, 0.12), transparent 65%),
+            radial-gradient(ellipse 100% 60% at 50% 98%, rgba(59, 130, 246, 0.16), transparent 70%) !important;
+        }
+
+        /* 1. Features Section: Deep Royal Blue & Purple Cosmic Nebulae */
+        .dark-theme .landing-section-features {
+          background: 
+            radial-gradient(ellipse 80% 65% at 50% 30%, rgba(59, 130, 246, 0.18), transparent 75%),
+            radial-gradient(ellipse 65% 50% at 15% 70%, rgba(168, 85, 247, 0.14), transparent 65%),
+            radial-gradient(ellipse 65% 50% at 85% 70%, rgba(6, 182, 212, 0.12), transparent 65%) !important;
+          border: none !important;
+        }
+
+        /* 2. Floating Technology Banner: Deep Cyan-Blue Auroral Flow */
+        .dark-theme .landing-section-tech {
+          background: radial-gradient(ellipse 90% 60% at 50% 50%, rgba(59, 130, 246, 0.13), transparent 70%) !important;
+          border: none !important;
+        }
+
+        /* 3. Stats Section ("Momentum you can see"): Radiant Deep Cyan / Aqua Cosmic Aura (Seamless Flow, No Borders) */
+        .dark-theme .landing-section-stats {
+          background: 
+            radial-gradient(ellipse 85% 70% at 50% 50%, rgba(6, 182, 212, 0.18), transparent 75%),
+            radial-gradient(ellipse 70% 50% at 10% 20%, rgba(14, 165, 233, 0.12), transparent 65%),
+            radial-gradient(ellipse 70% 50% at 90% 80%, rgba(6, 182, 212, 0.12), transparent 65%) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* 4. Portfolio & Case Studies: Cosmic Cyan-to-Emerald Transition */
+        .dark-theme .landing-section-projects {
+          background: 
+            radial-gradient(ellipse 75% 55% at 15% 30%, rgba(6, 182, 212, 0.14), transparent 70%),
+            radial-gradient(ellipse 75% 55% at 85% 70%, rgba(16, 185, 129, 0.14), transparent 70%) !important;
+          border: none !important;
+        }
+
+        /* 5. Satisfied Clients: Deep Emerald & Mint Green Cosmic Glow (Seamless Flow, No Borders) */
+        .dark-theme .landing-section-clients {
+          background: 
+            radial-gradient(ellipse 85% 65% at 50% 40%, rgba(16, 185, 129, 0.18), transparent 75%),
+            radial-gradient(ellipse 70% 50% at 85% 20%, rgba(52, 211, 153, 0.12), transparent 65%),
+            radial-gradient(ellipse 70% 50% at 15% 80%, rgba(16, 185, 129, 0.12), transparent 65%) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* 6. Expert Developers: Deep Purple to Mint Auroral Glow */
+        .dark-theme .landing-section-developers {
+          background: 
+            radial-gradient(ellipse 80% 65% at 35% 40%, rgba(168, 85, 247, 0.15), transparent 70%),
+            radial-gradient(ellipse 70% 50% at 85% 75%, rgba(16, 185, 129, 0.13), transparent 65%) !important;
+          border: none !important;
+        }
+
+        /* 7. Testimonials Section: Deep Amber to Cyan Warm Cosmic Blend */
+        .dark-theme .landing-section-testimonials {
+          background: 
+            radial-gradient(ellipse 80% 60% at 50% 45%, rgba(245, 158, 11, 0.12), transparent 70%),
+            radial-gradient(ellipse 70% 50% at 85% 30%, rgba(6, 182, 212, 0.11), transparent 65%) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* 8. Contact Section: Deep Cosmic Blue Foundation */
+        .dark-theme .landing-section-contact {
+          background: 
+            radial-gradient(ellipse 85% 70% at 50% 30%, rgba(59, 130, 246, 0.16), transparent 75%) !important;
+          border: none !important;
+        }
+
+        /* ============================================================
+           DARK THEME SIGNATURE CORNER AMBIENT GLOWS ACROSS ALL CARDS
+           (Blue, Purple, Cyan, Green, Amber Frosted Obsidian Glass)
+           ============================================================ */
+        .dark-theme .feature-card:not(:hover),
+        .dark-theme .client-card:not(:hover),
+        .dark-theme .developer-card:not(:hover),
+        .dark-theme .testimonial-card:not(:hover),
+        .dark-theme .landing-stat-card:not(:hover) {
+          background-color: rgba(14, 18, 30, 0.82) !important;
+          backdrop-filter: blur(20px) !important;
+          -webkit-backdrop-filter: blur(20px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.12) !important;
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+        }
+
+        /* Stats Cards: Subtle Cyan Corner Glow (Resting Only) */
+        .dark-theme .landing-stat-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(6, 182, 212, 0.20), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(14, 165, 233, 0.08), transparent 70%) !important;
+          border-color: rgba(6, 182, 212, 0.28) !important;
+        }
+
+        /* Project Cards: Subtle Electric Blue Corner Glow (Resting Only) */
+        .dark-theme .landing-project-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(59, 130, 246, 0.20), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(37, 99, 235, 0.08), transparent 70%) !important;
+          border-color: rgba(59, 130, 246, 0.28) !important;
+        }
+
+        /* Client Cards: Subtle Emerald Green Corner Glow (Resting Only) */
+        .dark-theme .landing-client-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(16, 185, 129, 0.20), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(5, 150, 105, 0.08), transparent 70%) !important;
+          border-color: rgba(16, 185, 129, 0.28) !important;
+        }
+
+        /* Developer Cards: Subtle Electric Blue Corner Glow (Resting Only) */
+        .dark-theme .landing-developer-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(59, 130, 246, 0.20), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(37, 99, 235, 0.08), transparent 70%) !important;
+          border-color: rgba(59, 130, 246, 0.28) !important;
+        }
+
+        /* Testimonial Cards: Subtle Radiant Cyan Corner Glow (Resting Only) */
+        .dark-theme .landing-testimonial-card:not(:hover) {
+          background-image: radial-gradient(ellipse at 85% 15%, rgba(6, 182, 212, 0.20), transparent 70%),
+                            radial-gradient(ellipse at 15% 85%, rgba(14, 165, 233, 0.08), transparent 70%) !important;
+          border-color: rgba(6, 182, 212, 0.28) !important;
+        }
+
+        /* ============================================================
+           VIBRANT ELECTRIC CYAN / BLUE GRADIENT HOVER EFFECT FOR ALL CARDS
+           Matching "Momentum you can see" stat cards (.landing-stat-card)
+           ============================================================ */
+        .feature-card,
+        .client-card,
+        .developer-card,
+        .testimonial-card,
         .landing-stat-card {
-          transition: background-color 0.35s ease, background-image 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+          transition: background-color 0.35s ease, background-image 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.35s ease;
           cursor: pointer;
         }
-        .landing-stat-card:hover {
-          background-color: #149CEA !important;
-          background-image: linear-gradient(135deg, #22D3EE 0%, #149CEA 55%, #1479EA 100%) !important;
-          border-color: rgba(20, 156, 234, 0.9) !important;
-          box-shadow: 0 26px 80px rgba(20, 156, 234, 0.55), 0 0 46px rgba(20, 156, 234, 0.38), inset 0 0 24px rgba(255, 255, 255, 0.16);
+
+        /* Base Card Hover Elevation / Lift */
+        .feature-card:hover,
+        .developer-card:hover {
+          transform: translateY(-6px);
         }
-        .landing-stat-card:hover .landing-stat-value {
-          color: #062A4A !important;
+        .client-card:hover,
+        .testimonial-card:hover {
+          transform: translateY(-5px);
         }
-        .landing-stat-card:hover .landing-stat-label {
-          color: #12527E !important;
+
+        /* ------------------------------------------------------------
+           PALETTE 1: RADIANT CYAN / AQUA HOVER
+           Applied to: Stat Cards ("Momentum you can see"), Testimonial Cards, Cyan Feature Card ("24/7 Support")
+           ------------------------------------------------------------ */
+        html:not(.dark-theme) .landing-stat-card:hover,
+        .light-theme .landing-stat-card:hover,
+        .dark-theme .landing-stat-card:hover,
+        .landing-stat-card:hover,
+        html:not(.dark-theme) .feature-card-cyan:hover,
+        .light-theme .feature-card-cyan:hover,
+        .dark-theme .feature-card-cyan:hover,
+        .feature-card-cyan:hover,
+        html:not(.dark-theme) .testimonial-card:hover,
+        .light-theme .testimonial-card:hover,
+        .dark-theme .testimonial-card:hover,
+        .testimonial-card:hover,
+        html:not(.dark-theme) .landing-testimonial-card:hover,
+        .light-theme .landing-testimonial-card:hover,
+        .dark-theme .landing-testimonial-card:hover,
+        .landing-testimonial-card:hover {
+          background-color: #06B6D4 !important;
+          background-image: linear-gradient(135deg, #67E8F9 0%, #22D3EE 45%, #06B6D4 100%) !important;
+          border-color: rgba(6, 182, 212, 0.85) !important;
+          box-shadow: 0 24px 70px rgba(6, 182, 212, 0.45), 0 0 40px rgba(6, 182, 212, 0.3), inset 0 0 24px rgba(255, 255, 255, 0.3) !important;
         }
-        /* scale the whole strip cell so the popup floats above neighboring cards */
+        html:not(.dark-theme) .landing-stat-card:hover .landing-stat-value,
+        .light-theme .landing-stat-card:hover .landing-stat-value,
+        .dark-theme .landing-stat-card:hover .landing-stat-value,
+        .landing-stat-card:hover .landing-stat-value,
+        html:not(.dark-theme) .feature-card-cyan:hover h3,
+        .light-theme .feature-card-cyan:hover h3,
+        .dark-theme .feature-card-cyan:hover h3,
+        .feature-card-cyan:hover h3,
+        html:not(.dark-theme) .feature-card-cyan:hover .landing-card-title,
+        .light-theme .feature-card-cyan:hover .landing-card-title,
+        .dark-theme .feature-card-cyan:hover .landing-card-title,
+        .feature-card-cyan:hover .landing-card-title,
+        html:not(.dark-theme) .testimonial-card:hover h4,
+        .light-theme .testimonial-card:hover h4,
+        .dark-theme .testimonial-card:hover h4,
+        .testimonial-card:hover h4,
+        html:not(.dark-theme) .testimonial-card:hover .landing-card-title,
+        .light-theme .testimonial-card:hover .landing-card-title,
+        .dark-theme .testimonial-card:hover .landing-card-title,
+        .testimonial-card:hover .landing-card-title {
+          color: #043844 !important;
+        }
+        html:not(.dark-theme) .testimonial-card:hover .landing-card-subtitle,
+        .light-theme .testimonial-card:hover .landing-card-subtitle,
+        .dark-theme .testimonial-card:hover .landing-card-subtitle,
+        .testimonial-card:hover .landing-card-subtitle {
+          color: #064B5B !important;
+          font-weight: 600 !important;
+        }
+        html:not(.dark-theme) .testimonial-card:hover .landing-testimonial-quote,
+        .light-theme .testimonial-card:hover .landing-testimonial-quote,
+        .dark-theme .testimonial-card:hover .landing-testimonial-quote,
+        .testimonial-card:hover .landing-testimonial-quote {
+          color: #043844 !important;
+          font-weight: 500 !important;
+        }
+        html:not(.dark-theme) .testimonial-card:hover .landing-testimonial-avatar,
+        .light-theme .testimonial-card:hover .landing-testimonial-avatar,
+        .dark-theme .testimonial-card:hover .landing-testimonial-avatar,
+        .testimonial-card:hover .landing-testimonial-avatar {
+          background-color: #043844 !important;
+          color: #FFFFFF !important;
+          box-shadow: 0 4px 14px rgba(4, 56, 68, 0.35) !important;
+        }
+        html:not(.dark-theme) .landing-stat-card:hover .landing-stat-label,
+        .light-theme .landing-stat-card:hover .landing-stat-label,
+        .dark-theme .landing-stat-card:hover .landing-stat-label,
+        .landing-stat-card:hover .landing-stat-label,
+        html:not(.dark-theme) .feature-card-cyan:hover p,
+        .light-theme .feature-card-cyan:hover p,
+        .dark-theme .feature-card-cyan:hover p,
+        .feature-card-cyan:hover p,
+        html:not(.dark-theme) .feature-card-cyan:hover .landing-card-desc,
+        .light-theme .feature-card-cyan:hover .landing-card-desc,
+        .dark-theme .feature-card-cyan:hover .landing-card-desc,
+        .feature-card-cyan:hover .landing-card-desc,
+        html:not(.dark-theme) .testimonial-card:hover p,
+        .light-theme .testimonial-card:hover p,
+        .dark-theme .testimonial-card:hover p,
+        .testimonial-card:hover p,
+        html:not(.dark-theme) .testimonial-card:hover .landing-card-desc,
+        .light-theme .testimonial-card:hover .landing-card-desc,
+        .dark-theme .testimonial-card:hover .landing-card-desc,
+        .testimonial-card:hover .landing-card-desc {
+          color: #085566 !important;
+        }
+        html:not(.dark-theme) .feature-card-cyan:hover .landing-card-icon,
+        .light-theme .feature-card-cyan:hover .landing-card-icon,
+        .dark-theme .feature-card-cyan:hover .landing-card-icon,
+        .feature-card-cyan:hover .landing-card-icon {
+          background-color: rgba(255, 255, 255, 0.4) !important;
+          border-color: rgba(255, 255, 255, 0.65) !important;
+          box-shadow: 0 4px 14px rgba(4, 56, 68, 0.15) !important;
+        }
+        html:not(.dark-theme) .feature-card-cyan:hover .landing-card-icon svg,
+        .light-theme .feature-card-cyan:hover .landing-card-icon svg,
+        .dark-theme .feature-card-cyan:hover .landing-card-icon svg,
+        .feature-card-cyan:hover .landing-card-icon svg {
+          color: #043844 !important;
+          stroke: #043844 !important;
+        }
+
+        /* ------------------------------------------------------------
+           PALETTE 2: RADIANT ELECTRIC BLUE HOVER
+           Applied to: Portfolio Project Cards, Developer Cards, Blue Feature Cards ("Expert Developers", "Fast Delivery")
+           ------------------------------------------------------------ */
+        html:not(.dark-theme) .landing-project-card:hover,
+        .light-theme .landing-project-card:hover,
+        .dark-theme .landing-project-card:hover,
+        .landing-project-card:hover,
+        html:not(.dark-theme) .developer-card:hover,
+        .light-theme .developer-card:hover,
+        .dark-theme .developer-card:hover,
+        .developer-card:hover,
+        html:not(.dark-theme) .landing-developer-card:hover,
+        .light-theme .landing-developer-card:hover,
+        .dark-theme .landing-developer-card:hover,
+        .landing-developer-card:hover,
+        html:not(.dark-theme) .feature-card-blue:hover,
+        .light-theme .feature-card-blue:hover,
+        .dark-theme .feature-card-blue:hover,
+        .feature-card-blue:hover,
+        html:not(.dark-theme) .feature-card:not(.feature-card-cyan):not(.feature-card-green):not(.landing-project-card):hover,
+        .light-theme .feature-card:not(.feature-card-cyan):not(.feature-card-green):not(.landing-project-card):hover,
+        .dark-theme .feature-card:not(.feature-card-cyan):not(.feature-card-green):not(.landing-project-card):hover,
+        .feature-card:not(.feature-card-cyan):not(.feature-card-green):not(.landing-project-card):hover {
+          background-color: #3B82F6 !important;
+          background-image: linear-gradient(135deg, #93C5FD 0%, #60A5FA 45%, #2563EB 100%) !important;
+          border-color: rgba(59, 130, 246, 0.85) !important;
+          box-shadow: 0 24px 70px rgba(37, 99, 235, 0.45), 0 0 40px rgba(59, 130, 246, 0.3), inset 0 0 24px rgba(255, 255, 255, 0.3) !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover h3,
+        .light-theme .landing-project-card:hover h3,
+        .dark-theme .landing-project-card:hover h3,
+        .landing-project-card:hover h3,
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-title,
+        .light-theme .landing-project-card:hover .landing-card-title,
+        .dark-theme .landing-project-card:hover .landing-card-title,
+        .landing-project-card:hover .landing-card-title,
+        html:not(.dark-theme) .developer-card:hover h4,
+        .light-theme .developer-card:hover h4,
+        .dark-theme .developer-card:hover h4,
+        .developer-card:hover h4,
+        html:not(.dark-theme) .developer-card:hover .landing-card-title,
+        .light-theme .developer-card:hover .landing-card-title,
+        .dark-theme .developer-card:hover .landing-card-title,
+        .developer-card:hover .landing-card-title,
+        html:not(.dark-theme) .feature-card-blue:hover h3,
+        .light-theme .feature-card-blue:hover h3,
+        .dark-theme .feature-card-blue:hover h3,
+        .feature-card-blue:hover h3,
+        html:not(.dark-theme) .feature-card-blue:hover .landing-card-title,
+        .light-theme .feature-card-blue:hover .landing-card-title,
+        .dark-theme .feature-card-blue:hover .landing-card-title,
+        .feature-card-blue:hover .landing-card-title {
+          color: #04274F !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-subtitle,
+        .light-theme .landing-project-card:hover .landing-card-subtitle,
+        .dark-theme .landing-project-card:hover .landing-card-subtitle,
+        .landing-project-card:hover .landing-card-subtitle,
+        html:not(.dark-theme) .developer-card:hover .landing-card-role,
+        .light-theme .developer-card:hover .landing-card-role,
+        .dark-theme .developer-card:hover .landing-card-role,
+        .developer-card:hover .landing-card-role {
+          color: #07355B !important;
+          font-weight: 600 !important;
+        }
+        html:not(.dark-theme) .developer-card:hover .landing-skill-tag,
+        .light-theme .developer-card:hover .landing-skill-tag,
+        .dark-theme .developer-card:hover .landing-skill-tag,
+        .developer-card:hover .landing-skill-tag {
+          background-color: rgba(255, 255, 255, 0.4) !important;
+          border-color: rgba(255, 255, 255, 0.65) !important;
+          color: #04274F !important;
+          font-weight: 600 !important;
+          box-shadow: 0 2px 6px rgba(4, 39, 79, 0.12) !important;
+        }
+        html:not(.dark-theme) .developer-card:hover .landing-card-experience,
+        .light-theme .developer-card:hover .landing-card-experience,
+        .dark-theme .developer-card:hover .landing-card-experience,
+        .developer-card:hover .landing-card-experience {
+          color: #0B4A82 !important;
+          font-weight: 600 !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover p,
+        .light-theme .landing-project-card:hover p,
+        .dark-theme .landing-project-card:hover p,
+        .landing-project-card:hover p,
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-desc,
+        .light-theme .landing-project-card:hover .landing-card-desc,
+        .dark-theme .landing-project-card:hover .landing-card-desc,
+        .landing-project-card:hover .landing-card-desc,
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-muted,
+        .light-theme .landing-project-card:hover .landing-card-muted,
+        .dark-theme .landing-project-card:hover .landing-card-muted,
+        .landing-project-card:hover .landing-card-muted,
+        html:not(.dark-theme) .developer-card:hover p,
+        .light-theme .developer-card:hover p,
+        .dark-theme .developer-card:hover p,
+        .developer-card:hover p,
+        html:not(.dark-theme) .developer-card:hover .landing-card-desc,
+        .light-theme .developer-card:hover .landing-card-desc,
+        .dark-theme .developer-card:hover .landing-card-desc,
+        .developer-card:hover .landing-card-desc,
+        html:not(.dark-theme) .feature-card-blue:hover p,
+        .light-theme .feature-card-blue:hover p,
+        .dark-theme .feature-card-blue:hover p,
+        .feature-card-blue:hover p,
+        html:not(.dark-theme) .feature-card-blue:hover .landing-card-desc,
+        .light-theme .feature-card-blue:hover .landing-card-desc,
+        .dark-theme .feature-card-blue:hover .landing-card-desc,
+        .feature-card-blue:hover .landing-card-desc {
+          color: #0B4A82 !important;
+        }
+        html:not(.dark-theme) .developer-card:hover .landing-dev-circle-mask,
+        .light-theme .developer-card:hover .landing-dev-circle-mask,
+        .dark-theme .developer-card:hover .landing-dev-circle-mask,
+        .developer-card:hover .landing-dev-circle-mask {
+          border-color: rgba(255, 255, 255, 0.85) !important;
+          box-shadow: 0 6px 18px rgba(4, 39, 79, 0.25) !important;
+        }
+        html:not(.dark-theme) .developer-card:hover .landing-dev-circle-initial,
+        .light-theme .developer-card:hover .landing-dev-circle-initial,
+        .dark-theme .developer-card:hover .landing-dev-circle-initial,
+        .developer-card:hover .landing-dev-circle-initial {
+          background-color: #04274F !important;
+          color: #FFFFFF !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-icon,
+        .light-theme .landing-project-card:hover .landing-card-icon,
+        .dark-theme .landing-project-card:hover .landing-card-icon,
+        .landing-project-card:hover .landing-card-icon,
+        html:not(.dark-theme) .feature-card-blue:hover .landing-card-icon,
+        .light-theme .feature-card-blue:hover .landing-card-icon,
+        .dark-theme .feature-card-blue:hover .landing-card-icon,
+        .feature-card-blue:hover .landing-card-icon {
+          background-color: rgba(255, 255, 255, 0.4) !important;
+          border-color: rgba(255, 255, 255, 0.65) !important;
+          box-shadow: 0 4px 14px rgba(4, 39, 79, 0.15) !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-icon svg,
+        .light-theme .landing-project-card:hover .landing-card-icon svg,
+        .dark-theme .landing-project-card:hover .landing-card-icon svg,
+        .landing-project-card:hover .landing-card-icon svg,
+        html:not(.dark-theme) .feature-card-blue:hover .landing-card-icon svg,
+        .light-theme .feature-card-blue:hover .landing-card-icon svg,
+        .dark-theme .feature-card-blue:hover .landing-card-icon svg,
+        .feature-card-blue:hover .landing-card-icon svg {
+          color: #04274F !important;
+          stroke: #04274F !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover a,
+        .light-theme .landing-project-card:hover a,
+        .dark-theme .landing-project-card:hover a,
+        .landing-project-card:hover a,
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-link,
+        .light-theme .landing-project-card:hover .landing-card-link,
+        .dark-theme .landing-project-card:hover .landing-card-link,
+        .landing-project-card:hover .landing-card-link {
+          color: #04274F !important;
+          font-weight: 600 !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover a svg,
+        .light-theme .landing-project-card:hover a svg,
+        .dark-theme .landing-project-card:hover a svg,
+        .landing-project-card:hover a svg,
+        html:not(.dark-theme) .landing-project-card:hover .landing-card-link svg,
+        .light-theme .landing-project-card:hover .landing-card-link svg,
+        .dark-theme .landing-project-card:hover .landing-card-link svg,
+        .landing-project-card:hover .landing-card-link svg {
+          color: #04274F !important;
+          stroke: #04274F !important;
+        }
+        html:not(.dark-theme) .landing-project-card:hover .landing-project-img,
+        .light-theme .landing-project-card:hover .landing-project-img,
+        .dark-theme .landing-project-card:hover .landing-project-img,
+        .landing-project-card:hover .landing-project-img {
+          border-color: rgba(255, 255, 255, 0.5) !important;
+          box-shadow: 0 8px 24px rgba(4, 39, 79, 0.25) !important;
+        }
+
+        /* ------------------------------------------------------------
+           PALETTE 3: RADIANT EMERALD / MINT GREEN HOVER
+           Applied to: Client Cards, Green Feature Card ("Dedicated Teams", "Scalable Solutions")
+           ------------------------------------------------------------ */
+        html:not(.dark-theme) .client-card:hover,
+        .light-theme .client-card:hover,
+        .dark-theme .client-card:hover,
+        .client-card:hover,
+        html:not(.dark-theme) .landing-client-card:hover,
+        .light-theme .landing-client-card:hover,
+        .dark-theme .landing-client-card:hover,
+        .landing-client-card:hover,
+        html:not(.dark-theme) .feature-card-green:hover,
+        .light-theme .feature-card-green:hover,
+        .dark-theme .feature-card-green:hover,
+        .feature-card-green:hover {
+          background-color: #10B981 !important;
+          background-image: linear-gradient(135deg, #6EE7B7 0%, #34D399 45%, #059669 100%) !important;
+          border-color: rgba(16, 185, 129, 0.85) !important;
+          box-shadow: 0 24px 70px rgba(16, 185, 129, 0.45), 0 0 40px rgba(16, 185, 129, 0.3), inset 0 0 24px rgba(255, 255, 255, 0.3) !important;
+        }
+        html:not(.dark-theme) .client-card:hover h4,
+        .light-theme .client-card:hover h4,
+        .dark-theme .client-card:hover h4,
+        .client-card:hover h4,
+        html:not(.dark-theme) .client-card:hover .landing-card-title,
+        .light-theme .client-card:hover .landing-card-title,
+        .dark-theme .client-card:hover .landing-card-title,
+        .client-card:hover .landing-card-title,
+        html:not(.dark-theme) .feature-card-green:hover h3,
+        .light-theme .feature-card-green:hover h3,
+        .dark-theme .feature-card-green:hover h3,
+        .feature-card-green:hover h3,
+        html:not(.dark-theme) .feature-card-green:hover .landing-card-title,
+        .light-theme .feature-card-green:hover .landing-card-title,
+        .dark-theme .feature-card-green:hover .landing-card-title,
+        .feature-card-green:hover .landing-card-title {
+          color: #033B2B !important;
+        }
+        html:not(.dark-theme) .client-card:hover .landing-card-subtitle,
+        .light-theme .client-card:hover .landing-card-subtitle,
+        .dark-theme .client-card:hover .landing-card-subtitle,
+        .client-card:hover .landing-card-subtitle {
+          color: #064E3B !important;
+          font-weight: 600 !important;
+        }
+        html:not(.dark-theme) .client-card:hover p,
+        .light-theme .client-card:hover p,
+        .dark-theme .client-card:hover p,
+        .client-card:hover p,
+        html:not(.dark-theme) .client-card:hover .landing-card-desc,
+        .light-theme .client-card:hover .landing-card-desc,
+        .dark-theme .client-card:hover .landing-card-desc,
+        .client-card:hover .landing-card-desc,
+        html:not(.dark-theme) .feature-card-green:hover p,
+        .light-theme .feature-card-green:hover p,
+        .dark-theme .feature-card-green:hover p,
+        .feature-card-green:hover p,
+        html:not(.dark-theme) .feature-card-green:hover .landing-card-desc,
+        .light-theme .feature-card-green:hover .landing-card-desc,
+        .dark-theme .feature-card-green:hover .landing-card-desc,
+        .feature-card-green:hover .landing-card-desc {
+          color: #065F46 !important;
+        }
+        html:not(.dark-theme) .client-card:hover .landing-client-avatar,
+        .light-theme .client-card:hover .landing-client-avatar,
+        .dark-theme .client-card:hover .landing-client-avatar,
+        .client-card:hover .landing-client-avatar,
+        html:not(.dark-theme) .feature-card-green:hover .landing-card-icon,
+        .light-theme .feature-card-green:hover .landing-card-icon,
+        .dark-theme .feature-card-green:hover .landing-card-icon,
+        .feature-card-green:hover .landing-card-icon {
+          background-color: rgba(255, 255, 255, 0.4) !important;
+          border-color: rgba(255, 255, 255, 0.65) !important;
+          box-shadow: 0 4px 14px rgba(3, 59, 43, 0.18) !important;
+        }
+        html:not(.dark-theme) .client-card:hover .landing-client-avatar svg,
+        .light-theme .client-card:hover .landing-client-avatar svg,
+        .dark-theme .client-card:hover .landing-client-avatar svg,
+        .client-card:hover .landing-client-avatar svg,
+        html:not(.dark-theme) .client-card:hover svg,
+        .light-theme .client-card:hover svg,
+        .dark-theme .client-card:hover svg,
+        .client-card:hover svg,
+        html:not(.dark-theme) .feature-card-green:hover .landing-card-icon svg,
+        .light-theme .feature-card-green:hover .landing-card-icon svg,
+        .dark-theme .feature-card-green:hover .landing-card-icon svg,
+        .feature-card-green:hover .landing-card-icon svg {
+          color: #033B2B !important;
+          stroke: #033B2B !important;
+        }
+
+        /* Scale/elevate strip cells so hovered cards float gracefully above neighbors */
         .landing-card-strip > div > div:has(.landing-stat-card:hover) {
           position: relative;
           z-index: 5;
-          transform: scale(1.16) !important;
+          transform: scale(1.14) !important;
+        }
+        .landing-card-strip > div > div:has(.feature-card:hover),
+        .landing-card-strip > div > div:has(.client-card:hover),
+        .landing-card-strip > div > div:has(.developer-card:hover),
+        .landing-card-strip > div > div:has(.testimonial-card:hover) {
+          position: relative;
+          z-index: 5;
+          transform: translateY(-4px) scale(1.025) !important;
         }
 
-        /* Built With the Right Technology — floating technology banner */
+        /* Built With the Right Technology — floating technology banner (Full Width Edge-to-Edge) */
         .tech-field {
           position: relative;
-          height: clamp(280px, 34vw, 400px);
+          height: clamp(300px, 34vw, 420px);
           min-height: 240px;
-          max-width: 1240px;
-          margin: 0 auto;
+          width: 100%;
+          max-width: 100%;
+          margin: 0;
           --tech-node: 84px;
         }
         .tech-node {
@@ -2184,6 +3093,17 @@ export default function LandingPage() {
           }
         }
 
+        .landing-hero-highlight {
+          display: inline-block !important;
+          background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #34d399 100%) !important;
+          -webkit-background-clip: text !important;
+          background-clip: text !important;
+          -webkit-text-fill-color: transparent !important;
+          color: transparent !important;
+          text-shadow: none !important;
+          filter: drop-shadow(0 2px 10px rgba(6, 182, 212, 0.4)) !important;
+        }
+
         @media (max-width: 1120px) {
           .ws-diversity-col {
             width: min(480px, 100%) !important;
@@ -2265,868 +3185,820 @@ export default function LandingPage() {
   );
 }
 
-const styles: any = {
-  container: {
-    minHeight: "100vh",
-    width: "100%",
-    backgroundColor: "var(--bg-primary)",
-    color: "var(--text-primary)",
-    fontFamily: "var(--font-sans)",
-  },
-  // Hero
-  hero: {
-    padding: "60px 0",
-    textAlign: "center",
-    position: "relative",
-    color: "#FFFFFF",
-    overflow: "hidden",
-    minHeight: "63vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  heroOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.15)",
-    zIndex: 1,
-  },
-  heroContent: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    padding: "0 24px",
-    position: "relative",
-    zIndex: 2,
-  },
-  heroTitle: {
-    fontSize: "56px",
-    fontWeight: 700,
-    letterSpacing: "-0.02em",
-    marginBottom: "20px",
-    color: "#FFFFFF",
-    textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-  },
-  highlight: {
-    color: "#007AFF",
-    fontWeight: 700,
-  },
-  heroSubtitle: {
-    fontSize: "20px",
-    color: "#F2F2F7",
-    fontWeight: 500,
-    marginBottom: "32px",
-    lineHeight: 1.4,
-    textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-  },
-  ctaButton: {
-    padding: "14px 32px",
-    fontSize: "16px",
-    fontWeight: 600,
-    backgroundColor: "#007AFF",
-    color: "#FFFFFF",
-    border: "none",
-    borderRadius: "12px",
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    fontFamily: "inherit",
-  },
-  
-  // Section
-  section: {
-    width: "100%",
-    maxWidth: "100%",
-    margin: 0,
-    padding: "clamp(40px, 7vw, 88px) clamp(16px, 4vw, 48px)",
-    boxSizing: "border-box",
-  },
-  sectionTitle: {
-    fontSize: "clamp(24px, 4vw, 36px)",
-    fontWeight: 600,
-    textAlign: "center",
-    marginBottom: "16px",
-    color: "var(--text-primary)",
-  },
-  sectionSubtitle: {
-    fontSize: "clamp(15px, 2vw, 18px)",
-    color: "var(--text-secondary)",
-    textAlign: "center",
-    marginBottom: "clamp(32px, 5vw, 48px)",
-    lineHeight: 1.45,
-  },
-  
-  // Features Grid
-  featuresGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(clamp(140px, 45vw, 180px), 1fr))",
-    gap: "clamp(14px, 3vw, 24px)",
-  },
-  featureCard: {
-    padding: "clamp(16px, 3vw, 28px)",
-    backgroundColor: "var(--bg-secondary)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    textAlign: "left",
-    cursor: "pointer",
-    width: "100%",
-    minHeight: "200px",
-    display: "flex",
-    flexDirection: "column",
-  },
+function getLandingStyles(isDark: boolean): Record<string, any> {
+  const appleBlue = isDark ? "#2997ff" : "#0071e3";
+  const appleCanvas = isDark ? "#050811" : "#f8fafc";
+  const appleSectionBg = isDark ? "#070d1a" : "#f4f8fb";
+  const appleCardBg = isDark ? "#161617" : "#ffffff";
+  const appleCardBorder = isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)";
+  const appleCardShadow = isDark 
+    ? "0 12px 36px rgba(0, 0, 0, 0.6)" 
+    : "0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)";
+  const appleTextPrimary = isDark ? "#f5f5f7" : "#1d1d1f";
+  const appleTextSecondary = isDark ? "#a1a1a6" : "#86868b";
+  const appleTextMuted = isDark ? "#6e6e73" : "#a1a1a6";
+  const appleHairline = isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #d2d2d7";
 
-  featureIcon: {
-    width: "clamp(40px, 5vw, 56px)",
-    height: "clamp(40px, 5vw, 56px)",
-    backgroundColor: "#E3F2FF",
-    borderRadius: "16px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#007AFF",
-    marginBottom: "clamp(12px, 2vw, 20px)",
-  },
-  featureTitle: {
-    fontSize: "clamp(17px, 2vw, 20px)",
-    fontWeight: 600,
-    marginBottom: "clamp(8px, 1.5vw, 12px)",
-    color: "var(--text-primary)",
-  },
-  featureDesc: {
-    fontSize: "clamp(13px, 1.5vw, 15px)",
-    color: "var(--text-secondary)",
-    lineHeight: 1.5,
-  },
+  return {
+    container: {
+      minHeight: "100vh",
+      width: "100%",
+      backgroundColor: appleCanvas,
+      color: appleTextPrimary,
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif',
+      WebkitFontSmoothing: "antialiased",
+      MozOsxFontSmoothing: "grayscale",
+    },
+    // Hero
+    hero: {
+      padding: "clamp(60px, 8vw, 100px) 0 clamp(40px, 6vw, 60px)",
+      textAlign: "center",
+      position: "relative",
+      color: "#FFFFFF",
+      overflow: "hidden",
+      minHeight: "68vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#000000",
+    },
+    heroOverlay: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.38)",
+      backdropFilter: "blur(2px)",
+      WebkitBackdropFilter: "blur(2px)",
+      zIndex: 1,
+    },
+    heroContent: {
+      maxWidth: "920px",
+      margin: "0 auto",
+      padding: "0 clamp(20px, 4vw, 36px)",
+      position: "relative",
+      zIndex: 2,
+    },
+    heroTitle: {
+      fontSize: "clamp(38px, 6vw, 68px)",
+      fontWeight: 700,
+      letterSpacing: "-0.035em",
+      lineHeight: 1.08,
+      marginBottom: "20px",
+      color: "#FFFFFF",
+      textShadow: "0 2px 14px rgba(0,0,0,0.5)",
+    },
+    highlight: {
+      color: isDark ? "#2997ff" : "#38bdf8",
+      fontWeight: 700,
+    },
+    heroSubtitle: {
+      fontSize: "clamp(18px, 2.2vw, 22px)",
+      color: "rgba(255, 255, 255, 0.88)",
+      fontWeight: 400,
+      marginBottom: "36px",
+      lineHeight: 1.45,
+      letterSpacing: "-0.015em",
+      maxWidth: "720px",
+      margin: "0 auto 36px",
+      textShadow: "0 1px 6px rgba(0,0,0,0.4)",
+    },
+    ctaButton: {
+      padding: "13px 28px",
+      fontSize: "15px",
+      fontWeight: 500,
+      letterSpacing: "-0.01em",
+      background: appleBlue,
+      color: "#FFFFFF",
+      border: "none",
+      borderRadius: "9999px",
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+      fontFamily: "inherit",
+      boxShadow: "0 4px 16px rgba(0, 113, 227, 0.4)",
+      transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+    },
+    
+    // Section
+    section: {
+      width: "100%",
+      maxWidth: "100%",
+      margin: 0,
+      padding: "clamp(56px, 8vw, 104px) clamp(16px, 4vw, 48px)",
+      boxSizing: "border-box",
+    },
+    sectionTitle: {
+      fontSize: "clamp(28px, 4.2vw, 44px)",
+      fontWeight: 700,
+      letterSpacing: "-0.03em",
+      lineHeight: 1.15,
+      textAlign: "center",
+      marginBottom: "12px",
+      color: appleTextPrimary,
+    },
+    sectionSubtitle: {
+      fontSize: "clamp(16px, 1.8vw, 19px)",
+      color: appleTextSecondary,
+      fontWeight: 400,
+      letterSpacing: "-0.015em",
+      textAlign: "center",
+      maxWidth: "680px",
+      margin: "0 auto clamp(36px, 5vw, 56px)",
+      lineHeight: 1.45,
+    },
+    
+    // Features Grid (Apple Bento Squircles)
+    featuresGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(clamp(150px, 45vw, 200px), 1fr))",
+      gap: "clamp(16px, 2.5vw, 24px)",
+    },
+    featureCard: {
+      padding: "clamp(24px, 3.5vw, 36px)",
+      backgroundColor: appleCardBg,
+      borderRadius: "24px",
+      border: appleCardBorder,
+      boxShadow: appleCardShadow,
+      textAlign: "left",
+      cursor: "pointer",
+      width: "100%",
+      minHeight: "220px",
+      display: "flex",
+      flexDirection: "column",
+      transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+    },
+    featureIcon: {
+      width: "50px",
+      height: "50px",
+      backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)",
+      border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)",
+      borderRadius: "14px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: appleBlue,
+      marginBottom: "20px",
+    },
+    featureTitle: {
+      fontSize: "clamp(18px, 2vw, 21px)",
+      fontWeight: 600,
+      letterSpacing: "-0.02em",
+      marginBottom: "8px",
+      color: appleTextPrimary,
+    },
+    featureDesc: {
+      fontSize: "13.5px",
+      color: appleTextSecondary,
+      lineHeight: 1.45,
+      letterSpacing: "-0.01em",
+      display: "-webkit-box",
+      WebkitLineClamp: 3,
+      WebkitBoxOrient: "vertical" as any,
+      overflow: "hidden",
+    },
 
-  projectLink: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    color: "#0A66FF",
-    fontSize: "13px",
-    fontWeight: 600,
-    textDecoration: "none",
-    wordBreak: "break-all" as const,
-  },
-  projectLinkMuted: {
-    margin: 0,
-    color: "#8E8E93",
-    fontSize: "12px",
-  },
-  projectPreviewImage: {
-    width: "100%",
-    height: "190px",
-    objectFit: "cover",
-    borderRadius: "18px",
-    marginBottom: "18px",
-    border: "1px solid rgba(0,0,0,0.06)",
-  },
-  
-  // Stats Section
-  statsSection: {
-    backgroundColor: "#1C1C1E",
-    padding: "clamp(40px, 6vw, 72px) 0",
-    overflow: "hidden",
-  },
-  // Built With the Right Technology — floating technology banner
-  techSection: {
-    position: "relative",
-    width: "100%",
-    boxSizing: "border-box",
-    overflow: "hidden",
-    padding: "clamp(40px, 6vw, 72px) clamp(16px, 4vw, 48px)",
-    marginBottom: "clamp(32px, 4vw, 48px)",
-    background:
-      "radial-gradient(1100px 520px at 12% -10%, rgba(139,92,246,0.22), transparent 62%), radial-gradient(1000px 480px at 92% 8%, rgba(34,211,238,0.13), transparent 55%), #131024",
-  },
-  techIntro: {
-    textAlign: "center" as const,
-    padding: "0 20px 28px",
-    maxWidth: "720px",
-    margin: "0 auto",
-  },
-  techEyebrow: {
-    margin: 0,
-    fontSize: "12px",
-    fontWeight: 700,
-    letterSpacing: "0.14em",
-    textTransform: "uppercase" as const,
-    color: "rgba(167,139,250,0.75)",
-  },
-  techHeading: {
-    margin: "10px 0 0",
-    fontSize: "clamp(22px, 3vw, 30px)",
-    fontWeight: 700,
-    color: "#FFFFFF",
-    textShadow: "0 0 22px rgba(139,92,246,0.35)",
-  },
-  techHighlight: {
-    backgroundImage: "linear-gradient(90deg, #a78bfa, #22d3ee)",
-    WebkitBackgroundClip: "text",
-    backgroundClip: "text",
-    color: "transparent",
-  },
-  techSub: {
-    margin: "12px 0 0",
-    fontSize: "15px",
-    lineHeight: 1.55,
-    color: "rgba(255,255,255,0.65)",
-  },
-  techNode: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    width: "var(--tech-node, 84px)",
-    height: "var(--tech-node, 84px)",
-    willChange: "transform",
-    cursor: "pointer",
-  },
-  techNodeMask: {
-    position: "absolute",
-    inset: 0,
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#171a2e",
-    backgroundImage: "radial-gradient(circle at 32% 26%, #232743, #0f1122 72%)",
-    border: "1px solid rgba(139,92,246,0.4)",
-    boxShadow: "0 10px 26px rgba(0,0,0,0.5), 0 0 16px rgba(139,92,246,0.18), inset 0 0 14px rgba(139,92,246,0.15)",
-    transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease",
-    willChange: "transform",
-  },
-  techNodeImg: {
-    width: "56%",
-    height: "56%",
-    objectFit: "contain" as const,
-    filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.55))",
-    pointerEvents: "none",
-    userSelect: "none" as const,
-  },
-  statsIntro: {
-    textAlign: "center" as const,
-    padding: "0 20px 28px",
-    maxWidth: "720px",
-    margin: "0 auto",
-  },
-  statsEyebrow: {
-    margin: 0,
-    fontSize: "12px",
-    fontWeight: 700,
-    letterSpacing: "0.14em",
-    textTransform: "uppercase" as const,
-    color: "rgba(255,255,255,0.5)",
-  },
-  statsHeading: {
-    margin: "10px 0 0",
-    fontSize: "clamp(22px, 3vw, 30px)",
-    fontWeight: 700,
-    color: "#FFFFFF",
-  },
-  statsSub: {
-    margin: "12px 0 0",
-    fontSize: "15px",
-    lineHeight: 1.55,
-    color: "rgba(255,255,255,0.65)",
-  },
-  hScrollOuter: {
-    width: "100%",
-    maxWidth: "100%",
-    overflowX: "auto" as const,
-    overflowY: "hidden",
-    WebkitOverflowScrolling: "touch",
-    padding: "4px clamp(4px, 2vw, 12px) 12px",
-    boxSizing: "border-box" as const,
-    scrollSnapType: "none",
-    scrollbarWidth: "none" as const,
-    msOverflowStyle: "none" as const,
-    cursor: "grab",
-    userSelect: "none" as const,
-  },
-  hScrollInner: {
-    display: "flex",
-    flexDirection: "row" as const,
-    alignItems: "stretch",
-    width: "max-content",
-    minHeight: "100%",
-  },
-  hScrollCell: {
-    flexShrink: 0,
-  },
-  horizontalCardSurface: {
-    padding: "clamp(16px, 3vw, 24px)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    background: "linear-gradient(180deg, var(--bg-primary) 0%, color-mix(in srgb, var(--bg-secondary) 88%, #007AFF) 100%)",
-    textAlign: "left" as const,
-    boxSizing: "border-box" as const,
-  },
-  horizontalCardSurfaceCenter: {
-    padding: "clamp(16px, 3vw, 24px)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    background: "linear-gradient(180deg, var(--bg-primary) 0%, color-mix(in srgb, var(--bg-secondary) 88%, #007AFF) 100%)",
-    textAlign: "center" as const,
-    boxSizing: "border-box" as const,
-  },
+    projectLink: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px",
+      color: appleBlue,
+      fontSize: "13.5px",
+      fontWeight: 500,
+      textDecoration: "none",
+      wordBreak: "break-all" as const,
+    },
+    projectLinkMuted: {
+      margin: 0,
+      color: appleTextMuted,
+      fontSize: "12px",
+    },
+    projectPreviewImage: {
+      width: "100%",
+      height: "165px",
+      objectFit: "cover",
+      borderRadius: "14px",
+      marginBottom: "14px",
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.06)",
+    },
+    
+    // Stats Section (Apple Keynote Style)
+    statsSection: {
+      backgroundColor: "transparent",
+      borderTop: "none",
+      borderBottom: "none",
+      padding: "clamp(48px, 7vw, 84px) 0",
+      overflow: "hidden",
+    },
+    // Technology Banner (Edge-to-Edge Full Width)
+    techSection: {
+      position: "relative",
+      width: "100%",
+      boxSizing: "border-box",
+      overflow: "hidden",
+      padding: "clamp(48px, 6vw, 80px) 0",
+      marginBottom: "clamp(32px, 4vw, 48px)",
+      background: "transparent",
+      borderTop: "none",
+      borderBottom: "none",
+    },
+    techIntro: {
+      textAlign: "center" as const,
+      padding: "0 20px 28px",
+      maxWidth: "720px",
+      margin: "0 auto",
+    },
+    techEyebrow: {
+      margin: 0,
+      fontSize: "12px",
+      fontWeight: 600,
+      letterSpacing: "0.08em",
+      textTransform: "uppercase" as const,
+      color: appleBlue,
+    },
+    techHeading: {
+      margin: "10px 0 0",
+      fontSize: "clamp(24px, 3.5vw, 34px)",
+      fontWeight: 700,
+      letterSpacing: "-0.03em",
+      color: appleTextPrimary,
+    },
+    techHighlight: {
+      backgroundImage: isDark
+        ? "linear-gradient(90deg, #38bdf8, #06b6d4)"
+        : "linear-gradient(90deg, #0284c7, #0d9488)",
+      WebkitBackgroundClip: "text",
+      backgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      color: "transparent",
+      textShadow: "none",
+    },
+    techSub: {
+      margin: "12px 0 0",
+      fontSize: "15px",
+      lineHeight: 1.5,
+      letterSpacing: "-0.01em",
+      color: appleTextSecondary,
+    },
+    techNode: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      width: "var(--tech-node, 84px)",
+      height: "var(--tech-node, 84px)",
+      willChange: "transform",
+      cursor: "pointer",
+    },
+    techNodeMask: {
+      position: "absolute",
+      inset: 0,
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: appleCardBg,
+      border: isDark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(0,0,0,0.08)",
+      boxShadow: appleCardShadow,
+      transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease",
+      willChange: "transform",
+    },
+    techNodeImg: {
+      width: "56%",
+      height: "56%",
+      objectFit: "contain" as const,
+      filter: isDark ? "drop-shadow(0 2px 6px rgba(0,0,0,0.4))" : "none",
+      pointerEvents: "none",
+      userSelect: "none" as const,
+    },
+    statsIntro: {
+      textAlign: "center" as const,
+      padding: "0 20px 28px",
+      maxWidth: "720px",
+      margin: "0 auto",
+    },
+    statsEyebrow: {
+      margin: 0,
+      fontSize: "12px",
+      fontWeight: 600,
+      letterSpacing: "0.08em",
+      textTransform: "uppercase" as const,
+      color: appleBlue,
+    },
+    statsHeading: {
+      margin: "10px 0 0",
+      fontSize: "clamp(24px, 3.5vw, 34px)",
+      fontWeight: 700,
+      letterSpacing: "-0.03em",
+      color: appleTextPrimary,
+    },
+    statsSub: {
+      margin: "12px 0 0",
+      fontSize: "15px",
+      lineHeight: 1.5,
+      letterSpacing: "-0.01em",
+      color: appleTextSecondary,
+    },
+    hScrollOuter: {
+      width: "100%",
+      maxWidth: "100%",
+      overflowX: "auto" as const,
+      overflowY: "hidden",
+      WebkitOverflowScrolling: "touch",
+      padding: "16px clamp(4px, 2vw, 12px) 24px",
+      boxSizing: "border-box" as const,
+      scrollSnapType: "none",
+      scrollbarWidth: "none" as const,
+      msOverflowStyle: "none" as const,
+      cursor: "grab",
+      userSelect: "none" as const,
+    },
+    hScrollInner: {
+      display: "flex",
+      flexDirection: "row" as const,
+      alignItems: "stretch",
+      width: "max-content",
+      minHeight: "100%",
+    },
+    hScrollCell: {
+      flexShrink: 0,
+    },
+    horizontalCardSurface: {
+      padding: "clamp(20px, 3vw, 28px)",
+      borderRadius: "24px",
+      border: appleCardBorder,
+      backgroundColor: appleCardBg,
+      backdropFilter: isDark ? "blur(20px)" : "none",
+      WebkitBackdropFilter: isDark ? "blur(20px)" : "none",
+      boxShadow: appleCardShadow,
+      textAlign: "left" as const,
+      boxSizing: "border-box" as const,
+    },
+    horizontalCardSurfaceCenter: {
+      padding: "clamp(20px, 3vw, 28px)",
+      borderRadius: "24px",
+      border: appleCardBorder,
+      backgroundColor: appleCardBg,
+      backdropFilter: isDark ? "blur(20px)" : "none",
+      WebkitBackdropFilter: isDark ? "blur(20px)" : "none",
+      boxShadow: appleCardShadow,
+      textAlign: "center" as const,
+      boxSizing: "border-box" as const,
+    },
 
-  statsStaticRow: {
-    display: "flex",
-    flexWrap: "wrap" as const,
-    justifyContent: "center",
-    gap: "22px",
-    padding: "0 clamp(12px, 3vw, 28px)",
-  },
-  statStaticCard: {
-    flex: "0 1 auto",
-    width: "min(240px, 82vw)",
-    padding: "18px 18px",
-    borderRadius: "16px",
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.14)",
-    boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
-  },
-  statStaticValue: {
-    margin: "0 0 6px",
-    fontSize: "clamp(30px, 5vw, 40px)",
-    fontWeight: 800,
-    color: "#fff",
-    letterSpacing: "-0.02em",
-  },
-  statStaticLabel: {
-    margin: 0,
-    fontSize: "13px",
-    fontWeight: 600,
-    color: "rgba(255,255,255,0.72)",
-  },
-  sliderCard: {
-    height: "100%",
-    minHeight: "280px",
-    display: "flex",
-    flexDirection: "column",
-  },
+    statsStaticRow: {
+      display: "flex",
+      flexWrap: "wrap" as const,
+      justifyContent: "center",
+      gap: "20px",
+      padding: "0 clamp(12px, 3vw, 28px)",
+    },
+    statStaticCard: {
+      flex: "0 1 auto",
+      width: "100%",
+      maxWidth: "100%",
+      padding: "22px 18px",
+      borderRadius: "22px",
+      background: appleCardBg,
+      border: appleCardBorder,
+      boxShadow: appleCardShadow,
+      textAlign: "center",
+      boxSizing: "border-box" as const,
+    },
+    statStaticValue: {
+      margin: "0 0 6px",
+      fontSize: "clamp(34px, 5vw, 44px)",
+      fontWeight: 700,
+      color: appleTextPrimary,
+      letterSpacing: "-0.035em",
+    },
+    statStaticLabel: {
+      margin: 0,
+      fontSize: "13px",
+      fontWeight: 500,
+      color: appleTextSecondary,
+      letterSpacing: "-0.01em",
+    },
+    sliderCard: {
+      height: "100%",
+      minHeight: "280px",
+      display: "flex",
+      flexDirection: "column",
+    },
 
-  statsGrid: {
-    maxWidth: "1000px",
-    margin: "0 auto",
-    padding: "0 24px",
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "32px",
-    textAlign: "center",
-  },
-  statCard: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    borderRadius: "16px",
-    padding: "22px",
-    minHeight: "132px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    textAlign: "center",
-  },
-  statNumber: {
-    fontSize: "48px",
-    fontWeight: 700,
-    color: "#FFFFFF",
-    marginBottom: "8px",
-  },
-  statLabel: {
-    fontSize: "14px",
-    color: "#8E8E93",
-  },
-  
-  // Client Grid
-  clientGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-    gap: "24px",
-  },
-  clientCard: {
-    padding: "clamp(16px, 3vw, 24px)",
-    backgroundColor: "var(--bg-secondary)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    textAlign: "center",
-  },
-  clientAvatarContainer: {
-    width: "clamp(48px, 6vw, 60px)",
-    height: "clamp(48px, 6vw, 60px)",
-    borderRadius: "50%",
-    margin: "0 auto 16px",
-    border: "2px solid #E3F2FF",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F2F7FF",
-  },
-  clientAvatarImg: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-  clientName: {
-    fontSize: "clamp(15px, 2vw, 16px)",
-    fontWeight: 600,
-    marginBottom: "4px",
-    color: "var(--text-primary)",
-  },
-  clientCompany: {
-    fontSize: "13px",
-    color: "#007AFF",
-    marginBottom: "8px",
-  },
-  clientProject: {
-    fontSize: "clamp(12px, 1.5vw, 13px)",
-    color: "#6C6C70",
-    lineHeight: 1.6,
-  },
-  
-  // Developer Grid
-  developerGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-    gap: "24px",
-  },
-  developerCard: {
-    padding: "clamp(16px, 3vw, 24px)",
-    backgroundColor: "var(--bg-primary)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    textAlign: "center",
-    cursor: "pointer",
-  },
-  circleMask: {
-    width: "clamp(70px, 8vw, 100px)",
-    height: "clamp(70px, 8vw, 100px)",
-    borderRadius: "50%",
-    overflow: "hidden",
-    margin: "0 auto 16px",
-    backgroundColor: "#F2F2F7",
-    border: "3px solid #E3F2FF",
-  },
-  devAvatarImg: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-  circleInitial: {
-    fontSize: "clamp(28px, 4vw, 40px)",
-    fontWeight: 600,
-    color: "#FFFFFF",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    height: "100%",
-    background: "linear-gradient(135deg, #007AFF, #34C759)",
-  },
-  developerName: {
-    fontSize: "clamp(16px, 2vw, 18px)",
-    fontWeight: 600,
-    marginBottom: "4px",
-    color: "var(--text-primary)",
-  },
+    clientAvatarContainer: {
+      width: "56px",
+      height: "56px",
+      borderRadius: "50%",
+      margin: "0 auto 16px",
+      border: isDark ? "1px solid rgba(41, 151, 255, 0.3)" : "1px solid rgba(0, 113, 227, 0.2)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: isDark ? "rgba(41, 151, 255, 0.12)" : "rgba(0, 113, 227, 0.08)",
+      color: appleBlue,
+    },
+    clientAvatarImg: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    },
+    clientName: {
+      fontSize: "16px",
+      fontWeight: 600,
+      letterSpacing: "-0.015em",
+      marginBottom: "4px",
+      color: appleTextPrimary,
+    },
+    clientCompany: {
+      fontSize: "13px",
+      color: appleBlue,
+      fontWeight: 500,
+      letterSpacing: "-0.01em",
+      marginBottom: "8px",
+    },
+    clientProject: {
+      fontSize: "13px",
+      color: appleTextSecondary,
+      lineHeight: 1.55,
+      letterSpacing: "-0.01em",
+    },
+    
+    // Developer Grid
+    developerGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+      gap: "24px",
+    },
+    developerCard: {
+      padding: "clamp(20px, 3vw, 28px)",
+      backgroundColor: appleCardBg,
+      borderRadius: "24px",
+      border: appleCardBorder,
+      boxShadow: appleCardShadow,
+      textAlign: "center",
+      cursor: "pointer",
+    },
+    circleMask: {
+      width: "84px",
+      height: "84px",
+      borderRadius: "50%",
+      overflow: "hidden",
+      margin: "0 auto 16px",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#f5f5f7",
+      border: isDark ? "2px solid rgba(41, 151, 255, 0.3)" : "2px solid rgba(0, 113, 227, 0.2)",
+    },
+    devAvatarImg: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    },
+    circleInitial: {
+      fontSize: "32px",
+      fontWeight: 600,
+      color: "#FFFFFF",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "100%",
+      height: "100%",
+      background: appleBlue,
+    },
+    developerName: {
+      fontSize: "17px",
+      fontWeight: 600,
+      letterSpacing: "-0.02em",
+      marginBottom: "4px",
+      color: appleTextPrimary,
+    },
+    developerRole: {
+      fontSize: "13px",
+      color: appleBlue,
+      fontWeight: 500,
+      marginBottom: "12px",
+    },
+    skillTags: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "6px",
+      justifyContent: "center",
+      marginBottom: "12px",
+    },
+    skillTag: {
+      padding: "4px 10px",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#f5f5f7",
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #e5e5ea",
+      borderRadius: "9999px",
+      fontSize: "11.5px",
+      color: isDark ? "#d1d1d6" : "#424245",
+      fontWeight: 500,
+    },
+    developerExperience: {
+      fontSize: "12px",
+      color: appleTextSecondary,
+      marginBottom: "8px",
+    },
+    developerBlurb: {
+      fontSize: "13px",
+      color: appleTextSecondary,
+      lineHeight: 1.55,
+      margin: 0,
+    },
+    rating: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "4px",
+    },
+    ratingValue: {
+      fontSize: "12px",
+      fontWeight: 600,
+      color: "#FF9F0A",
+      marginLeft: "4px",
+    },
 
-  developerRole: {
-    fontSize: "13px",
-    color: "#007AFF",
-    marginBottom: "12px",
-  },
-  skillTags: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "6px",
-    justifyContent: "center",
-    marginBottom: "12px",
-  },
-  skillTag: {
-    padding: "4px 10px",
-    backgroundColor: "var(--bg-secondary)",
-    borderRadius: "20px",
-    fontSize: "11px",
-    color: "var(--text-primary)",
-  },
-  developerExperience: {
-    fontSize: "12px",
-    color: "var(--text-secondary)",
-    marginBottom: "8px",
-  },
-  developerBlurb: {
-    fontSize: "13px",
-    color: "var(--text-secondary)",
-    lineHeight: 1.6,
-    margin: 0,
-  },
-  rating: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "4px",
-  },
-  ratingValue: {
-    fontSize: "12px",
-    fontWeight: 600,
-    color: "#FFB800",
-    marginLeft: "4px",
-  },
-  
-  // Testimonials
-  testimonialGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "24px",
-  },
-  marqueeViewport: {
-    overflow: "hidden",
-    maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
-  },
-  marqueeTrack: {
-    display: "flex",
-    gap: "20px",
-    width: "max-content",
-    paddingRight: "20px",
-  },
-  testimonialCard: {
-    padding: "clamp(16px, 3vw, 28px)",
-    backgroundColor: "var(--bg-secondary)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    textAlign: "center",
-    width: "clamp(170px, 80vw, 320px)",
-    flexShrink: 0,
-  },
+    // Testimonials
+    testimonialCard: {
+      padding: "clamp(20px, 3vw, 28px)",
+      backgroundColor: appleCardBg,
+      borderRadius: "24px",
+      border: appleCardBorder,
+      boxShadow: appleCardShadow,
+      textAlign: "center",
+      width: "100%",
+      maxWidth: "100%",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      boxSizing: "border-box",
+      flexShrink: 0,
+    },
+    testimonialAvatar: {
+      width: "52px",
+      height: "52px",
+      background: appleBlue,
+      boxShadow: "0 4px 14px rgba(0, 113, 227, 0.3)",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: "0 auto 14px",
+      color: "#FFFFFF",
+      fontWeight: 600,
+      fontSize: "17px",
+    },
+    testimonialStars: {
+      display: "flex",
+      justifyContent: "center",
+      gap: "4px",
+      marginBottom: "12px",
+    },
+    testimonialText: {
+      fontSize: "14px",
+      color: appleTextPrimary,
+      lineHeight: 1.45,
+      marginBottom: "14px",
+      fontStyle: "normal",
+      letterSpacing: "-0.01em",
+      display: "-webkit-box",
+      WebkitLineClamp: 3,
+      WebkitBoxOrient: "vertical" as any,
+      overflow: "hidden",
+    },
+    testimonialName: {
+      fontSize: "15px",
+      fontWeight: 600,
+      letterSpacing: "-0.015em",
+      marginBottom: "2px",
+      color: appleTextPrimary,
+    },
+    testimonialCompany: {
+      fontSize: "12.5px",
+      color: appleTextSecondary,
+    },
 
-  testimonialAvatar: {
-    width: "60px",
-    height: "60px",
-    backgroundColor: "#007AFF",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "0 auto 16px",
-    color: "#FFFFFF",
-    fontWeight: 600,
-    fontSize: "20px",
-  },
-  testimonialStars: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "4px",
-    marginBottom: "16px",
-  },
-  testimonialText: {
-    fontSize: "15px",
-    color: "var(--text-primary)",
-    lineHeight: 1.5,
-    marginBottom: "16px",
-    fontStyle: "italic",
-  },
-  testimonialName: {
-    fontSize: "16px",
-    fontWeight: 600,
-    marginBottom: "4px",
-  },
-  testimonialCompany: {
-    fontSize: "13px",
-    color: "var(--text-secondary)",
-  },
+    // Contact Section (Apple Consultation Console - Full Screen & Compact)
+    contactSection: {
+      backgroundColor: appleSectionBg,
+      borderTop: appleHairline,
+      padding: "clamp(44px, 6vw, 76px) 0",
+      width: "100%",
+    },
+    contactContainer: {
+      width: "100%",
+      maxWidth: "100%",
+      margin: 0,
+      padding: "0 clamp(20px, 3.5vw, 64px)",
+      boxSizing: "border-box",
+    },
+    contactHeader: {
+      textAlign: "center",
+      marginBottom: "36px",
+    },
+    contactGrid: {
+      display: "grid",
+      gap: "clamp(24px, 3.5vw, 48px)",
+      width: "100%",
+      alignItems: "start",
+    },
+    contactInfo: {
+      width: "100%",
+    },
+    contactInfoTitle: {
+      fontSize: "22px",
+      fontWeight: 700,
+      letterSpacing: "-0.025em",
+      color: appleTextPrimary,
+      marginBottom: "10px",
+    },
+    contactInfoDesc: {
+      fontSize: "14.5px",
+      color: appleTextSecondary,
+      lineHeight: 1.5,
+      letterSpacing: "-0.01em",
+      marginBottom: "28px",
+    },
+    infoItems: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "18px",
+    },
+    infoItem: {
+      display: "flex",
+      gap: "14px",
+      alignItems: "flex-start",
+    },
+    infoIcon: {
+      width: "38px",
+      height: "38px",
+      backgroundColor: appleCardBg,
+      border: appleCardBorder,
+      borderRadius: "10px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "16px",
+      boxShadow: isDark ? "none" : "0 2px 8px rgba(0, 0, 0, 0.04)",
+      flexShrink: 0,
+    },
+    infoLabel: {
+      fontSize: "11px",
+      fontWeight: 600,
+      color: appleTextSecondary,
+      marginBottom: "3px",
+      textTransform: "uppercase",
+      letterSpacing: "0.06em",
+    },
+    infoValue: {
+      fontSize: "14px",
+      fontWeight: 500,
+      color: appleTextPrimary,
+    },
+    infoValueRow: {
+      display: "flex",
+      flexWrap: "wrap",
+      alignItems: "center",
+      rowGap: "6px",
+      fontSize: "14px",
+      fontWeight: 500,
+      color: appleTextPrimary,
+    },
+    infoValueRowItem: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px",
+    },
+    infoValueSeparator: {
+      color: appleTextSecondary,
+      opacity: 0.5,
+      marginRight: "6px",
+    },
+    infoSocialRow: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "8px",
+      alignItems: "center",
+    },
+    infoSocialLink: {
+      width: "34px",
+      height: "34px",
+      borderRadius: "999px",
+      border: appleCardBorder,
+      backgroundColor: appleCardBg,
+      color: appleTextPrimary,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textDecoration: "none",
+      transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+    },
+    contactFormContainer: {
+      width: "100%",
+    },
+    contactGlassCard: {
+      backgroundColor: appleCardBg,
+      backdropFilter: isDark ? "blur(20px)" : "none",
+      WebkitBackdropFilter: isDark ? "blur(20px)" : "none",
+      padding: "clamp(20px, 3vw, 32px)",
+      borderRadius: "24px",
+      boxShadow: appleCardShadow,
+      border: appleCardBorder,
+      width: "100%",
+      maxWidth: "100%",
+      boxSizing: "border-box",
+    },
+    contactForm: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "12px",
+    },
+    formRow: {
+      display: "flex",
+      gap: "12px",
+      flexWrap: "wrap",
+    },
+    formGroup: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      gap: "5px",
+      minWidth: "170px",
+    },
+    formLabel: {
+      fontSize: "12.5px",
+      fontWeight: 600,
+      letterSpacing: "-0.01em",
+      color: appleTextPrimary,
+    },
+    formInput: {
+      padding: "9px 13px",
+      borderRadius: "11px",
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.14)" : "1px solid #d2d2d7",
+      fontSize: "13.5px",
+      fontFamily: "inherit",
+      outline: "none",
+      transition: "all 0.2s ease",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#ffffff",
+      color: appleTextPrimary,
+    },
+    formSelect: {
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      cursor: "pointer",
+      paddingRight: "36px",
+      width: "100%",
+    },
+    selectOption: {
+      backgroundColor: isDark ? "#1c1c1e" : "#ffffff",
+      color: appleTextPrimary,
+    },
+    emailInput: {
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.14)" : "1px solid #d2d2d7",
+      boxShadow: "none",
+    },
+    formInputError: {
+      borderColor: "#FF3B30",
+      boxShadow: "0 0 0 1px #FF3B30",
+    },
+    fieldError: {
+      margin: "3px 2px 0",
+      fontSize: "11.5px",
+      fontWeight: 500,
+      color: "#FF3B30",
+    },
+    formTextarea: {
+      padding: "10px 13px",
+      borderRadius: "11px",
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.14)" : "1px solid #d2d2d7",
+      fontSize: "13.5px",
+      fontFamily: "inherit",
+      outline: "none",
+      minHeight: "80px",
+      resize: "vertical" as any,
+      transition: "all 0.2s ease",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#ffffff",
+      color: appleTextPrimary,
+    },
+    submitBtn: {
+      padding: "11px 26px",
+      background: appleBlue,
+      color: "#FFFFFF",
+      border: "none",
+      borderRadius: "9999px",
+      fontSize: "14.5px",
+      fontWeight: 500,
+      letterSpacing: "-0.01em",
+      cursor: "pointer",
+      marginTop: "4px",
+      boxShadow: "0 4px 16px rgba(0, 113, 227, 0.35)",
+      transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+    },
+  };
+}
 
-
-  // Diversity Section Styles
-
-  diversitySection: {
-    backgroundColor: "var(--bg-secondary)",
-    padding: "clamp(56px, 8vw, 100px) 0",
-    width: "100%",
-  },
-  // Main content grid: 2.5% | 45% LEFT CARD | 5% GAP | 45% RIGHT CARD | 2.5%
-  diversityGrid: {
-    display: "grid",
-    gridTemplateColumns: "2.5% 45% 5% 45% 2.5%",
-    width: "100%",
-    alignItems: "stretch",
-    boxSizing: "border-box",
-  },
-  // LEFT card — 45% width, contains text + image
-  diversityLeftCard: {
-    gridColumn: "2 / 3",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    padding: "2% 0 0 0",
-    boxSizing: "border-box",
-  },
-  // RIGHT card — 45% width, contains text + video
-  diversityRightCard: {
-    gridColumn: "4 / 5",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    padding: "2% 0 0 0",
-    boxSizing: "border-box",
-  },
-  diversityMediaMessage: {
-    fontSize: "17px",
-    fontWeight: 500,
-    color: "var(--text-secondary)",
-    lineHeight: 1.6,
-  },
-
-  diversityVideo: {
-    width: "100%",
-    height: "100%",
-    display: "block",
-    objectFit: "cover",
-  },
-  diversityBadge: {
-    padding: "10px 18px",
-    backgroundColor: "var(--bg-primary)",
-    borderRadius: "20px",
-    fontSize: "15px",
-    fontWeight: 600,
-    color: "#007AFF",
-    boxShadow: "var(--card-shadow)",
-    display: "inline-block",
-  },
-  // Main frame — 90% of card height, both image and video must be identical in size/position
-  diversityMainFrame: {
-    width: "100%",
-    height: "90%",
-    borderRadius: "24px",
-    overflow: "hidden",
-    boxShadow: "var(--card-shadow)",
-  },
-  diversityImageContainer: {
-    width: "100%",
-    height: "100%",
-    borderRadius: "24px",
-    objectFit: "cover",
-  },
-  diversityImage: {
-    width: "100%",
-    height: "100%",
-    display: "block",
-    objectFit: "cover",
-  },
-  diversityVideoContainer: {
-    width: "100%",
-    height: "100%",
-    borderRadius: "24px",
-    objectFit: "cover",
-  },
-
-  // Contact Section Styles
-  contactSection: {
-    backgroundColor: "var(--bg-primary)",
-    padding: "clamp(56px, 8vw, 100px) 0",
-    width: "100%",
-  },
-  contactContainer: {
-    width: "100%",
-    maxWidth: "100%",
-    margin: 0,
-    padding: "0 clamp(16px, 4vw, 48px)",
-  },
-  contactHeader: {
-    textAlign: "center",
-    marginBottom: "60px",
-  },
-  contactGrid: {
-    display: "flex",
-    gap: "60px",
-    flexWrap: "wrap",
-  },
-  contactInfo: {
-    flex: 1,
-    minWidth: "300px",
-  },
-  contactInfoTitle: {
-    fontSize: "24px",
-    fontWeight: 700,
-    color: "var(--text-primary)",
-    marginBottom: "16px",
-  },
-  contactInfoDesc: {
-    fontSize: "16px",
-    color: "var(--text-secondary)",
-    lineHeight: 1.6,
-    marginBottom: "40px",
-  },
-  infoItems: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-  },
-  infoItem: {
-    display: "flex",
-    gap: "20px",
-    alignItems: "flex-start",
-  },
-  infoIcon: {
-    width: "48px",
-    height: "48px",
-    backgroundColor: "var(--bg-primary)",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "20px",
-    boxShadow: "var(--card-shadow)",
-  },
-  infoLabel: {
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "var(--text-secondary)",
-    marginBottom: "4px",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-  },
-  infoValue: {
-    fontSize: "16px",
-    fontWeight: 500,
-    color: "var(--text-primary)",
-  },
-  // One horizontal row per category (emails | phones | socials) that wraps
-  // naturally only when the available width requires it.
-  infoValueRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    rowGap: "8px",
-    fontSize: "16px",
-    fontWeight: 500,
-    color: "var(--text-primary)",
-  },
-  infoValueRowItem: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-  infoValueSeparator: {
-    color: "var(--text-secondary)",
-    opacity: 0.6,
-    marginRight: "8px",
-  },
-  infoSocialRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "10px",
-    alignItems: "center",
-  },
-  infoSocialLink: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "999px",
-    border: "1px solid var(--border-color)",
-    backgroundColor: "var(--bg-primary)",
-    color: "var(--text-primary)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textDecoration: "none",
-    transition: "all 0.24s cubic-bezier(0.22, 1, 0.36, 1)",
-  },
-  contactFormContainer: {
-    flex: 1.5,
-    minWidth: "320px",
-  },
-  contactGlassCard: {
-    backgroundColor: "var(--bg-primary)",
-    padding: "40px",
-    borderRadius: "24px",
-    boxShadow: "var(--card-shadow)",
-    border: "1px solid var(--border-color)",
-  },
-  contactForm: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-  formRow: {
-    display: "flex",
-    gap: "20px",
-    flexWrap: "wrap",
-  },
-  formGroup: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    minWidth: "200px",
-  },
-  formLabel: {
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "var(--text-primary)",
-  },
-  formInput: {
-    padding: "14px 16px",
-    borderRadius: "12px",
-    border: "1px solid var(--border-color)",
-    fontSize: "16px",
-    fontFamily: "inherit",
-    outline: "none",
-    transition: "all 0.2s ease",
-    backgroundColor: "var(--bg-secondary)",
-    color: "var(--text-primary)",
-  },
-  formSelect: {
-    appearance: "none",
-    WebkitAppearance: "none",
-    MozAppearance: "none",
-    cursor: "pointer",
-    paddingRight: "40px",
-    width: "100%",
-  },
-  selectOption: {
-    backgroundColor: "var(--bg-secondary)",
-    color: "var(--text-primary)",
-  },
-  emailInput: {
-    border: "1px solid var(--border-color)",
-    boxShadow: "inset 0 0 0 1px var(--border-color)",
-  },
-  formInputError: {
-    borderColor: "#FF3B30",
-    boxShadow: "inset 0 0 0 1px #FF3B30",
-  },
-  fieldError: {
-    margin: "6px 2px 0",
-    fontSize: "13px",
-    fontWeight: 500,
-    color: "#FF3B30",
-  },
-  formTextarea: {
-    padding: "14px 16px",
-    borderRadius: "12px",
-    border: "1px solid var(--border-color)",
-    fontSize: "16px",
-    fontFamily: "inherit",
-    outline: "none",
-    minHeight: "150px",
-    resize: "vertical" as any,
-    transition: "all 0.2s ease",
-    backgroundColor: "var(--bg-secondary)",
-    color: "var(--text-primary)",
-  },
-  submitBtn: {
-    padding: "16px 32px",
-    backgroundColor: "#007AFF",
-    color: "#FFFFFF",
-    border: "none",
-    borderRadius: "12px",
-    fontSize: "16px",
-    fontWeight: 600,
-    cursor: "pointer",
-    marginTop: "10px",
-    transition: "all 0.3s ease",
-    width: "100%",
-  },
-};
+const defaultLandingStyles = getLandingStyles(true);
+const styles = defaultLandingStyles;
 

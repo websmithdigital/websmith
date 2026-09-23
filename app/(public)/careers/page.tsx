@@ -172,7 +172,7 @@ export default function CareersPage() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: isDark ? "#070B14" : "#f8fafc",
+        backgroundColor: "transparent",
         color: isDark ? "#f8fafc" : "#0f172a",
         paddingTop: "48px",
         paddingBottom: "80px",
@@ -212,7 +212,10 @@ export default function CareersPage() {
             style={{
               background: "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)",
               WebkitBackgroundClip: "text",
+              backgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              color: "transparent",
+              textShadow: "none",
             }}
           >
             Senior Engineers

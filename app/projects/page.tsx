@@ -5,12 +5,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, FolderOpen, LayoutGrid, List, Kanban, MessageSquareQuote, Star, X } from 'lucide-react';
+import { Plus, Search, FolderOpen, LayoutGrid, List, Kanban, MessageSquareQuote, Star, X, Edit2, Trash2 } from 'lucide-react';
 import { useProjects } from './hooks/useProjects';
 import ProjectCard from './components/ProjectCard';
 import ProjectModal from './components/ProjectModal';
 import KanbanBoard from '../../components/ui/KanbanBoard';
-import { Project, bulkUpdateProjectStatus, deleteProjectFeedback, getProjectFeedback, toggleFeedbackTestimonial, updateProjectStatus } from './services/projectService';
+import { Project, bulkUpdateProjectStatus, deleteProjectFeedback, getProjectFeedback, toggleFeedbackTestimonial, updateProjectStatus, submitProjectFeedback, updateProjectFeedback } from './services/projectService';
 import NavbarVisibilityToggle from '../../components/admin/NavbarVisibilityToggle';
 
 export default function ProjectsPage() {
@@ -23,6 +23,17 @@ export default function ProjectsPage() {
   const [feedbackProject, setFeedbackProject] = useState<Project | null>(null);
   const [feedbackItems, setFeedbackItems] = useState<NonNullable<Project['feedback']>>([]);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [isAddingFeedback, setIsAddingFeedback] = useState(false);
+  const [editingFeedbackId, setEditingFeedbackId] = useState<string | null>(null);
+  const [feedbackForm, setFeedbackForm] = useState({
+    clientName: '',
+    company: '',
+    rating: 5,
+    comment: '',
+    publishedAsTestimonial: true,
+  });
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
 
   const handleAddProject = () => {
     setEditingProject(null);
@@ -76,6 +87,9 @@ export default function ProjectsPage() {
 
   const handleViewFeedback = async (project: Project) => {
     setFeedbackProject(project);
+    setIsAddingFeedback(false);
+    setEditingFeedbackId(null);
+    setFeedbackError(null);
     setFeedbackLoading(true);
     try {
       const feedback = await getProjectFeedback(project._id!);
@@ -85,6 +99,73 @@ export default function ProjectsPage() {
       setFeedbackItems([]);
     } finally {
       setFeedbackLoading(false);
+    }
+  };
+
+  const handleStartAddFeedback = () => {
+    setEditingFeedbackId(null);
+    setFeedbackForm({
+      clientName: feedbackProject?.client || '',
+      company: feedbackProject?.clientCompany || '',
+      rating: 5,
+      comment: '',
+      publishedAsTestimonial: true,
+    });
+    setFeedbackError(null);
+    setIsAddingFeedback(true);
+  };
+
+  const handleStartEditFeedback = (fb: any) => {
+    setEditingFeedbackId(fb._id);
+    setFeedbackForm({
+      clientName: fb.clientName || fb.authorName || feedbackProject?.client || '',
+      company: fb.company || feedbackProject?.clientCompany || '',
+      rating: fb.rating || 5,
+      comment: fb.comment || '',
+      publishedAsTestimonial: Boolean(fb.publishedAsTestimonial),
+    });
+    setFeedbackError(null);
+    setIsAddingFeedback(true);
+  };
+
+  const handleSaveFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedbackProject) return;
+    if (!feedbackForm.comment.trim()) {
+      setFeedbackError('Please enter a feedback comment or quote.');
+      return;
+    }
+    setFeedbackSaving(true);
+    setFeedbackError(null);
+    try {
+      let updatedList;
+      if (editingFeedbackId) {
+        updatedList = await updateProjectFeedback(feedbackProject._id!, editingFeedbackId, {
+          clientName: feedbackForm.clientName.trim(),
+          authorName: feedbackForm.clientName.trim(),
+          company: feedbackForm.company.trim(),
+          rating: Number(feedbackForm.rating) || 5,
+          comment: feedbackForm.comment.trim(),
+          publishedAsTestimonial: feedbackForm.publishedAsTestimonial,
+        });
+      } else {
+        updatedList = await submitProjectFeedback(feedbackProject._id!, {
+          clientName: feedbackForm.clientName.trim(),
+          authorName: feedbackForm.clientName.trim(),
+          company: feedbackForm.company.trim(),
+          rating: Number(feedbackForm.rating) || 5,
+          comment: feedbackForm.comment.trim(),
+          publishedAsTestimonial: feedbackForm.publishedAsTestimonial,
+        });
+      }
+      setFeedbackItems(updatedList);
+      setIsAddingFeedback(false);
+      setEditingFeedbackId(null);
+    } catch (err: any) {
+      console.error('Save feedback error:', err);
+      setFeedbackError(typeof err === 'string' ? err : 'Failed to save feedback');
+    } finally {
+      setFeedbackSaving(false);
     }
   };
 
@@ -130,75 +211,73 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div style={styles.container} className="wsd-page">
+    <div style={styles.container} className="wsd-page admin-panel-scope">
       {/* Header */}
       <div style={styles.header} className="projects-header wsd-page-header">
-        <div>
+        <div style={styles.headerTitleBlock}>
           <h1 style={styles.title}>Projects</h1>
           <p style={styles.subtitle}>Manage all your development projects</p>
         </div>
-        <button onClick={handleAddProject} style={styles.addBtn} className="add-btn">
-          <Plus size={18} />
-          <span>New Project</span>
-        </button>
-      </div>
 
-      <div style={styles.visibilityGrid}>
-        <NavbarVisibilityToggle
-          sectionKey="projects"
-          label="Projects"
-          description="Show or hide the Projects link in the public website navbar. Published projects remain accessible by direct URL."
-        />
-        <NavbarVisibilityToggle
-          sectionKey="testimonials"
-          label="Testimonials"
-          description="Show or hide the Testimonials link in the public website navbar. Published testimonials remain available by direct URL."
-        />
-      </div>
+        {/* Top & Middle Search */}
+        <div style={styles.middleSearchWrap} className="projects-middle-search">
+          <div style={styles.searchBox} className="admin-search-box wsd-search-box">
+            <Search size={18} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
+        </div>
 
-      {/* Search and Filter */}
-      <div style={styles.searchSection} className="projects-search-section wsd-toolbar">
-        <div style={styles.searchBox} className="wsd-search-box">
-          <Search size={18} color="var(--text-secondary)" />
-          <input
-            type="text"
-            placeholder="Search projects..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={styles.searchInput}
+        {/* Right Actions */}
+        <div style={styles.headerButtons} className="wsd-page-actions">
+          <div style={styles.viewToggle}>
+            <button onClick={() => setViewMode('grid')} style={{ ...styles.toggleBtn, ...(viewMode === 'grid' ? styles.toggleActive : {}) }} title="Grid view"><LayoutGrid size={16} /></button>
+            <button onClick={() => setViewMode('list')} style={{ ...styles.toggleBtn, ...(viewMode === 'list' ? styles.toggleActive : {}) }} title="List view"><List size={16} /></button>
+            <button onClick={() => setViewMode('kanban')} style={{ ...styles.toggleBtn, ...(viewMode === 'kanban' ? styles.toggleActive : {}) }} title="Kanban view"><Kanban size={16} /></button>
+          </div>
+          <NavbarVisibilityToggle
+            sectionKey="projects"
+            label="Projects"
+            variant="compact"
           />
-        </div>
-        <div style={styles.viewToggle}>
-          <button onClick={() => setViewMode('grid')} style={{ ...styles.toggleBtn, ...(viewMode === 'grid' ? styles.toggleActive : {}) }}><LayoutGrid size={16} /></button>
-          <button onClick={() => setViewMode('list')} style={{ ...styles.toggleBtn, ...(viewMode === 'list' ? styles.toggleActive : {}) }}><List size={16} /></button>
-          <button onClick={() => setViewMode('kanban')} style={{ ...styles.toggleBtn, ...(viewMode === 'kanban' ? styles.toggleActive : {}) }}><Kanban size={16} /></button>
-        </div>
-        <div style={styles.filterTabs} className="wsd-chip-row">
-          <button
-            onClick={() => setStatusFilter('all')}
-            style={{ ...styles.filterTab, ...(statusFilter === 'all' ? styles.filterTabActive : {}) }}
-          >
-            All ({statusCounts.all})
-          </button>
-          <button
-            onClick={() => setStatusFilter('pending')}
-            style={{ ...styles.filterTab, ...(statusFilter === 'pending' ? styles.filterTabActive : {}) }}
-          >
-            Pending ({statusCounts.pending})
-          </button>
-          <button
-            onClick={() => setStatusFilter('in-progress')}
-            style={{ ...styles.filterTab, ...(statusFilter === 'in-progress' ? styles.filterTabActive : {}) }}
-          >
-            In Progress ({statusCounts['in-progress']})
-          </button>
-          <button
-            onClick={() => setStatusFilter('completed')}
-            style={{ ...styles.filterTab, ...(statusFilter === 'completed' ? styles.filterTabActive : {}) }}
-          >
-            Completed ({statusCounts.completed})
+          <button onClick={handleAddProject} style={styles.addBtn} className="admin-primary-btn add-btn">
+            <Plus size={16} />
+            <span>New Project</span>
           </button>
         </div>
+      </div>
+
+      {/* Filter Tabs Row */}
+      <div style={styles.filterTabsRow} className="wsd-chip-row">
+        <button
+          onClick={() => setStatusFilter('all')}
+          style={{ ...styles.filterTab, ...(statusFilter === 'all' ? styles.filterTabActive : {}) }}
+        >
+          All ({statusCounts.all})
+        </button>
+        <button
+          onClick={() => setStatusFilter('pending')}
+          style={{ ...styles.filterTab, ...(statusFilter === 'pending' ? styles.filterTabActive : {}) }}
+        >
+          Pending ({statusCounts.pending})
+        </button>
+        <button
+          onClick={() => setStatusFilter('in-progress')}
+          style={{ ...styles.filterTab, ...(statusFilter === 'in-progress' ? styles.filterTabActive : {}) }}
+        >
+          In Progress ({statusCounts['in-progress']})
+        </button>
+        <button
+          onClick={() => setStatusFilter('completed')}
+          style={{ ...styles.filterTab, ...(statusFilter === 'completed' ? styles.filterTabActive : {}) }}
+        >
+          Completed ({statusCounts.completed})
+        </button>
       </div>
 
       {/* Loading State */}
@@ -253,7 +332,7 @@ export default function ProjectsPage() {
       {!loading && !error && filteredProjects.length > 0 && viewMode === 'list' && (
         <div style={styles.list} className="wsd-list">
           {filteredProjects.map((project) => (
-            <div key={project._id} style={styles.listRow} className="wsd-list-row">
+            <div key={project._id} style={styles.listRow} className="wsd-list-row admin-card">
               <div>
                 <strong>{project.name}</strong>
                 <p style={styles.listMeta}>{project.client} · {project.assignedDeveloperName || 'Unassigned'}</p>
@@ -304,21 +383,148 @@ export default function ProjectsPage() {
 
       {feedbackProject && (
         <div style={styles.feedbackModalBackdrop} onClick={() => setFeedbackProject(null)}>
-          <div style={styles.feedbackModal} onClick={(event) => event.stopPropagation()}>
+          <div style={{ ...styles.feedbackModal, maxWidth: '680px' }} onClick={(event) => event.stopPropagation()}>
             <div style={styles.feedbackModalHeader}>
               <div>
-                <h2 style={styles.feedbackModalTitle}>Project Feedback</h2>
+                <h2 style={styles.feedbackModalTitle}>Project Feedback & Testimonials</h2>
                 <p style={styles.feedbackModalSubtitle}>{feedbackProject.name} · {feedbackProject.client}</p>
               </div>
-              <button type="button" onClick={() => setFeedbackProject(null)} style={styles.iconBtn}>
-                <X size={18} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {!isAddingFeedback && (
+                  <button
+                    type="button"
+                    onClick={handleStartAddFeedback}
+                    style={{
+                      padding: '7px 14px',
+                      borderRadius: '10px',
+                      backgroundColor: '#007AFF',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <Plus size={14} /> Add Testimonial
+                  </button>
+                )}
+                <button type="button" onClick={() => setFeedbackProject(null)} style={styles.iconBtn}>
+                  <X size={18} />
+                </button>
+              </div>
             </div>
+
+            {isAddingFeedback && (
+              <form onSubmit={handleSaveFeedback} style={{ padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 12px 0', color: 'var(--text-primary)' }}>
+                  {editingFeedbackId ? 'Edit Testimonial / Feedback' : 'New Testimonial / Feedback'}
+                </h3>
+                {feedbackError && (
+                  <p style={{ color: '#FF3B30', fontSize: '13px', margin: '0 0 10px 0' }}>{feedbackError}</p>
+                )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-primary)' }}>Client / Author Name *</label>
+                    <input
+                      type="text"
+                      value={feedbackForm.clientName}
+                      onChange={(e) => setFeedbackForm({ ...feedbackForm, clientName: e.target.value })}
+                      placeholder="e.g. David Vance"
+                      required
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-primary)' }}>Company / Title</label>
+                    <input
+                      type="text"
+                      value={feedbackForm.company}
+                      onChange={(e) => setFeedbackForm({ ...feedbackForm, company: e.target.value })}
+                      placeholder="e.g. CTO, Logix Global"
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-primary)' }}>Rating (1 - 5 Stars)</label>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFeedbackForm({ ...feedbackForm, rating: star })}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '4px',
+                        }}
+                      >
+                        <Star size={20} fill={star <= feedbackForm.rating ? '#FFB800' : 'none'} color={star <= feedbackForm.rating ? '#FFB800' : 'var(--text-secondary)'} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-primary)' }}>Feedback / Testimonial Quote *</label>
+                  <textarea
+                    rows={3}
+                    value={feedbackForm.comment}
+                    onChange={(e) => setFeedbackForm({ ...feedbackForm, comment: e.target.value })}
+                    placeholder="Write client testimonial or feedback quote..."
+                    required
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', fontSize: '13px', resize: 'vertical' }}
+                  />
+                </div>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+                  <input
+                    type="checkbox"
+                    checked={feedbackForm.publishedAsTestimonial}
+                    onChange={(e) => setFeedbackForm({ ...feedbackForm, publishedAsTestimonial: e.target.checked })}
+                  />
+                  Publish this as a testimonial on the public website
+                </label>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingFeedback(false); setEditingFeedbackId(null); }}
+                    style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'transparent', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={feedbackSaving}
+                    style={{ padding: '8px 18px', borderRadius: '10px', border: 'none', backgroundColor: '#007AFF', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {feedbackSaving ? 'Saving...' : editingFeedbackId ? 'Update Feedback' : 'Add Testimonial'}
+                  </button>
+                </div>
+              </form>
+            )}
 
             {feedbackLoading ? (
               <p style={styles.feedbackEmpty}>Loading feedback...</p>
             ) : feedbackItems.length === 0 ? (
-              <p style={styles.feedbackEmpty}>No client feedback has been submitted yet.</p>
+              <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                <p style={styles.feedbackEmpty}>No client feedback has been submitted yet.</p>
+                {!isAddingFeedback && (
+                  <button
+                    type="button"
+                    onClick={handleStartAddFeedback}
+                    style={{ marginTop: '8px', padding: '8px 16px', borderRadius: '10px', backgroundColor: '#007AFF', color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    + Add First Testimonial
+                  </button>
+                )}
+              </div>
             ) : (
               <div style={styles.feedbackList}>
                 {feedbackItems.map((feedback) => (
@@ -327,7 +533,8 @@ export default function ProjectsPage() {
                       <div>
                         <strong style={styles.feedbackClient}>{feedback.clientName || feedbackProject.client}</strong>
                         <p style={styles.feedbackMeta}>
-                          {feedback.date ? new Date(feedback.date).toLocaleDateString() : 'No date'} · {feedbackProject.clientEmail || 'No email'}
+                          {feedback.company ? feedback.company + ' · ' : ''}
+                          {feedback.date ? new Date(feedback.date).toLocaleDateString() : 'No date'}
                         </p>
                       </div>
                       <div style={styles.feedbackStars}>
@@ -350,8 +557,27 @@ export default function ProjectsPage() {
                           <MessageSquareQuote size={14} />
                           {feedback.publishedAsTestimonial ? 'Unpublish Testimonial' : 'Publish as Testimonial'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditFeedback(feedback)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-color)',
+                            backgroundColor: 'var(--bg-secondary)',
+                            color: '#007AFF',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <Edit2 size={13} /> Edit
+                        </button>
                         <button type="button" onClick={() => handleDeleteFeedback(feedback._id!)} style={styles.deleteFeedbackBtn}>
-                          Delete Feedback
+                          <Trash2 size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Delete
                         </button>
                       </div>
                     )}
@@ -391,16 +617,42 @@ export default function ProjectsPage() {
 
 const styles: any = {
   container: { 
-    padding: 0,
-    backgroundColor: 'var(--bg-primary)',
-    minHeight: '100vh',
+    backgroundColor: 'transparent',
+    minHeight: '100%',
+    width: '100%',
     color: 'var(--text-primary)'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '32px',
+    alignItems: 'center',
+    gap: '20px',
+    marginBottom: '20px',
+    width: '100%',
+  },
+  headerTitleBlock: {
+    flexShrink: 0,
+    minWidth: '180px',
+  },
+  middleSearchWrap: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: '220px',
+  },
+  headerButtons: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+    flexShrink: 0,
+    flexWrap: 'nowrap',
+  },
+  filterTabsRow: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+    marginBottom: '24px',
+    overflowX: 'auto',
   },
   title: {
     fontSize: '34px',
@@ -446,23 +698,22 @@ const styles: any = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '12px 16px',
-    backgroundColor: 'var(--bg-primary)',
-    border: '1.5px solid var(--border-color)',
+    padding: '10px 18px',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border-color)',
     borderRadius: '14px',
-    marginBottom: '16px',
-    boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-    flex: 1,
-    minWidth: 0,
+    width: '100%',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
   },
   searchInput: {
     flex: 1,
     border: 'none',
     outline: 'none',
-    fontSize: '15px',
+    fontSize: '14px',
     fontFamily: 'inherit',
     backgroundColor: 'transparent',
     color: 'var(--text-primary)',
+    width: '100%',
   },
   filterTabs: {
     display: 'flex',
@@ -495,10 +746,32 @@ const styles: any = {
     gap: '24px',
   },
   list: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  listRow: { display: 'grid', gridTemplateColumns: '1.5fr auto auto auto', gap: '16px', alignItems: 'center', padding: '16px 20px', border: '1.5px solid var(--border-color)', borderRadius: '16px', backgroundColor: 'var(--bg-primary)' },
+  listRow: {
+    display: 'grid',
+    gridTemplateColumns: '1.5fr auto auto auto',
+    gap: '16px',
+    alignItems: 'center',
+    padding: '16px 20px',
+    border: '1px solid var(--border-color)',
+    borderRadius: '16px',
+    backgroundColor: 'var(--bg-secondary)',
+    boxShadow: '0 4px 16px rgba(15, 23, 42, 0.05)',
+    transition: 'all 0.2s ease',
+  },
   listMeta: { margin: 0, fontSize: '13px', color: 'var(--text-secondary)', textTransform: 'capitalize' },
   listActions: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
-  listBtn: { padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 },
+  listBtn: {
+    padding: '8px 14px',
+    borderRadius: '10px',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--bg-secondary)',
+    color: 'var(--text-primary)',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontWeight: 600,
+    fontSize: '13px',
+    transition: 'all 0.2s ease',
+  },
   loadingContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -566,7 +839,7 @@ const styles: any = {
     fontFamily: 'inherit',
   },
   feedbackModalBackdrop: { position: 'fixed' as const, inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200, padding: '20px' },
-  feedbackModal: { width: '100%', maxWidth: '680px', maxHeight: '86vh', overflow: 'auto', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
+  feedbackModal: { width: '100%', maxWidth: '680px', maxHeight: '86vh', overflow: 'auto', backgroundColor: 'transparent', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
   feedbackModalHeader: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' },
   feedbackModalTitle: { margin: 0, color: 'var(--text-primary)', fontSize: '22px', fontWeight: 700 },
   feedbackModalSubtitle: { margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' },

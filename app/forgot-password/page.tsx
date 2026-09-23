@@ -185,9 +185,13 @@ export default function ForgotPasswordPage() {
         <nav style={styles.nav}>
           <Link href="/" style={styles.logoArea}>
             <div style={styles.logoCircle}>
-              <img src="/images/websmith_1x1.jpg" alt="Websmith Digital logo" width={34} height={34} style={styles.logoImage} />
+              <img src="/images/icon.png" alt="Websmith Digital icon" width={42} height={42} style={styles.logoImage} />
             </div>
-            <span style={styles.logoText}>Websmith</span>
+            <img
+              src="/images/wordmark1.png"
+              alt="Websmith Digital"
+              style={{ height: "44px", width: "auto", objectFit: "contain" }}
+            />
           </Link>
           <div style={styles.navActions}>
             <Link href="/login" style={styles.navButton}>
@@ -198,7 +202,7 @@ export default function ForgotPasswordPage() {
       </header>
 
       <div style={styles.dialogArea}>
-        <div style={styles.card}>
+        <div style={styles.card} className="wsd-auth-card">
           <Link href="/login" style={styles.backLink}>
             <ArrowLeft size={16} />
             Back to login
@@ -378,24 +382,26 @@ const styles: Record<string, any> = {
   logoArea: {
     display: "inline-flex",
     alignItems: "center",
-    gap: "10px",
+    gap: "12px",
     textDecoration: "none",
   },
   logoCircle: {
-    width: "34px",
-    height: "34px",
-    borderRadius: "999px",
+    width: "42px",
+    height: "42px",
+    borderRadius: "11px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
     backgroundColor: "#FFFFFF",
     boxShadow: "0 4px 12px rgba(15, 23, 42, 0.12)",
+    padding: "2px",
   },
   logoImage: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "contain",
+    transform: "scale(1.2)",
   },
   logoText: {
     color: "#111827",
@@ -422,16 +428,13 @@ const styles: Record<string, any> = {
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "center",
-    backgroundColor: "rgba(17, 24, 39, 0.2)",
+    backgroundColor: "transparent",
   },
   card: {
     width: "100%",
     maxWidth: "520px",
     marginTop: "34px",
     borderRadius: "20px",
-    backgroundColor: "#FFFFFF",
-    border: "1px solid #E5E7EB",
-    boxShadow: "0 24px 50px rgba(15, 23, 42, 0.2)",
     padding: "32px",
   },
   backLink: {

@@ -24,8 +24,11 @@ import { useStoreUI } from "../../app/software-store/StoreUIContext";
 import MegaMenuServices from "./MegaMenuServices";
 import DropdownIndustries from "./DropdownIndustries";
 import DropdownCompany from "./DropdownCompany";
+import { getPublicIndustries, getPublicServiceCategories } from "../../lib/cms/cmsService";
+import type { CmsIndustry, CmsServiceCategory } from "../../lib/cms/types";
 
-const brandLogo = "/images/websmith_1x1.jpg";
+const brandLogo = "/images/icon.png";
+const brandWordmark = "/images/wordmark1.png";
 
 type PublicSiteNavProps = {
   /** Minimal bar (logo + Home + CTA) for sign-in pages — avoids the full marketing menu on /login */
@@ -45,6 +48,10 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
   const storeUI = useStoreUI();
   const isDark = publicTheme === "dark";
 
+  // Dynamic CMS Data for mobile navigation
+  const [mobileIndustries, setMobileIndustries] = useState<CmsIndustry[]>([]);
+  const [mobileServiceCategories, setMobileServiceCategories] = useState<CmsServiceCategory[]>([]);
+
   // DreamX Dropdown state
   const [activeDropdown, setActiveDropdown] = useState<"services" | "industries" | "company" | null>(null);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -54,6 +61,28 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
 
   useLayoutEffect(() => {
     setNavMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+    async function loadNavData() {
+      try {
+        const [indList, catList] = await Promise.all([
+          getPublicIndustries(),
+          getPublicServiceCategories({ menuOnly: true }),
+        ]);
+        if (!isCancelled) {
+          if (Array.isArray(indList) && indList.length > 0) setMobileIndustries(indList);
+          if (Array.isArray(catList) && catList.length > 0) setMobileServiceCategories(catList);
+        }
+      } catch (err) {
+        console.error("Failed to load nav CMS data:", err);
+      }
+    }
+    loadNavData();
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   const showGuestThemeToggle = navMounted;
@@ -96,9 +125,16 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
         <div style={styles.navAuthInner} className="landing-nav-content">
           <Link href="/" style={styles.logo} className="logo-hover" onClick={() => setMobileOpen(false)}>
             <div style={styles.logoCircle}>
-              <Image src={brandLogo} alt="Websmith Digital logo" width={36} height={36} style={styles.logoImage} priority />
+              <Image src={brandLogo} alt="Websmith Digital icon" width={42} height={42} style={styles.logoImage} priority />
             </div>
-            <span style={styles.logoText}>Websmith</span>
+            <Image
+              src={brandWordmark}
+              alt="Websmith Digital"
+              width={195}
+              height={44}
+              style={{ height: "44px", width: "auto", objectFit: "contain" }}
+              priority
+            />
           </Link>
           <div style={styles.authNavRight}>
             <Link href="/" style={styles.authTextLink}>
@@ -148,9 +184,16 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid var(--border-color)",
               }}
             >
-              <Image src={brandLogo} alt="Websmith Digital logo" width={36} height={36} style={styles.logoImage} priority />
+              <Image src={brandLogo} alt="Websmith Digital icon" width={42} height={42} style={styles.logoImage} priority />
             </div>
-            <span style={{ ...styles.logoText, color: isDark ? "#FFFFFF" : "#1d1d1f" }}>Websmith</span>
+            <Image
+              src={brandWordmark}
+              alt="Websmith Digital"
+              width={195}
+              height={44}
+              style={{ height: "44px", width: "auto", objectFit: "contain" }}
+              priority
+            />
           </Link>
 
           {/* DreamX-Style Desktop Navigation */}
@@ -201,6 +244,9 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                   }}
                 />
               </button>
+              {activeDropdown === "services" && (
+                <MegaMenuServices isDark={isDark} onClose={() => setActiveDropdown(null)} />
+              )}
             </div>
 
             {/* 3. Industries ▾ */}
@@ -307,12 +353,13 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
 
             {/* 7. Contact Us */}
             <Link
-              href="/#contact"
+              href="/contact"
               style={{
                 ...styles.menuItem,
-                color: isDark ? "#E2E8F0" : "#1d1d1f",
+                color: pathname === "/contact" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
+                fontWeight: pathname === "/contact" ? 600 : 500,
               }}
-              className="menu-item-hover"
+              className={`menu-item-hover ${pathname === "/contact" ? "active-nav-link" : ""}`}
             >
               Contact Us
             </Link>
@@ -452,16 +499,6 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
           </button>
         </div>
 
-        {/* Global Centered Services Mega-Menu */}
-        {activeDropdown === "services" && (
-          <div
-            onMouseEnter={() => handleMouseEnter("services")}
-            onMouseLeave={handleMouseLeave}
-          >
-            <MegaMenuServices isDark={isDark} onClose={() => setActiveDropdown(null)} />
-          </div>
-        )}
-
         <button
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -600,18 +637,16 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                     >
                       View All Services ➔
                     </Link>
-                    <Link href="/services" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Software Engineering
-                    </Link>
-                    <Link href="/services" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Enterprise ERP & CRM
-                    </Link>
-                    <Link href="/services" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Universal Licensing (ULP)
-                    </Link>
-                    <Link href="/services" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      AI Solutions
-                    </Link>
+                    {mobileServiceCategories.map((cat) => (
+                      <Link
+                        key={cat._id || cat.slug}
+                        href={`/services?tab=${cat.slug}#${cat.slug}`}
+                        onClick={() => setMobileOpen(false)}
+                        style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
@@ -644,11 +679,23 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                 </button>
                 {mobileExpandedSection === "industries" && (
                   <div style={{ paddingLeft: "16px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-                    <span style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>FinTech & Banking</span>
-                    <span style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>E-Commerce & Retail</span>
-                    <span style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>Healthcare & MedTech</span>
-                    <span style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>Enterprise SaaS</span>
-                    <span style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>Logistics & Supply Chain</span>
+                    <Link
+                      href="/industries"
+                      onClick={() => setMobileOpen(false)}
+                      style={{ fontSize: "13px", color: "#3b82f6", fontWeight: 600, padding: "4px 0" }}
+                    >
+                      View All Industries ➔
+                    </Link>
+                    {mobileIndustries.map((ind) => (
+                      <Link
+                        key={ind._id || ind.slug}
+                        href={`/industries?sector=${ind.slug}`}
+                        onClick={() => setMobileOpen(false)}
+                        style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}
+                      >
+                        {ind.name}
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
@@ -696,19 +743,19 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                 {mobileExpandedSection === "company" && (
                   <div style={{ paddingLeft: "16px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
                     <Link href="/about" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      About Us
+                      About WebSmith
                     </Link>
                     <Link href="/careers" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Careers (Hiring)
+                      Careers & Culture (Hiring)
                     </Link>
-                    <Link href="/#developers" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Core Team
+                    <Link href="/about#team" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
+                      Core Team & Architects
                     </Link>
                     <Link href="/blog" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Blog
+                      Engineering Blog
                     </Link>
                     <Link href="/documentation" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Documentation
+                      Documentation Center
                     </Link>
                   </div>
                 )}
@@ -730,12 +777,13 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
 
               {/* Contact Us */}
               <Link
-                href="/#contact"
+                href="/contact"
                 style={{
                   ...styles.mobileMenuItem,
-                  color: isDark ? "#E2E8F0" : "#1d1d1f",
+                  color: pathname === "/contact" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
+                  fontWeight: pathname === "/contact" ? 600 : 500,
                 }}
-                className="mobile-menu-item"
+                className={`mobile-menu-item ${pathname === "/contact" ? "active-mobile-link" : ""}`}
                 onClick={() => setMobileOpen(false)}
               >
                 Contact Us
@@ -888,14 +936,15 @@ const styles: Record<string, CSSProperties> = {
   logo: {
     display: "flex",
     alignItems: "center",
-    gap: "10px",
+    gap: "12px",
     cursor: "pointer",
     textDecoration: "none",
+    flexShrink: 0,
   },
   logoCircle: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "50%",
+    width: "42px",
+    height: "42px",
+    borderRadius: "11px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -903,11 +952,13 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: "var(--bg-secondary)",
     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
     flexShrink: 0,
+    padding: "2px",
   },
   logoImage: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "contain",
+    transform: "scale(1.2)",
   },
   themeEmoji: {
     fontSize: "18px",
@@ -928,6 +979,7 @@ const styles: Record<string, CSSProperties> = {
     gap: "32px",
     alignItems: "center",
     paddingRight: "24px",
+    flexShrink: 0,
   },
   menuItem: {
     fontSize: "15px",

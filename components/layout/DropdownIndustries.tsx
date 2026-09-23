@@ -1,47 +1,14 @@
+// FILE: components/layout/DropdownIndustries.tsx
+// PURPOSE: Dynamic Industries dropdown mega menu connected to CMS API
+
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Landmark, ShoppingCart, HeartPulse, Cloud, Truck, ArrowRight, type LucideIcon } from "lucide-react";
-
-type IndustryItem = {
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  href: string;
-};
-
-const INDUSTRIES: IndustryItem[] = [
-  {
-    title: "FinTech & Banking",
-    description: "High-security payment gateways & wallet systems",
-    icon: Landmark,
-    href: "/services",
-  },
-  {
-    title: "E-Commerce & Retail",
-    description: "Multi-vendor marketplaces & high-speed checkout",
-    icon: ShoppingCart,
-    href: "/services",
-  },
-  {
-    title: "Healthcare & MedTech",
-    description: "Compliant patient portals & telehealth systems",
-    icon: HeartPulse,
-    href: "/services",
-  },
-  {
-    title: "Enterprise SaaS & B2B",
-    description: "Multi-tenant platforms & subscription billing",
-    icon: Cloud,
-    href: "/services",
-  },
-  {
-    title: "Logistics & Supply Chain",
-    description: "Fleet tracking & automated warehouse ERP",
-    icon: Truck,
-    href: "/services",
-  },
-];
+import { ArrowRight, Landmark } from "lucide-react";
+import LucideIcon from "@/components/shared/LucideIcon";
+import { getPublicIndustries } from "@/lib/cms/cmsService";
+import type { CmsIndustry } from "@/lib/cms/types";
 
 export default function DropdownIndustries({
   isDark,
@@ -50,6 +17,22 @@ export default function DropdownIndustries({
   isDark: boolean;
   onClose: () => void;
 }) {
+  const [industries, setIndustries] = useState<CmsIndustry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getPublicIndustries()
+      .then((data) => {
+        setIndustries(data || []);
+      })
+      .catch((err) => {
+        console.warn("DropdownIndustries fetch error:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div
       className="wsd-mega-menu"
@@ -59,37 +42,42 @@ export default function DropdownIndustries({
         left: 0,
         width: "420px",
         maxWidth: "92vw",
-        backgroundColor: isDark ? "#0d1322" : "#ffffff",
-        border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
+        backgroundColor: isDark ? "rgba(13, 19, 34, 0.92)" : "rgba(255, 255, 255, 0.95)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(226, 232, 240, 0.9)",
         borderRadius: "18px",
         boxShadow: isDark
           ? "0 28px 70px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06)"
           : "0 24px 60px -12px rgba(0, 0, 0, 0.15), 0 8px 24px -6px rgba(0, 0, 0, 0.06)",
         padding: "10px",
-        zIndex: 100,
+        zIndex: 1400,
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        {INDUSTRIES.map((industry, index) => {
-          const Icon = industry.icon;
+        {loading && (
+          <div style={{ padding: "16px", textAlign: "center", fontSize: "13px", color: isDark ? "#94a3b8" : "#64748b" }}>
+            Loading sectors...
+          </div>
+        )}
+
+        {!loading && industries.length === 0 && (
+          <div style={{ padding: "16px", textAlign: "center", fontSize: "13px", color: isDark ? "#94a3b8" : "#64748b" }}>
+            No industries configured yet.
+          </div>
+        )}
+
+        {industries.map((industry, index) => {
+          const href = `/industries?sector=${industry.slug}`;
           return (
             <Link
-              key={index}
-              href={industry.href}
+              key={industry._id || index}
+              href={href}
               onClick={onClose}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "10px 12px",
-                borderRadius: "12px",
-                textDecoration: "none",
-                backgroundColor: "transparent",
-                transition: "all 0.15s ease",
-              }}
-              className="wsd-industry-row"
+              className="wsd-nav-menu-row"
             >
               <div
+                className="wsd-nav-icon-box"
                 style={{
                   width: "36px",
                   height: "36px",
@@ -102,10 +90,11 @@ export default function DropdownIndustries({
                   flexShrink: 0,
                 }}
               >
-                <Icon size={18} />
+                <LucideIcon name={industry.icon} size={18} fallback={Landmark} />
               </div>
               <div style={{ flex: 1 }}>
                 <div
+                  className="wsd-nav-row-title"
                   style={{
                     fontSize: "13.5px",
                     fontWeight: 600,
@@ -113,7 +102,7 @@ export default function DropdownIndustries({
                     lineHeight: 1.25,
                   }}
                 >
-                  {industry.title}
+                  {industry.name}
                 </div>
                 <div
                   style={{
@@ -123,20 +112,14 @@ export default function DropdownIndustries({
                     marginTop: "2px",
                   }}
                 >
-                  {industry.description}
+                  {industry.shortDescription}
                 </div>
               </div>
-              <ArrowRight size={14} style={{ opacity: 0.4, color: isDark ? "#ffffff" : "#0f172a" }} />
+              <ArrowRight size={14} className="wsd-nav-arrow" style={{ opacity: 0.4, color: isDark ? "#ffffff" : "#0f172a" }} />
             </Link>
           );
         })}
       </div>
-      <style>{`
-        .wsd-industry-row:hover {
-          background-color: ${isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.06)"} !important;
-          transform: translateX(2px);
-        }
-      `}</style>
     </div>
   );
 }

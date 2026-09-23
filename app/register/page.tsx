@@ -224,7 +224,7 @@ export default function RegisterPage() {
     <div style={styles.container}>
       <div style={styles.background}></div>
 
-      <div style={styles.card}>
+      <div style={styles.card} className="wsd-auth-card">
         {/* Back to Login */}
         <button onClick={() => router.push("/login")} style={styles.backButton} className="back-button-hover">
           <ArrowLeft size={18} />
@@ -234,11 +234,18 @@ export default function RegisterPage() {
         {/* Logo Section */}
         <div style={styles.logoContainer}>
           <div style={styles.circleMask} className="circle-mask-hover">
-            <Image src="/images/websmith_1x1.jpg" alt="Websmith Digital logo" width={64} height={64} style={styles.logoImage} priority />
+            <Image src="/images/icon.png" alt="Websmith Digital icon" width={72} height={72} style={styles.logoImage} priority />
           </div>
-          <h1 style={styles.logoText} className="logo-text-hover">
-            {step === 'provider' ? 'Join Websmith' : 'Create Account'}
-          </h1>
+          <div className="logo-text-hover" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Image
+              src="/images/wordmark1.png"
+              alt="Websmith Digital"
+              width={240}
+              height={50}
+              style={{ height: "50px", width: "auto", objectFit: "contain" }}
+              priority
+            />
+          </div>
         </div>
 
         {/* Provider Selection Step - Professional Card-in-Card Design */}
@@ -504,7 +511,7 @@ const styles: any = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F2F2F7",
+    backgroundColor: "transparent",
     position: "relative",
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
@@ -514,17 +521,13 @@ const styles: any = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: "radial-gradient(circle at 20% 50%, rgba(0,122,255,0.08) 0%, rgba(242,242,247,0) 50%)",
     pointerEvents: "none",
   },
   card: {
-    backgroundColor: "#FFFFFF",
     borderRadius: "28px",
     padding: "48px 40px",
     width: "100%",
     maxWidth: "520px",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)",
-    border: "1px solid rgba(224,224,230,0.5)",
     position: "relative",
     zIndex: 1,
   },
@@ -549,9 +552,9 @@ const styles: any = {
     marginBottom: "32px",
   },
   circleMask: {
-    width: "64px",
-    height: "64px",
-    borderRadius: "50%",
+    width: "72px",
+    height: "72px",
+    borderRadius: "18px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -559,11 +562,14 @@ const styles: any = {
     overflow: "hidden",
     backgroundColor: "#FFFFFF",
     boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+    border: "1px solid var(--border-color, #E5E5EA)",
+    padding: "4px",
   },
   logoImage: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "contain",
+    transform: "scale(1.2)",
   },
   logoText: {
     fontSize: "18px",
