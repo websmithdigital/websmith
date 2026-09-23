@@ -482,7 +482,12 @@ function ServicesContent() {
 
                   <button
                     type="button"
-                    onClick={() => openLeadServicesModal()}
+                    onClick={() =>
+                      openLeadServicesModal({
+                        id: category._id || category.slug || category.name,
+                        name: category.name,
+                      })
+                    }
                     style={{
                       width: "100%",
                       padding: "11px 18px",

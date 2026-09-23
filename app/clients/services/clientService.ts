@@ -14,6 +14,12 @@ export interface Client {
   status: 'active' | 'inactive';
   customId?: string;
   published?: boolean;
+  website?: string;
+  industry?: string;
+  contactPerson?: string;
+  city?: string;
+  country?: string;
+  notes?: string;
   createdAt?: string;
 }
 

@@ -5,7 +5,7 @@
 'use client';
 
 import { Client } from '../services/clientService';
-import { Users, Mail, Phone, Building, Edit2, Trash2 } from 'lucide-react';
+import { Users, Mail, Phone, Building, Edit2, Trash2, Globe } from 'lucide-react';
 
 interface ClientCardProps {
   client: Client;
@@ -65,11 +65,34 @@ export default function ClientCard({ client, onEdit, onDelete, onTogglePublish }
             <span style={styles.detailText}>{client.company}</span>
           </div>
         )}
+        {client.website && (
+          <div style={styles.detailItem}>
+            <Globe size={14} color="var(--text-secondary)" />
+            <a
+              href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ ...styles.detailText, color: '#007AFF', textDecoration: 'none' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {client.website.replace(/^https?:\/\//, '')}
+            </a>
+          </div>
+        )}
+        {client.industry && (
+          <div style={{ marginTop: '4px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+              {client.industry}
+            </span>
+          </div>
+        )}
       </div>
 
-      {client.address && (
+      {client.notes ? (
+        <p style={styles.clientAddress}>{client.notes}</p>
+      ) : client.address ? (
         <p style={styles.clientAddress}>{client.address}</p>
-      )}
+      ) : null}
 
       <div style={styles.cardActions}>
         {onTogglePublish && (

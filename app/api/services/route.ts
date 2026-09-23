@@ -1,6 +1,38 @@
 import { apiHandler, jsonBody, json, forbidden } from "@/lib/server/api";
 
 export const GET = apiHandler(async ({ db }) => {
+  const categories = await db
+    .collection("cms_service_categories")
+    .find({ isActive: { $ne: false } })
+    .sort({ displayOrder: 1, name: 1 })
+    .toArray();
+
+  if (categories.length > 0) {
+    const items = await db
+      .collection("cms_services")
+      .find({ isActive: { $ne: false } })
+      .sort({ displayOrder: 1 })
+      .toArray();
+
+    return json({
+      data: categories.map((c) => ({
+        id: c._id.toString(),
+        name: c.name,
+        slug: c.slug,
+        description: c.description,
+        icon: c.icon,
+        badge: c.badge,
+        subServices: items
+          .filter((s) => String(s.categoryId) === c._id.toString())
+          .map((s) => ({
+            id: s._id.toString(),
+            name: s.name,
+            shortDescription: s.shortDescription,
+          })),
+      })),
+    });
+  }
+
   const services = await db
     .collection("services")
     .find({ isActive: { $ne: false } })

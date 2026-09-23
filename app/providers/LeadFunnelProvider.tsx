@@ -8,6 +8,8 @@ export interface SelectedLeadService {
   name: string;
 }
 
+export type InitialLeadServiceInput = SelectedLeadService | SelectedLeadService[] | string | string[];
+
 export type LeadWizardStep = "services" | "details" | "success";
 
 interface LeadFunnelContextValue {
@@ -18,7 +20,7 @@ interface LeadFunnelContextValue {
   leadServicesModalOpen: boolean;
   leadWizardStep: LeadWizardStep;
   setLeadWizardStep: (step: LeadWizardStep) => void;
-  openLeadServicesModal: () => void;
+  openLeadServicesModal: (initialService?: InitialLeadServiceInput) => void;
   closeLeadServicesModal: () => void;
 }
 
@@ -53,10 +55,14 @@ export function LeadFunnelProvider({ children }: { children: React.ReactNode }) 
   };
 
   const toggleService = (service: SelectedLeadService) => {
-    const exists = selectedServices.some((item) => item.id === service.id);
+    const exists = selectedServices.some(
+      (item) => item.id === service.id || item.name.toLowerCase() === service.name.toLowerCase()
+    );
     persist(
       exists
-        ? selectedServices.filter((item) => item.id !== service.id)
+        ? selectedServices.filter(
+            (item) => item.id !== service.id && item.name.toLowerCase() !== service.name.toLowerCase()
+          )
         : [...selectedServices, service]
     );
   };
@@ -77,7 +83,21 @@ export function LeadFunnelProvider({ children }: { children: React.ReactNode }) 
       leadServicesModalOpen,
       leadWizardStep,
       setLeadWizardStep,
-      openLeadServicesModal: () => {
+      openLeadServicesModal: (initialService?: InitialLeadServiceInput) => {
+        if (initialService) {
+          if (typeof initialService === "string") {
+            persist([{ id: initialService.toLowerCase().replace(/\s+/g, "-"), name: initialService }]);
+          } else if (Array.isArray(initialService)) {
+            const formatted = initialService.map((item) =>
+              typeof item === "string"
+                ? { id: item.toLowerCase().replace(/\s+/g, "-"), name: item }
+                : item
+            );
+            persist(formatted);
+          } else {
+            persist([initialService]);
+          }
+        }
         setLeadWizardStep("services");
         setLeadServicesModalOpen(true);
       },

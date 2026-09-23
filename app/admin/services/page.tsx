@@ -492,27 +492,9 @@ export default function AdminServicesPage() {
                 </div>
               </div>
 
-              {/* Subcategories Filter / Search */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", gap: "12px", flexWrap: "wrap" }}>
-                <div style={{ position: "relative", width: "280px" }}>
-                  <Search size={14} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)" }} />
-                  <input
-                    type="text"
-                    placeholder="Search subcategories..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "8px 10px 8px 32px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--input-border)",
-                      backgroundColor: "var(--input-bg)",
-                      color: "var(--text-primary)",
-                      fontSize: "12.5px",
-                    }}
-                  />
-                </div>
-                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+              {/* Subcategories Count */}
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "14px" }}>
+                <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 }}>
                   {filteredServices.length} subcategories
                 </span>
               </div>

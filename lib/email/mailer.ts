@@ -127,6 +127,7 @@ const EMAIL_ROUTES: Record<string, { sender: string; name: string }> = {
   new_sales_enquiry: { sender: MAIL_FROM_ADDRESS, name: MAIL_FROM_NAME },
   sales_reply: { sender: MAIL_FROM_ADDRESS, name: MAIL_FROM_NAME },
   conversation_created: { sender: MAIL_FROM_ADDRESS, name: MAIL_FROM_NAME },
+  invoice_created: { sender: MAIL_SALES_ADDRESS, name: MAIL_SALES_NAME },
 };
 const EMAIL_TYPES: Record<string, {
   subject: string;
@@ -911,6 +912,45 @@ If you did not request this password reset, please ignore this email or contact 
 
 Best regards,
 The ${COMPANY_NAME} Team`
+  },
+
+  // ================================================================
+  // INVOICE CREATED
+  // ================================================================
+  invoice_created: {
+    subject: `New Invoice {{invoice_number}} Issued - ${COMPANY_NAME}`,
+    defaultBody: (d) => wrapHtml('New Invoice Issued', `
+      <p>Hello <strong>${d.customer_name || 'Valued Client'}</strong>,</p>
+      <p>A new invoice has been generated for your account. Below is the summary of your invoice details:</p>
+      ${infoTable([
+        { label: 'Invoice Number', value: `<strong>${d.invoice_number || 'N/A'}</strong>` },
+        { label: 'Project / Service', value: d.project_name || d.description || 'Professional Services' },
+        { label: 'Billing Schedule', value: d.billing_type || 'Standard Terms' },
+        { label: 'Issue Date', value: d.issue_date || 'N/A' },
+        { label: 'Payment Due Date', value: d.due_date || 'N/A' },
+        { label: 'Total Due', value: `<span style="color:#007AFF;font-size:16px;font-weight:700">${d.total_amount || '$0.00'}</span>` },
+      ])}
+      <p style="margin:20px 0 10px 0;font-size:14px;color:#555">You can inspect itemized line items, download your PDF invoice, and complete payment via your Client Portal:</p>
+      ${btn('View & Pay Invoice', d.portal_url || `${WEBSITE_URL}/client/invoices`)}
+      <p style="margin:16px 0 0;font-size:12.5px;color:#777">If you have any questions or require custom billing arrangements, please reach out to your account executive.</p>
+    `),
+    defaultPlainText: (d) => `Hello ${d.customer_name || 'Valued Client'},
+
+A new invoice has been issued to your account at ${COMPANY_NAME}.
+
+Invoice Summary:
+- Invoice Number: ${d.invoice_number || 'N/A'}
+- Project / Service: ${d.project_name || d.description || 'Professional Services'}
+- Billing Schedule: ${d.billing_type || 'Standard Terms'}
+- Issue Date: ${d.issue_date || 'N/A'}
+- Due Date: ${d.due_date || 'N/A'}
+- Total Due: ${d.total_amount || '$0.00'}
+
+View and pay your invoice in the Client Portal:
+${d.portal_url || `${WEBSITE_URL}/client/invoices`}
+
+Best regards,
+The ${COMPANY_NAME} Billing Team`
   },
 
 };

@@ -1,9 +1,13 @@
 import API from "./apiService";
+import { SEED_SERVICE_CATEGORIES } from "@/lib/cms/types";
 
 export interface PublicService {
   id: string;
   name: string;
   description: string;
+  badge?: string;
+  icon?: string;
+  subServices?: Array<{ id?: string; name: string; shortDescription?: string }>;
   price?: number | null;
 }
 
@@ -26,26 +30,51 @@ export interface LeadPayload {
   services: string[];
 }
 
-
 export const getPublicServices = async (): Promise<PublicService[]> => {
   try {
-    const response = await API.get("/services", {
+    const response = await API.get("/cms/services/categories", {
       params: { t: Date.now() },
       headers: {
         "Cache-Control": "no-cache",
         Pragma: "no-cache",
       },
     });
-    return response.data?.data || [];
-  } catch (error: any) {
-    if (error.response?.status === 404) {
-      console.warn("Public services endpoint not found (404). Check if backend is running correctly.");
-      return [];
+    const categories = response.data?.data;
+    if (Array.isArray(categories) && categories.length > 0) {
+      return categories.map((cat: any) => ({
+        id: cat._id || cat.slug || cat.id,
+        name: cat.name,
+        description: cat.description,
+        badge: cat.badge,
+        icon: cat.icon,
+        subServices: (cat.services || []).map((s: any) => ({
+          id: s._id || s.slug,
+          name: s.name,
+          shortDescription: s.shortDescription,
+        })),
+      }));
     }
-    console.error("Get public services error:", error);
-    // Return empty array to prevent downstream crashes in UI
-    return [];
+  } catch (error: any) {
+    console.warn("Failed to fetch CMS categories for public services, falling back to seed data:", error?.message);
   }
+
+  // Fallback to active CMS seed categories
+  if (Array.isArray(SEED_SERVICE_CATEGORIES) && SEED_SERVICE_CATEGORIES.length > 0) {
+    return SEED_SERVICE_CATEGORIES.map((cat: any) => ({
+      id: cat.id || cat.slug,
+      name: cat.name,
+      description: cat.description,
+      badge: cat.badge,
+      icon: cat.icon,
+      subServices: (cat.services || []).map((s: any) => ({
+        id: s.slug || s.name,
+        name: s.name,
+        shortDescription: s.shortDescription,
+      })),
+    }));
+  }
+
+  return [];
 };
 
 export const createLead = async (payload: LeadPayload) => {

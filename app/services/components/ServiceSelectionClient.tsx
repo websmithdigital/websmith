@@ -32,9 +32,22 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
         setLoading(true);
         const data = await getPublicServices();
         setServices(data);
-        const nextSelectedServices = selectedServices.filter((selectedService) =>
-          data.some((service) => service.id === selectedService.id)
-        );
+        const nextSelectedServices = selectedServices
+          .map((selected) => {
+            const matched = data.find(
+              (service) =>
+                service.id === selected.id ||
+                service.name.toLowerCase() === selected.name.toLowerCase()
+            );
+            return matched ? { id: matched.id, name: matched.name } : selected;
+          })
+          .filter((selectedService) =>
+            data.some(
+              (service) =>
+                service.id === selectedService.id ||
+                service.name.toLowerCase() === selectedService.name.toLowerCase()
+            )
+          );
 
         const hasSelectionChanged =
           nextSelectedServices.length !== selectedServices.length ||
@@ -91,7 +104,9 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
         <>
           <div style={styles.grid}>
             {services.map((service) => {
-              const selected = selectedServices.some((item) => item.id === service.id);
+              const selected = selectedServices.some(
+                (item) => item.id === service.id || item.name.toLowerCase() === service.name.toLowerCase()
+              );
 
               return (
                 <button
@@ -121,6 +136,39 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                     </div>
                     <h3 style={styles.serviceTitle}>{service.name}</h3>
                     <p style={styles.serviceDescription}>{service.description}</p>
+
+                    {service.subServices && service.subServices.length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "12px" }}>
+                        {service.subServices.slice(0, 4).map((sub, sIdx) => (
+                          <span
+                            key={sub.id || sIdx}
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              padding: "3px 8px",
+                              borderRadius: "6px",
+                              backgroundColor: selected ? "rgba(0, 122, 255, 0.1)" : "var(--bg-secondary)",
+                              color: selected ? "#007AFF" : "var(--text-secondary)",
+                              border: "1px solid var(--border-color)",
+                            }}
+                          >
+                            {sub.name}
+                          </span>
+                        ))}
+                        {service.subServices.length > 4 && (
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              padding: "3px 6px",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            +{service.subServices.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </Card>
                 </button>
               );

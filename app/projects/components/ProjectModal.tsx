@@ -113,13 +113,17 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
 
   useEffect(() => {
     if (project) {
+      const rawClientId = typeof project.clientId === 'object' && project.clientId !== null
+        ? ((project.clientId as any)._id || '')
+        : (project.clientId || '');
+
       setFormData({
         name: project.name || '',
         description: project.description || '',
         publicUrl: project.publicUrl || '',
         previewImage: project.previewImage || '',
         client: project.client || '',
-        clientId: project.clientId || '',
+        clientId: rawClientId,
         assignedDevId: project.assignedDevId || '',
         status: project.status || 'pending',
         priority: project.priority || 'medium',
@@ -169,6 +173,46 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
     }
     setErrors({});
   }, [project, isOpen]);
+
+  useEffect(() => {
+    if (clients.length > 0 && project) {
+      setFormData((prev) => {
+        const currentMatch = clients.find((c) => c._id === prev.clientId);
+        if (currentMatch) {
+          return {
+            ...prev,
+            customClientId: prev.customClientId || currentMatch.customId || '',
+            client: prev.client || currentMatch.name || '',
+            clientEmail: prev.clientEmail || currentMatch.email || '',
+            clientCompany: prev.clientCompany || currentMatch.company || '',
+          };
+        }
+
+        const match = clients.find((c) =>
+          (prev.customClientId && c.customId === prev.customClientId) ||
+          (project.customClientId && c.customId === project.customClientId) ||
+          (prev.clientCompany && c.company?.toLowerCase() === prev.clientCompany.toLowerCase()) ||
+          (project.clientCompany && c.company?.toLowerCase() === project.clientCompany.toLowerCase()) ||
+          (prev.client && c.name?.toLowerCase() === prev.client.toLowerCase()) ||
+          (project.client && c.name?.toLowerCase() === project.client.toLowerCase()) ||
+          (prev.clientEmail && c.email?.toLowerCase() === prev.clientEmail.toLowerCase())
+        );
+
+        if (match) {
+          return {
+            ...prev,
+            clientId: match._id,
+            customClientId: prev.customClientId || match.customId || '',
+            client: prev.client || match.name || '',
+            clientEmail: prev.clientEmail || match.email || '',
+            clientPhone: prev.clientPhone || match.phone || '',
+            clientCompany: prev.clientCompany || match.company || '',
+          };
+        }
+        return prev;
+      });
+    }
+  }, [clients, project]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -266,7 +310,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
                 <option value="">Select client</option>
                 {clients.map((client) => (
                   <option key={client._id} value={client._id}>
-                    {client.customId ? `[${client.customId}] ` : ''}{client.name} ({client.email})
+                    {client.customId ? `[${client.customId}] ` : ''}{client.name}{client.company ? ` • ${client.company}` : ''}
                   </option>
                 ))}
               </select>

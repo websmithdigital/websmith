@@ -357,38 +357,34 @@ export default function Sidebar({
           flex-direction: column;
           min-height: 0;
           align-self: stretch;
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-        @media (min-width: 901px) {
-          .app-sidebar,
-          aside.app-sidebar,
-          div.app-sidebar {
-            overflow: hidden !important;
-            overflow-y: hidden !important;
-          }
-        }
-        @media (min-width: 901px) and (max-height: 800px) {
-          .app-sidebar,
-          aside.app-sidebar,
-          div.app-sidebar {
-            overflow-y: auto !important;
-            scrollbar-width: thin !important;
-          }
-        }
-        @media (max-width: 900px) {
-          .app-sidebar.app-sidebar-open {
-            overflow-y: auto !important;
-            -webkit-overflow-scrolling: touch !important;
-          }
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          scrollbar-width: thin !important;
+          scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
+          -webkit-overflow-scrolling: touch;
         }
         .app-sidebar::-webkit-scrollbar,
         aside.app-sidebar::-webkit-scrollbar,
         div.app-sidebar::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
+          width: 5px !important;
+          height: 5px !important;
+          display: block !important;
+        }
+        .app-sidebar::-webkit-scrollbar-track,
+        aside.app-sidebar::-webkit-scrollbar-track,
+        div.app-sidebar::-webkit-scrollbar-track {
           background: transparent !important;
+        }
+        .app-sidebar::-webkit-scrollbar-thumb,
+        aside.app-sidebar::-webkit-scrollbar-thumb,
+        div.app-sidebar::-webkit-scrollbar-thumb {
+          background: rgba(150, 150, 150, 0.25) !important;
+          border-radius: 4px !important;
+        }
+        .app-sidebar::-webkit-scrollbar-thumb:hover,
+        aside.app-sidebar::-webkit-scrollbar-thumb:hover,
+        div.app-sidebar::-webkit-scrollbar-thumb:hover {
+          background: rgba(150, 150, 150, 0.45) !important;
         }
         .logo-image-hover {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -462,8 +458,6 @@ export default function Sidebar({
         @media (min-width: 901px) and (max-height: 800px) {
           .app-sidebar {
             padding: 6px 8px 8px !important;
-            overflow-y: auto !important;
-            scrollbar-width: thin !important;
           }
         }
       `}</style>
@@ -486,8 +480,8 @@ const styles: any = {
     minHeight: 0,
     boxSizing: "border-box",
     alignSelf: "stretch",
-    overflow: "hidden",
-    overflowY: "hidden",
+    overflowX: "hidden",
+    overflowY: "auto",
   },
 
   profileSection: {
