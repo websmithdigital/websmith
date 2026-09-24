@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { MongoClient, ObjectId } from "@/lib/server/api";
+import { getPortalDb, ObjectId } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export async function POST(request: Request) {
-  let mongoClient = null;
-
   try {
     const authorization = request.headers.get("authorization") || "";
     const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : null;
@@ -51,23 +49,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || "";
-    if (!MONGODB_URI) {
-      return NextResponse.json(
-        { success: false, error: "Database configuration missing" },
-        { status: 500 }
-      );
-    }
-
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-    const usersCollection = mongoClient.db("WSD").collection("users");
+    const db = getPortalDb();
+    const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ _id: new ObjectId(payload.sub) });
 
     if (!user) {
-      await mongoClient.close();
-      mongoClient = null;
       return NextResponse.json(
         { success: false, error: "Account not found in authentication system" },
         { status: 404 }
@@ -77,8 +64,6 @@ export async function POST(request: Request) {
     if (currentPassword) {
       const currentPasswordValid = await bcrypt.compare(currentPassword, user.password);
       if (!currentPasswordValid) {
-        await mongoClient.close();
-        mongoClient = null;
         return NextResponse.json(
           { success: false, error: "Current password is incorrect", message: "Current password is incorrect" },
           { status: 400 }
@@ -100,9 +85,6 @@ export async function POST(request: Request) {
       }
     );
 
-    await mongoClient.close();
-    mongoClient = null;
-
     return NextResponse.json({
       success: true,
       message: "Password changed successfully",
@@ -110,9 +92,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Change password error (internal):", errMsg);
-    if (mongoClient) {
-      try { await mongoClient.close(); } catch (_) {}
-    }
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred. Please try again later." },
       { status: 500 }

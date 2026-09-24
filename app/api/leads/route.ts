@@ -13,7 +13,7 @@ const sanitize = (value: unknown) =>
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
     .trim();
 
-export const POST = apiHandler(async ({ db, client, request }) => {
+export const POST = apiHandler(async ({ db, request }) => {
   const body = await jsonBody(request);
   const name = sanitize(body.name);
   const email = sanitize(body.email).toLowerCase();
@@ -219,7 +219,7 @@ export const POST = apiHandler(async ({ db, client, request }) => {
   // 4. Send Customer Welcome / Thank-You Email with Direct Live Chat Link
   const origin = new URL(request.url).origin;
   try {
-    await sendWelcomeEmail(db, client, {
+    await sendWelcomeEmail(db, {
       ticketId,
       requestId,
       contactName: name,

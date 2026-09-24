@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MongoClient } from "@/lib/server/api";
+import { getPortalDb } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -34,8 +34,6 @@ function signToken(user: any): string {
 }
 
 export async function POST(request: Request) {
-  let mongoClient = null;
-
   try {
     const { name, email, password } = await request.json();
 
@@ -60,24 +58,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || "";
-    if (!MONGODB_URI) {
-      return NextResponse.json(
-        { success: false, error: "Database configuration missing" },
-        { status: 500 }
-      );
-    }
-
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-    const usersCollection = mongoClient.db("WSD").collection("users");
+    const db = getPortalDb();
+    const usersCollection = db.collection("users");
 
     const normalizedEmail = email.trim().toLowerCase();
 
     const existing = await usersCollection.findOne({ email: normalizedEmail });
     if (existing) {
-      await mongoClient.close();
-      mongoClient = null;
       return NextResponse.json(
         { success: false, error: "An account with this email already exists", message: "An account with this email already exists" },
         { status: 409 }
@@ -136,8 +123,6 @@ export async function POST(request: Request) {
     };
 
     const insertResult = await usersCollection.insertOne(newUser);
-    await mongoClient.close();
-    mongoClient = null;
 
     const savedUser = { ...newUser, _id: insertResult.insertedId };
 
@@ -149,9 +134,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Register error (internal):", errMsg);
-    if (mongoClient) {
-      try { await mongoClient.close(); } catch (_) {}
-    }
     if (/E11000 duplicate key/i.test(errMsg)) {
       return NextResponse.json(
         { success: false, error: "An account with this email already exists", message: "An account with this email already exists" },

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MongoClient } from "@/lib/server/api";
+import { getPortalDb } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/backend-db";
 import { sendLoginOtp } from "@/lib/otp/login-otp";
@@ -20,8 +20,6 @@ export async function POST(request: Request) {
     return rateLimitResponse(rateLimit.reset);
   }
 
-  let mongoClient = null;
-
   try {
     const { identifier, password } = await request.json();
 
@@ -31,17 +29,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || "";
-    if (!MONGODB_URI) {
-      return NextResponse.json(
-        { success: false, error: "Database configuration missing" },
-        { status: 500 }
-      );
-    }
 
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-    const usersCollection = mongoClient.db("WSD").collection("users");
+    const db = getPortalDb();
+    const usersCollection = db.collection("users");
 
     const identifierValue = identifier.trim();
     const user = await usersCollection.findOne({
@@ -49,8 +39,6 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      await mongoClient.close();
-      mongoClient = null;
       return NextResponse.json(
         { success: false, error: "Invalid credentials. Please try again." },
         { status: 401 }
@@ -59,16 +47,11 @@ export async function POST(request: Request) {
 
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
-      await mongoClient.close();
-      mongoClient = null;
       return NextResponse.json(
         { success: false, error: "Invalid credentials. Please try again." },
         { status: 401 }
       );
     }
-
-    await mongoClient.close();
-    mongoClient = null;
 
     const accountEmail =
       typeof user.email === "string" ? user.email : identifierValue.toLowerCase();
@@ -95,9 +78,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Login error (internal):", errMsg);
-    if (mongoClient) {
-      try { await mongoClient.close(); } catch (_) {}
-    }
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred. Please try again later." },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MongoClient, ObjectId } from "@/lib/server/api";
+import { getPortalDb, ObjectId } from "@/lib/server/db";
 import jwt from "jsonwebtoken";
 
 function toPublicUser(user: any) {
@@ -21,8 +21,6 @@ function toPublicUser(user: any) {
 }
 
 export async function GET(request: Request) {
-  let mongoClient = null;
-
   try {
     const authorization = request.headers.get("authorization") || "";
     const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : null;
@@ -52,31 +50,17 @@ export async function GET(request: Request) {
       );
     }
 
-    const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || "";
-    if (!MONGODB_URI) {
-      return NextResponse.json(
-        { success: false, error: "Database configuration missing" },
-        { status: 500 }
-      );
-    }
-
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-    const usersCollection = mongoClient.db("WSD").collection("users");
+    const db = getPortalDb();
+    const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ _id: new ObjectId(payload.sub) });
 
     if (!user) {
-      await mongoClient.close();
-      mongoClient = null;
       return NextResponse.json(
         { success: false, error: "Account not found in authentication system" },
         { status: 404 }
       );
     }
-
-    await mongoClient.close();
-    mongoClient = null;
 
     return NextResponse.json({
       success: true,
@@ -85,9 +69,6 @@ export async function GET(request: Request) {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Get current user error (internal):", errMsg);
-    if (mongoClient) {
-      try { await mongoClient.close(); } catch (_) {}
-    }
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred. Please try again later." },
       { status: 500 }

@@ -1,16 +1,10 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
-import { MongoClient } from "@/lib/server/api";
+import { getDb } from "@/lib/backend-db";
+import { getPortalDb } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
-});
 
 export async function POST(request: Request) {
   let pgClient = null;
-  let mongoClient = null;
 
   try {
     const { email, newPassword, confirmPassword, otp } = await request.json();
@@ -43,6 +37,7 @@ export async function POST(request: Request) {
       );
     }
 
+    const pool = await getDb();
     pgClient = await pool.connect();
 
     const otpResult = await pgClient.query(
@@ -64,25 +59,11 @@ export async function POST(request: Request) {
 
     const noreplyEmail = email.trim().toLowerCase();
 
-    const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || "";
-    if (!MONGODB_URI) {
-      pgClient.release();
-      pgClient = null;
-      return NextResponse.json(
-        { success: false, error: "Database configuration missing" },
-        { status: 500 }
-      );
-    }
-
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-    const db = mongoClient.db("WSD");
+    const db = getPortalDb();
     const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ email: noreplyEmail });
     if (!user) {
-      await mongoClient.close();
-      mongoClient = null;
       pgClient.release();
       pgClient = null;
       return NextResponse.json(
@@ -109,9 +90,6 @@ export async function POST(request: Request) {
       }
     );
 
-    await mongoClient.close();
-    mongoClient = null;
-
     await pgClient.query(
       `DELETE FROM otp_verifications WHERE email = $1 AND purpose = $2`,
       [noreplyEmail, "password_reset"]
@@ -127,9 +105,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Password reset error (internal):", errMsg);
-    if (mongoClient) {
-      try { await mongoClient.close(); } catch (_) {}
-    }
     if (pgClient) {
       try { pgClient.release(); } catch (_) {}
     }

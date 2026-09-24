@@ -865,8 +865,8 @@ export async function createClientAccount(
  * embedded as a real URL (the raw JWT token is never exposed in the message). */
 export async function sendWelcomeEmail(
   db: any,
-  client: any,
-  input: {
+  inputOrClient: any,
+  maybeInput?: {
     ticketId: string;
     requestId: string;
     contactName: string;
@@ -878,6 +878,17 @@ export async function sendWelcomeEmail(
     createdAt: Date;
   }
 ) {
+  const input = (maybeInput || inputOrClient) as {
+    ticketId: string;
+    requestId: string;
+    contactName: string;
+    contactEmail: string;
+    subject: string;
+    description: string;
+    account: { customId?: string | null; _id: string };
+    origin: string;
+    createdAt: Date;
+  };
   const templates = await ensureResolutionTemplates(db);
   const template = templates.find((t) => t.key === FIRST_WELCOME_TEMPLATE_KEY) || findDefaultTemplate(templates);
   if (!template) return;

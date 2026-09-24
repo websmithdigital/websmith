@@ -591,23 +591,3 @@ export function getPortalDb(customPool?: Pool): Db {
   }
   return globalDbInstance;
 }
-
-export class MongoClient {
-  private dbInstance: Db;
-
-  constructor(_uri?: string) {
-    this.dbInstance = getPortalDb();
-  }
-
-  async connect(): Promise<this> {
-    return this;
-  }
-
-  async close(): Promise<void> {
-    // Shared pool in Neon, no-op for individual request close
-  }
-
-  db(_name?: string): Db {
-    return this.dbInstance;
-  }
-}

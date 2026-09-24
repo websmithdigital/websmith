@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import {
-  MongoClient,
   ObjectId,
   Db,
   parseObjectId,
   getPortalDb,
 } from "./db";
 
-export { MongoClient, ObjectId, Db, parseObjectId, getPortalDb };
+export { ObjectId, Db, parseObjectId, getPortalDb };
 
 export class HttpError extends Error {
   status: number;
@@ -22,10 +21,6 @@ export const badRequest = (msg: string) => new HttpError(400, msg);
 export const unauthorized = (msg = "Authentication required") => new HttpError(401, msg);
 export const forbidden = (msg = "Insufficient permissions") => new HttpError(403, msg);
 export const notFound = (msg = "Not found") => new HttpError(404, msg);
-
-export function getMongoUri(): string {
-  return process.env.DATABASE_URL || "";
-}
 
 export function serialize(value: any): any {
   if (value == null) return value;
@@ -73,7 +68,6 @@ export function json(data: any, init?: { status?: number }) {
 export type ApiRouteContext = {
   request: Request;
   db: Db;
-  client: MongoClient;
   user: any;
   params: Record<string, string>;
 };
@@ -88,20 +82,15 @@ export function apiHandler(
   opts?: ApiHandlerOpts
 ) {
   return async (request: Request, routeCtx?: { params: any }) => {
-    let client: MongoClient | null = null;
     try {
       const db = getPortalDb();
-      client = new MongoClient();
       const params = routeCtx?.params ? await routeCtx.params : {};
       let user: any = null;
       if (opts?.auth) {
         user = await authUser(db, request, opts.roles);
       }
-      return await handler({ request, db, client, user, params });
+      return await handler({ request, db, user, params });
     } catch (error) {
-      if (client) {
-        try { await client.close(); } catch {}
-      }
       if (error instanceof HttpError) {
         return NextResponse.json(
           { success: false, error: error.message, message: error.message },

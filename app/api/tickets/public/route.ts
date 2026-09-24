@@ -30,7 +30,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // stored records never carry raw control bytes from the public form.
 const sanitize = (value: string) => value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
 
-export const POST = apiHandler(async ({ db, client, request }) => {
+export const POST = apiHandler(async ({ db, request }) => {
   const ipAddress =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
@@ -282,7 +282,7 @@ export const POST = apiHandler(async ({ db, client, request }) => {
   // per successful submission; the email body never exposes the JWT token.
   const origin = new URL(request.url).origin;
   try {
-    await sendWelcomeEmail(db, client, {
+    await sendWelcomeEmail(db, {
       ticketId,
       requestId,
       contactName,
