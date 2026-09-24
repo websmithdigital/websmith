@@ -6,14 +6,11 @@ import {
   Cpu, 
   Layers, 
   Users2, 
-  Sparkles, 
   CheckCircle2, 
   ArrowRight, 
   Award, 
-  Zap, 
   Globe2, 
-  Lock,
-  Building2 
+  Lock 
 } from "lucide-react";
 import { useLeadFunnel } from "../../providers/LeadFunnelProvider";
 import { usePublicTheme } from "../../providers/PublicThemeProvider";
@@ -76,43 +73,72 @@ export default function AboutPage() {
     },
   ];
 
+  const teamMembers = [
+    {
+      name: "Alex Mercer",
+      role: "Principal Systems Architect",
+      specialty: "High-Throughput APIs, Distributed State & Cloud Infrastructure",
+      exp: "12+ yrs exp",
+      initials: "AM",
+    },
+    {
+      name: "Elena Rostova",
+      role: "VP of Engineering & Security",
+      specialty: "HMAC-SHA256 Cryptography, Node-Locking & Compliance",
+      exp: "10+ yrs exp",
+      initials: "ER",
+    },
+    {
+      name: "Marcus Chen",
+      role: "Head of ERP & Enterprise Systems",
+      specialty: "Multi-Tenant Partitioning, Inventory Engines & Financial Billing",
+      exp: "11+ yrs exp",
+      initials: "MC",
+    },
+    {
+      name: "Sarah Al-Mansoor",
+      role: "Lead Frontend & Design Systems Architect",
+      specialty: "Next.js App Router, Micro-Interactions & Design Systems",
+      exp: "8+ yrs exp",
+      initials: "SM",
+    },
+    {
+      name: "Tariq Vance",
+      role: "Director of DevOps & SRE",
+      specialty: "Automated CI/CD, Kubernetes Orchestration & Zero-Downtime",
+      exp: "9+ yrs exp",
+      initials: "TV",
+    },
+    {
+      name: "Maya Lin",
+      role: "AI & Data Architecture Lead",
+      specialty: "Autonomous Agent Pipelines, Vector Embeddings & Neural Search",
+      exp: "7+ yrs exp",
+      initials: "ML",
+    },
+  ];
+
   return (
     <div
+      className="wsd-about-page"
       style={{
         minHeight: "100vh",
         backgroundColor: "transparent",
         color: isDark ? "#f8fafc" : "#0f172a",
-        paddingTop: "48px",
-        paddingBottom: "80px",
+        paddingTop: "28px",
+        paddingBottom: "50px",
       }}
     >
       {/* Hero Section */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)", textAlign: "center" }}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 16px",
-            borderRadius: "9999px",
-            backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
-            border: isDark ? "1px solid rgba(37, 99, 235, 0.3)" : "1px solid rgba(37, 99, 235, 0.2)",
-            color: "#3b82f6",
-            fontSize: "13px",
-            fontWeight: 600,
-            marginBottom: "20px",
-          }}
-        >
-          <Sparkles size={14} /> Who We Are &amp; What Drives Us
-        </div>
-
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(16px, 4vw, 64px)", textAlign: "center" }}>
         <h1
+          className="wsd-about-hero-title"
           style={{
-            fontSize: "clamp(34px, 5vw, 56px)",
+            fontSize: "clamp(26px, 3.8vw, 42px)",
             fontWeight: 800,
             letterSpacing: "-0.03em",
             lineHeight: 1.15,
-            marginBottom: "20px",
+            marginBottom: "10px",
           }}
         >
           Engineering Practical{" "}
@@ -131,12 +157,13 @@ export default function AboutPage() {
         </h1>
 
         <p
+          className="wsd-about-hero-desc"
           style={{
-            fontSize: "clamp(16px, 2vw, 19px)",
+            fontSize: "clamp(13.5px, 1.4vw, 15px)",
             color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
-            maxWidth: "780px",
-            margin: "0 auto 40px",
-            lineHeight: 1.65,
+            maxWidth: "680px",
+            margin: "0 auto 20px",
+            lineHeight: 1.55,
           }}
         >
           At <strong>WebSmith Digital</strong>, we go beyond traditional software development. We architect resilient digital ecosystems, enterprise ERP platforms, and universal software licensing solutions that empower businesses to automate, scale, and outperform competition.
@@ -144,11 +171,12 @@ export default function AboutPage() {
 
         {/* Metrics Grid */}
         <div
+          className="wsd-about-metrics-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-            marginBottom: "72px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: "12px",
+            marginBottom: "36px",
           }}
         >
           {metrics.map((metric, idx) => {
@@ -156,10 +184,10 @@ export default function AboutPage() {
             return (
               <div
                 key={idx}
-                className="wsd-unified-card"
+                className="wsd-about-metric-card wsd-unified-card"
                 style={{
-                  padding: "24px 18px",
-                  borderRadius: "20px",
+                  padding: "14px 12px",
+                  borderRadius: "16px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -167,35 +195,38 @@ export default function AboutPage() {
                 }}
               >
                 <div
+                  className="wsd-about-metric-icon-box"
                   style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "12px",
+                    width: "34px",
+                    height: "34px",
+                    borderRadius: "10px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
                     color: "#3b82f6",
-                    marginBottom: "12px",
+                    marginBottom: "8px",
                   }}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
                 </div>
                 <div
+                  className="wsd-about-metric-val"
                   style={{
-                    fontSize: "30px",
+                    fontSize: "22px",
                     fontWeight: 800,
                     letterSpacing: "-0.02em",
                     color: isDark ? "#ffffff" : "#0f172a",
                     lineHeight: 1.1,
-                    marginBottom: "6px",
+                    marginBottom: "4px",
                   }}
                 >
                   {metric.value}
                 </div>
                 <div
+                  className="wsd-about-metric-lbl"
                   style={{
-                    fontSize: "13px",
+                    fontSize: "12px",
                     fontWeight: 500,
                     color: isDark ? "rgba(255, 255, 255, 0.55)" : "#64748b",
                   }}
@@ -209,29 +240,31 @@ export default function AboutPage() {
       </div>
 
       {/* Core Engineering Philosophy */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)" }}>
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2
+            className="wsd-section-heading"
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "12px",
+              marginBottom: "6px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Our Engineering Principles
           </h2>
-          <p style={{ fontSize: "15px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
             The standards that dictate how we architect, code, and support every platform.
           </p>
         </div>
 
         <div
+          className="wsd-about-principles-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "20px",
+            gap: "14px",
           }}
         >
           {corePillars.map((pillar, idx) => {
@@ -239,44 +272,48 @@ export default function AboutPage() {
             return (
               <div
                 key={idx}
-                className="wsd-unified-card"
+                className="wsd-about-principle-card wsd-unified-card"
                 style={{
-                  padding: "28px 24px",
-                  borderRadius: "20px",
+                  padding: "18px 16px",
+                  borderRadius: "16px",
                   display: "flex",
                   flexDirection: "column",
                 }}
               >
                 <div
+                  className="wsd-about-principle-icon-box"
                   style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "12px",
+                    width: "34px",
+                    height: "34px",
+                    borderRadius: "10px",
                     backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
                     color: "#3b82f6",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginBottom: "16px",
+                    marginBottom: "12px",
                   }}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
                 </div>
                 <h3
+                  className="wsd-about-principle-title"
                   style={{
-                    fontSize: "17px",
+                    fontSize: "15px",
                     fontWeight: 700,
-                    marginBottom: "10px",
+                    marginBottom: "6px",
                     color: isDark ? "#ffffff" : "#0f172a",
                   }}
                 >
                   {pillar.title}
                 </h3>
                 <p
+                  className="wsd-about-principle-desc"
                   style={{
-                    fontSize: "13.5px",
-                    lineHeight: 1.6,
+                    fontSize: "12.5px",
+                    lineHeight: 1.5,
                     color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569",
+                    margin: 0,
                   }}
                 >
                   {pillar.desc}
@@ -288,42 +325,45 @@ export default function AboutPage() {
       </div>
 
       {/* Evolution Timeline */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)" }}>
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2
+            className="wsd-section-heading"
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "12px",
+              marginBottom: "6px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Evolution &amp; Technical Milestones
           </h2>
-          <p style={{ fontSize: "15px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
             How our engineering capabilities expanded into a full-scale digital ecosystem.
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: "24px" }}>
+        <div className="wsd-about-milestones-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "14px" }}>
           {milestones.map((m, idx) => (
             <div
               key={idx}
+              className="wsd-about-milestone-card"
               style={{
                 display: "grid",
-                gridTemplateColumns: "100px 1fr",
-                gap: "24px",
-                padding: "24px",
-                borderRadius: "20px",
+                gridTemplateColumns: "80px 1fr",
+                gap: "16px",
+                padding: "16px 18px",
+                borderRadius: "16px",
                 backgroundColor: isDark ? "rgba(13, 19, 34, 0.6)" : "#ffffff",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                 alignItems: "center",
               }}
             >
               <div
+                className="wsd-about-milestone-year"
                 style={{
-                  fontSize: "14px",
+                  fontSize: "12.5px",
                   fontWeight: 800,
                   color: "#3b82f6",
                   textTransform: "uppercase",
@@ -334,19 +374,21 @@ export default function AboutPage() {
               </div>
               <div>
                 <h3
+                  className="wsd-about-milestone-title"
                   style={{
-                    fontSize: "17px",
+                    fontSize: "15px",
                     fontWeight: 700,
-                    marginBottom: "6px",
+                    marginBottom: "4px",
                     color: isDark ? "#ffffff" : "#0f172a",
                   }}
                 >
                   {m.title}
                 </h3>
                 <p
+                  className="wsd-about-milestone-desc"
                   style={{
-                    fontSize: "13.5px",
-                    lineHeight: 1.6,
+                    fontSize: "12.5px",
+                    lineHeight: 1.5,
                     color: isDark ? "rgba(255, 255, 255, 0.65)" : "#64748b",
                     margin: 0,
                   }}
@@ -360,117 +402,61 @@ export default function AboutPage() {
       </div>
 
       {/* Core Engineering Team & Architects Section */}
-      <div id="team" style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)", scrollMarginTop: "100px" }}>
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "6px 16px",
-              borderRadius: "9999px",
-              backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
-              border: isDark ? "1px solid rgba(37, 99, 235, 0.3)" : "1px solid rgba(37, 99, 235, 0.2)",
-              color: "#3b82f6",
-              fontSize: "13px",
-              fontWeight: 600,
-              marginBottom: "16px",
-            }}
-          >
-            <Users2 size={14} /> Technical Leadership
-          </div>
+      <div id="team" style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)", scrollMarginTop: "90px" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2
+            className="wsd-section-heading"
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "12px",
+              marginBottom: "6px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Core Team &amp; Technical Architects
           </h2>
-          <p style={{ fontSize: "15px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", maxWidth: "640px", margin: "0 auto" }}>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", maxWidth: "640px", margin: "0 auto" }}>
             The senior systems engineers, security researchers, and product architects driving our platform ecosystems.
           </p>
         </div>
 
         <div
+          className="wsd-team-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "24px",
+            gap: "14px",
           }}
         >
-          {[
-            {
-              name: "Alex Mercer",
-              role: "Principal Systems Architect",
-              specialty: "High-Throughput APIs, Distributed State & Cloud Infrastructure",
-              exp: "12+ yrs experience",
-              initials: "AM",
-            },
-            {
-              name: "Elena Rostova",
-              role: "VP of Engineering & Security",
-              specialty: "HMAC-SHA256 Cryptography, Node-Locking & PCI-DSS/HIPAA Compliance",
-              exp: "10+ yrs experience",
-              initials: "ER",
-            },
-            {
-              name: "Marcus Chen",
-              role: "Head of ERP & Enterprise Systems",
-              specialty: "Multi-Tenant Partitioning, Inventory Engines & Financial Billing",
-              exp: "11+ yrs experience",
-              initials: "MC",
-            },
-            {
-              name: "Sarah Al-Mansoor",
-              role: "Lead Frontend & Design Systems Architect",
-              specialty: "Next.js App Router, Micro-Interactions & Design Systems",
-              exp: "8+ yrs experience",
-              initials: "SM",
-            },
-            {
-              name: "Tariq Vance",
-              role: "Director of DevOps & SRE",
-              specialty: "Automated CI/CD, Kubernetes Orchestration & Zero-Downtime Releases",
-              exp: "9+ yrs experience",
-              initials: "TV",
-            },
-            {
-              name: "Maya Lin",
-              role: "AI & Data Architecture Lead",
-              specialty: "Autonomous Agent Pipelines, Vector Embeddings & Neural Search",
-              exp: "7+ yrs experience",
-              initials: "ML",
-            },
-          ].map((dev, idx) => (
+          {teamMembers.map((dev, idx) => (
             <div
               key={idx}
+              className="wsd-team-card"
               style={{
-                padding: "24px",
-                borderRadius: "20px",
+                padding: "18px 16px",
+                borderRadius: "16px",
                 backgroundColor: isDark ? "rgba(13, 19, 34, 0.75)" : "#ffffff",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                 display: "flex",
                 flexDirection: "column",
-                gap: "14px",
+                gap: "10px",
                 transition: "transform 0.2s ease, border-color 0.2s ease",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div
+                  className="wsd-team-avatar"
                   style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "14px",
+                    width: "38px",
+                    height: "38px",
+                    borderRadius: "10px",
                     background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     color: "#ffffff",
-                    fontSize: "16px",
+                    fontSize: "14px",
                     fontWeight: 700,
                     letterSpacing: "-0.02em",
                     flexShrink: 0,
@@ -478,24 +464,32 @@ export default function AboutPage() {
                 >
                   {dev.initials}
                 </div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <h3
+                    className="wsd-team-name"
                     style={{
-                      fontSize: "16px",
+                      fontSize: "15px",
                       fontWeight: 700,
                       color: isDark ? "#ffffff" : "#0f172a",
                       margin: 0,
                       lineHeight: 1.3,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
                     {dev.name}
                   </h3>
                   <div
+                    className="wsd-team-role"
                     style={{
-                      fontSize: "12.5px",
+                      fontSize: "12px",
                       fontWeight: 600,
                       color: "#3b82f6",
-                      marginTop: "2px",
+                      marginTop: "1px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
                     {dev.role}
@@ -504,9 +498,10 @@ export default function AboutPage() {
               </div>
 
               <div
+                className="wsd-team-specialty"
                 style={{
-                  fontSize: "13px",
-                  lineHeight: 1.5,
+                  fontSize: "12.5px",
+                  lineHeight: 1.45,
                   color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569",
                   flex: 1,
                 }}
@@ -515,20 +510,21 @@ export default function AboutPage() {
               </div>
 
               <div
+                className="wsd-team-footer"
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  paddingTop: "12px",
+                  paddingTop: "10px",
                   borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid #f1f5f9",
-                  fontSize: "11.5px",
+                  fontSize: "11px",
                   color: isDark ? "rgba(255, 255, 255, 0.45)" : "#94a3b8",
                   fontWeight: 500,
                 }}
               >
                 <span>{dev.exp}</span>
                 <span style={{ color: "#10b981", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#10b981" }} /> Active Architect
+                  <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#10b981" }} /> Active Architect
                 </span>
               </div>
             </div>
@@ -537,11 +533,12 @@ export default function AboutPage() {
       </div>
 
       {/* Bottom CTA */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "40px auto 0", padding: "0 clamp(16px, 4vw, 64px)" }}>
         <div
+          className="wsd-about-cta"
           style={{
-            padding: "56px clamp(24px, 5vw, 64px)",
-            borderRadius: "28px",
+            padding: "32px clamp(20px, 4vw, 44px)",
+            borderRadius: "20px",
             textAlign: "center",
             background: isDark
               ? "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(13, 19, 34, 0.8) 100%)"
@@ -550,23 +547,25 @@ export default function AboutPage() {
           }}
         >
           <h2
+            className="wsd-about-cta-title"
             style={{
-              fontSize: "clamp(24px, 3.5vw, 36px)",
+              fontSize: "clamp(20px, 2.5vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "14px",
+              marginBottom: "10px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Ready to partner with an engineering-first team?
           </h2>
           <p
+            className="wsd-about-cta-desc"
             style={{
-              fontSize: "15px",
+              fontSize: "14px",
               color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
               maxWidth: "600px",
-              margin: "0 auto 28px",
-              lineHeight: 1.6,
+              margin: "0 auto 20px",
+              lineHeight: 1.55,
             }}
           >
             Let&apos;s discuss your upcoming software launch, ERP automation, or platform scaling requirements.
@@ -574,26 +573,177 @@ export default function AboutPage() {
 
           <button
             type="button"
+            className="wsd-about-cta-btn"
             onClick={() => openLeadServicesModal()}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "13px 32px",
+              padding: "11px 26px",
               borderRadius: "9999px",
-              fontSize: "14.5px",
+              fontSize: "13.5px",
               fontWeight: 700,
               color: "#ffffff",
               background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 8px 24px -4px rgba(37, 99, 235, 0.4)",
+              boxShadow: "0 6px 20px -4px rgba(37, 99, 235, 0.4)",
             }}
           >
-            Get Started <ArrowRight size={16} />
+            Get Started <ArrowRight size={15} />
           </button>
         </div>
       </div>
+
+      <style>{`
+        .wsd-team-card:hover {
+          border-color: rgba(37, 99, 235, 0.4) !important;
+          transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+          .wsd-about-page {
+            padding-top: 70px !important;
+            padding-bottom: 24px !important;
+          }
+          .wsd-about-hero-title {
+            font-size: 18px !important;
+            line-height: 1.18 !important;
+            margin-bottom: 4px !important;
+          }
+          .wsd-about-hero-desc {
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 12px !important;
+          }
+          .wsd-about-metrics-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            margin-bottom: 18px !important;
+          }
+          .wsd-about-metric-card {
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+          }
+          .wsd-about-metric-icon-box {
+            width: 24px !important;
+            height: 24px !important;
+            margin-bottom: 3px !important;
+          }
+          .wsd-about-metric-val {
+            font-size: 15px !important;
+            margin-bottom: 1px !important;
+          }
+          .wsd-about-metric-lbl {
+            font-size: 9px !important;
+          }
+          .wsd-section-heading {
+            font-size: 15px !important;
+            margin-bottom: 2px !important;
+          }
+          .wsd-section-subtext {
+            font-size: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          .wsd-about-principles-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            margin-bottom: 18px !important;
+          }
+          .wsd-about-principle-card {
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+          }
+          .wsd-about-principle-icon-box {
+            width: 24px !important;
+            height: 24px !important;
+            margin-bottom: 6px !important;
+          }
+          .wsd-about-principle-title {
+            font-size: 11px !important;
+            margin-bottom: 3px !important;
+          }
+          .wsd-about-principle-desc {
+            font-size: 9px !important;
+            line-height: 1.25 !important;
+          }
+          .wsd-about-milestones-grid {
+            grid-template-columns: 1fr !important;
+            gap: 6px !important;
+            margin-bottom: 18px !important;
+          }
+          .wsd-about-milestone-card {
+            grid-template-columns: 55px 1fr !important;
+            gap: 8px !important;
+            padding: 8px 10px !important;
+            border-radius: 10px !important;
+          }
+          .wsd-about-milestone-year {
+            font-size: 10px !important;
+          }
+          .wsd-about-milestone-title {
+            font-size: 11px !important;
+            margin-bottom: 2px !important;
+          }
+          .wsd-about-milestone-desc {
+            font-size: 9px !important;
+            line-height: 1.25 !important;
+          }
+          .wsd-team-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            margin-bottom: 18px !important;
+          }
+          .wsd-team-card {
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+            gap: 6px !important;
+          }
+          .wsd-team-avatar {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 11px !important;
+            border-radius: 8px !important;
+          }
+          .wsd-team-name {
+            font-size: 11px !important;
+            line-height: 1.2 !important;
+          }
+          .wsd-team-role {
+            font-size: 9.5px !important;
+            margin-top: 1px !important;
+          }
+          .wsd-team-specialty {
+            font-size: 9px !important;
+            line-height: 1.2 !important;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          .wsd-team-footer {
+            font-size: 8.5px !important;
+            padding-top: 4px !important;
+          }
+          .wsd-about-cta {
+            margin-top: 14px !important;
+            padding: 14px 10px !important;
+            border-radius: 12px !important;
+          }
+          .wsd-about-cta-title {
+            font-size: 15px !important;
+            margin-bottom: 4px !important;
+          }
+          .wsd-about-cta-desc {
+            font-size: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          .wsd-about-cta-btn {
+            padding: 8px 16px !important;
+            font-size: 11px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

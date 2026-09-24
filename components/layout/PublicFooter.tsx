@@ -42,6 +42,7 @@ export default function PublicFooter() {
 
   return (
     <footer
+      className="public-footer-root"
       style={{
         ...styles.footer,
         backgroundColor: isDark ? "#070B14" : "var(--bg-secondary)",
@@ -49,31 +50,33 @@ export default function PublicFooter() {
       }}
     >
       <div style={styles.content} className="landing-footer-content">
-        <div style={styles.section}>
-          <div style={styles.brandRow}>
+        <div style={styles.section} className="public-footer-brand">
+          <div style={styles.brandRow} className="public-footer-brand-row">
             <span
+              className="public-footer-logo-shell"
               style={{
                 ...styles.footerLogoShell,
                 backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "var(--bg-primary)",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid var(--border-color)",
               }}
             >
-              <Image src="/images/icon.png" alt="Websmith Digital icon" width={48} height={48} style={styles.footerLogo} />
+              <Image src="/images/icon.png" alt="Websmith Digital icon" width={48} height={48} style={styles.footerLogo} className="public-footer-logo-img" />
             </span>
             <Image
               src="/images/wordmark1.png"
               alt={publicFooterConfig.brand.name}
               width={235}
               height={50}
+              className="public-footer-wordmark"
               style={{ height: "50px", width: "auto", objectFit: "contain" }}
             />
           </div>
-          <p style={styles.tagline}>{publicFooterConfig.brand.tagline}</p>
-          <p style={styles.aboutSummary}>
+          <p style={styles.tagline} className="public-footer-tagline">{publicFooterConfig.brand.tagline}</p>
+          <p style={styles.aboutSummary} className="public-footer-about">
             We design smart solutions and build powerful digital ecosystems that help businesses grow and automate through innovation and practicality.
           </p>
           {socials.length > 0 && (
-            <div style={styles.socialRow}>
+            <div style={styles.socialRow} className="public-footer-social-row">
               {socials.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -95,21 +98,36 @@ export default function PublicFooter() {
           )}
         </div>
 
-        {publicFooterConfig.sections.map((section) => (
-          <div key={section.title} style={styles.section}>
-            <h4 style={styles.sectionTitle}>{section.title}</h4>
-            {section.links.map((link) => (
-              <Link key={`${section.title}-${link.href}`} href={link.href} style={styles.link} className="public-footer-link">
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        ))}
+        <div className="public-footer-links-grid">
+          {publicFooterConfig.sections.map((section, idx) => (
+            <div key={section.title} style={styles.section} className={`public-footer-nav-col public-footer-nav-col-${idx}`}>
+              <h4 style={styles.sectionTitle} className="public-footer-col-title">{section.title}</h4>
+              <div className="public-footer-link-list">
+                {section.links.map((link) => (
+                  <Link key={`${section.title}-${link.href}`} href={link.href} style={styles.link} className="public-footer-link">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-      <div style={styles.bottomBar}>
-        <p style={styles.bottomText}>© {year} Websmith Digital. All Rights Reserved. Developed with care by the Websmith Digital Team.</p>
+      <div style={styles.bottomBar} className="public-footer-bottom-bar">
+        <p style={styles.bottomText} className="public-footer-bottom-text">© {year} Websmith Digital. All Rights Reserved. Developed with care by the Websmith Digital Team.</p>
       </div>
       <style>{`
+        .public-footer-links-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 32px;
+          flex: 1;
+        }
+        .public-footer-link-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
         .public-footer-link,
         .public-footer-social {
           transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1);
@@ -124,10 +142,97 @@ export default function PublicFooter() {
           transform: translateY(-3px);
           box-shadow: 0 12px 24px rgba(0, 122, 255, 0.14);
         }
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+          .public-footer-root {
+            padding: 24px 0 14px !important;
+          }
           .landing-footer-content {
-            grid-template-columns: 1fr !important;
-            gap: 32px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+            margin-bottom: 16px !important;
+            padding: 0 16px !important;
+          }
+          .public-footer-brand {
+            gap: 8px !important;
+          }
+          .public-footer-brand-row {
+            gap: 10px !important;
+          }
+          .public-footer-logo-shell {
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 9px !important;
+            padding: 2px !important;
+          }
+          .public-footer-logo-img {
+            width: 100% !important;
+            height: 100% !important;
+          }
+          .public-footer-wordmark {
+            height: 30px !important;
+            width: auto !important;
+          }
+          .public-footer-tagline {
+            font-size: 11.5px !important;
+            line-height: 1.35 !important;
+            margin: 0 !important;
+          }
+          .public-footer-about {
+            display: none !important;
+          }
+          .public-footer-social-row {
+            gap: 8px !important;
+            margin-top: 4px !important;
+          }
+          .public-footer-social {
+            width: 28px !important;
+            height: 28px !important;
+          }
+          .public-footer-social svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .public-footer-links-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 16px 12px !important;
+          }
+          .public-footer-nav-col {
+            gap: 6px !important;
+          }
+          .public-footer-nav-col-2 {
+            grid-column: 1 / -1 !important;
+            margin-top: 2px !important;
+          }
+          .public-footer-nav-col-2 .public-footer-link-list {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 4px 12px !important;
+          }
+          .public-footer-col-title {
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            margin-bottom: 2px !important;
+            color: var(--text-primary) !important;
+          }
+          .public-footer-link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px !important;
+          }
+          .public-footer-link {
+            font-size: 11px !important;
+            line-height: 1.3 !important;
+            padding: 1px 0 !important;
+          }
+          .public-footer-bottom-bar {
+            padding-top: 12px !important;
+            margin: 0 16px !important;
+          }
+          .public-footer-bottom-text {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
           }
         }
       `}</style>

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Briefcase, 
-  Sparkles, 
   MapPin, 
   Clock, 
   ArrowRight, 
@@ -13,8 +12,7 @@ import {
   Laptop, 
   HeartHandshake, 
   GraduationCap, 
-  Send,
-  Users2
+  Send
 } from "lucide-react";
 import API from "../../../core/services/apiService";
 import { usePublicTheme } from "../../providers/PublicThemeProvider";
@@ -170,41 +168,25 @@ export default function CareersPage() {
 
   return (
     <div
+      className="wsd-careers-page"
       style={{
         minHeight: "100vh",
         backgroundColor: "transparent",
         color: isDark ? "#f8fafc" : "#0f172a",
-        paddingTop: "48px",
-        paddingBottom: "80px",
+        paddingTop: "28px",
+        paddingBottom: "50px",
       }}
     >
       {/* Hero Header */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)", textAlign: "center" }}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 16px",
-            borderRadius: "9999px",
-            backgroundColor: isDark ? "rgba(34, 197, 94, 0.15)" : "rgba(34, 197, 94, 0.1)",
-            border: isDark ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(34, 197, 94, 0.2)",
-            color: "#22c55e",
-            fontSize: "13px",
-            fontWeight: 600,
-            marginBottom: "20px",
-          }}
-        >
-          <Sparkles size={14} /> We&apos;re Hiring Globally
-        </div>
-
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(16px, 4vw, 64px)", textAlign: "center" }}>
         <h1
+          className="wsd-careers-hero-title"
           style={{
-            fontSize: "clamp(34px, 5vw, 56px)",
+            fontSize: "clamp(26px, 3.8vw, 42px)",
             fontWeight: 800,
             letterSpacing: "-0.03em",
             lineHeight: 1.15,
-            marginBottom: "20px",
+            marginBottom: "10px",
           }}
         >
           Build Exceptional Software With{" "}
@@ -223,47 +205,50 @@ export default function CareersPage() {
         </h1>
 
         <p
+          className="wsd-careers-hero-desc"
           style={{
-            fontSize: "clamp(15px, 2vw, 18px)",
+            fontSize: "clamp(13.5px, 1.4vw, 15px)",
             color: isDark ? "rgba(255, 255, 255, 0.65)" : "rgba(100, 116, 139, 0.9)",
-            maxWidth: "760px",
-            margin: "0 auto 36px",
-            lineHeight: 1.6,
+            maxWidth: "680px",
+            margin: "0 auto 20px",
+            lineHeight: 1.55,
           }}
         >
           Join WebSmith Digital in architecting enterprise digital ecosystems, complex ERP platforms, and universal software licensing engines for ambitious brands worldwide.
         </p>
 
         {/* Action Button */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "14px", flexWrap: "wrap", marginBottom: "64px" }}>
+        <div className="wsd-careers-hero-btns" style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", marginBottom: "36px" }}>
           <a
             href={`mailto:${contactInfo.email}?subject=Application for Engineering Role at WebSmith Digital`}
+            className="wsd-careers-btn-primary"
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "13px 30px",
+              padding: "10px 22px",
               borderRadius: "9999px",
-              fontSize: "14px",
+              fontSize: "13.5px",
               fontWeight: 700,
               color: "#ffffff",
               background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
               textDecoration: "none",
-              boxShadow: "0 8px 24px -4px rgba(37, 99, 235, 0.4)",
+              boxShadow: "0 6px 20px -4px rgba(37, 99, 235, 0.4)",
             }}
           >
-            Send Your Resume <Send size={15} />
+            Send Your Resume <Send size={14} />
           </a>
 
           <Link
             href="/portfolio"
+            className="wsd-careers-btn-secondary"
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "13px 26px",
+              padding: "10px 20px",
               borderRadius: "9999px",
-              fontSize: "14px",
+              fontSize: "13.5px",
               fontWeight: 600,
               color: isDark ? "#ffffff" : "#0f172a",
               backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#ffffff",
@@ -277,29 +262,31 @@ export default function CareersPage() {
       </div>
 
       {/* Perks & Benefits Section */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)" }}>
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2
+            className="wsd-section-heading"
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "12px",
+              marginBottom: "6px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Why Engineers &amp; Designers Join Us
           </h2>
-          <p style={{ fontSize: "15px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
             A culture founded on craft, high-ownership autonomy, and zero bureaucracy.
           </p>
         </div>
 
         <div
+          className="wsd-perks-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "24px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: "14px",
           }}
         >
           {PERKS.map((perk, idx) => {
@@ -307,35 +294,37 @@ export default function CareersPage() {
             return (
               <div
                 key={idx}
+                className="wsd-perk-card"
                 style={{
-                  padding: "32px 26px",
-                  borderRadius: "22px",
+                  padding: "20px 18px",
+                  borderRadius: "16px",
                   backgroundColor: isDark ? "rgba(13, 19, 34, 0.7)" : "#ffffff",
                   border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                  boxShadow: isDark ? "none" : "0 8px 24px -4px rgba(15, 23, 42, 0.05)",
+                  boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(15, 23, 42, 0.04)",
                   display: "flex",
                   flexDirection: "column",
                 }}
               >
                 <div
+                  className="wsd-perk-icon-box"
                   style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "12px",
+                    width: "34px",
+                    height: "34px",
+                    borderRadius: "10px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
                     color: "#3b82f6",
-                    marginBottom: "18px",
+                    marginBottom: "12px",
                   }}
                 >
-                  <Icon size={22} />
+                  <Icon size={18} />
                 </div>
-                <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px", color: isDark ? "#ffffff" : "#0f172a" }}>
+                <h3 className="wsd-perk-title" style={{ fontSize: "15px", fontWeight: 700, marginBottom: "6px", color: isDark ? "#ffffff" : "#0f172a" }}>
                   {perk.title}
                 </h3>
-                <p style={{ fontSize: "13.5px", lineHeight: 1.6, color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569" }}>
+                <p className="wsd-perk-desc" style={{ fontSize: "12.5px", lineHeight: 1.5, color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569", margin: 0 }}>
                   {perk.description}
                 </p>
               </div>
@@ -345,83 +334,95 @@ export default function CareersPage() {
       </div>
 
       {/* Open Roles Section */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)" }}>
-        <div style={{ textAlign: "center", marginBottom: "36px" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <h2
+            className="wsd-section-heading"
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "12px",
+              marginBottom: "6px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Current Openings
           </h2>
-          <p style={{ fontSize: "15px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
             Explore opportunities across our engineering, design, and operations teams.
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap", marginBottom: "40px" }}>
-          {departments.map((dept) => {
-            const isActive = activeDepartment === dept;
-            return (
-              <button
-                key={dept}
-                type="button"
-                onClick={() => setActiveDepartment(dept)}
-                style={{
-                  padding: "8px 18px",
-                  borderRadius: "9999px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  backgroundColor: isActive
-                    ? "#2563eb"
-                    : isDark
-                    ? "rgba(255, 255, 255, 0.05)"
-                    : "rgba(0, 0, 0, 0.04)",
-                  color: isActive
-                    ? "#ffffff"
-                    : isDark
-                    ? "rgba(255, 255, 255, 0.7)"
-                    : "rgba(15, 23, 42, 0.7)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                {dept}
-              </button>
-            );
-          })}
+        {/* Filter Tabs - Capsule Container */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "28px" }}>
+          <div
+            className="wsd-dept-tabs"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "4px",
+              borderRadius: "9999px",
+              backgroundColor: isDark ? "rgba(13, 19, 34, 0.85)" : "#ffffff",
+              border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #e2e8f0",
+              boxShadow: isDark ? "none" : "0 2px 8px rgba(0, 0, 0, 0.04)",
+            }}
+          >
+            {departments.map((dept) => {
+              const isActive = activeDepartment === dept;
+              return (
+                <button
+                  key={dept}
+                  type="button"
+                  onClick={() => setActiveDepartment(dept)}
+                  className="wsd-dept-tab-btn"
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "9999px",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    border: "none",
+                    cursor: "pointer",
+                    backgroundColor: isActive ? "#2563eb" : "transparent",
+                    color: isActive
+                      ? "#ffffff"
+                      : isDark
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(15, 23, 42, 0.7)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {dept}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Job Cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           {filteredRoles.map((role) => (
             <div
               key={role.id}
               style={{
-                borderRadius: "22px",
-                padding: "28px clamp(20px, 3vw, 36px)",
-                backgroundColor: isDark ? "rgba(13, 19, 34, 0.85)" : "#ffffff",
+                borderRadius: "16px",
+                padding: "20px clamp(16px, 2.5vw, 28px)",
+                backgroundColor: isDark ? "rgba(13, 19, 34, 0.8)" : "#ffffff",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                boxShadow: isDark ? "none" : "0 10px 30px -6px rgba(15, 23, 42, 0.06)",
+                boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(15, 23, 42, 0.04)",
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                gap: "24px",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "18px",
                 alignItems: "center",
                 transition: "transform 0.2s ease, border-color 0.2s ease",
               }}
               className="wsd-job-card"
             >
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
                   <span
                     style={{
-                      padding: "4px 10px",
+                      padding: "3px 8px",
                       borderRadius: "6px",
                       fontSize: "11px",
                       fontWeight: 700,
@@ -431,30 +432,31 @@ export default function CareersPage() {
                   >
                     {role.department}
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
-                    <MapPin size={13} /> {role.location}
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
+                    <MapPin size={12} /> {role.location}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
-                    <Clock size={13} /> {role.type} • {role.experience}
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
+                    <Clock size={12} /> {role.type} • {role.experience}
                   </div>
                 </div>
 
-                <h3 style={{ fontSize: "19px", fontWeight: 700, marginBottom: "10px", color: isDark ? "#ffffff" : "#0f172a" }}>
+                <h3 className="wsd-role-title" style={{ fontSize: "16px", fontWeight: 700, marginBottom: "6px", color: isDark ? "#ffffff" : "#0f172a" }}>
                   {role.title}
                 </h3>
 
-                <p style={{ fontSize: "13.5px", lineHeight: 1.55, color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569", marginBottom: "16px" }}>
+                <p className="wsd-role-desc" style={{ fontSize: "12.5px", lineHeight: 1.5, color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569", marginBottom: "12px" }}>
                   {role.description}
                 </p>
 
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                   {role.tags.map((tag, tIdx) => (
                     <span
                       key={tIdx}
+                      className="wsd-role-tag"
                       style={{
-                        padding: "3px 8px",
-                        borderRadius: "6px",
-                        fontSize: "11px",
+                        padding: "2px 8px",
+                        borderRadius: "5px",
+                        fontSize: "10.5px",
                         fontWeight: 500,
                         backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "#f1f5f9",
                         color: isDark ? "#94a3b8" : "#334155",
@@ -467,25 +469,26 @@ export default function CareersPage() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+              <div className="wsd-role-action" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
                 <a
                   href={`mailto:${contactInfo.email}?subject=Application for ${role.title}`}
+                  className="wsd-role-apply-btn"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "8px",
-                    padding: "11px 24px",
-                    borderRadius: "12px",
-                    fontSize: "13.5px",
+                    padding: "9px 20px",
+                    borderRadius: "10px",
+                    fontSize: "12.5px",
                     fontWeight: 600,
                     color: "#ffffff",
                     backgroundColor: "#2563eb",
                     textDecoration: "none",
-                    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
+                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
                     transition: "all 0.15s ease",
                   }}
                 >
-                  Apply via Email <ArrowRight size={14} />
+                  Apply via Email <ArrowRight size={13} />
                 </a>
               </div>
             </div>
@@ -494,56 +497,60 @@ export default function CareersPage() {
       </div>
 
       {/* Hiring Process */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)" }}>
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <h2
+            className="wsd-section-heading"
             style={{
-              fontSize: "clamp(26px, 4vw, 36px)",
+              fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "12px",
+              marginBottom: "6px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Our Hiring Process
           </h2>
-          <p style={{ fontSize: "15px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
             Fast, transparent, and respectful of your time. No multi-month interview loops.
           </p>
         </div>
 
         <div
+          className="wsd-steps-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "20px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "12px",
           }}
         >
           {HIRING_STEPS.map((step, idx) => (
             <div
               key={idx}
+              className="wsd-step-card"
               style={{
-                borderRadius: "20px",
-                padding: "24px 20px",
+                borderRadius: "16px",
+                padding: "16px 14px",
                 backgroundColor: isDark ? "rgba(13, 19, 34, 0.6)" : "#ffffff",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
               }}
             >
               <div
+                className="wsd-step-number"
                 style={{
-                  fontSize: "30px",
+                  fontSize: "22px",
                   fontWeight: 900,
-                  color: isDark ? "rgba(37, 99, 235, 0.3)" : "rgba(37, 99, 235, 0.2)",
+                  color: isDark ? "rgba(37, 99, 235, 0.4)" : "rgba(37, 99, 235, 0.25)",
                   lineHeight: 1,
-                  marginBottom: "12px",
+                  marginBottom: "6px",
                 }}
               >
                 {step.number}
               </div>
-              <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "8px", color: isDark ? "#ffffff" : "#0f172a" }}>
+              <h3 className="wsd-step-title" style={{ fontSize: "14px", fontWeight: 700, marginBottom: "4px", color: isDark ? "#ffffff" : "#0f172a" }}>
                 {step.title}
               </h3>
-              <p style={{ fontSize: "13px", lineHeight: 1.55, color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b" }}>
+              <p className="wsd-step-desc" style={{ fontSize: "12px", lineHeight: 1.45, color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", margin: 0 }}>
                 {step.desc}
               </p>
             </div>
@@ -552,11 +559,12 @@ export default function CareersPage() {
       </div>
 
       {/* Bottom CTA Card */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)" }}>
+      <div style={{ width: "100%", maxWidth: "100%", margin: "40px auto 0", padding: "0 clamp(16px, 4vw, 64px)" }}>
         <div
+          className="wsd-careers-cta"
           style={{
-            padding: "56px clamp(24px, 5vw, 64px)",
-            borderRadius: "28px",
+            padding: "32px clamp(20px, 4vw, 44px)",
+            borderRadius: "20px",
             textAlign: "center",
             background: isDark
               ? "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(13, 19, 34, 0.8) 100%)"
@@ -565,23 +573,25 @@ export default function CareersPage() {
           }}
         >
           <h2
+            className="wsd-careers-cta-title"
             style={{
-              fontSize: "clamp(24px, 3.5vw, 36px)",
+              fontSize: "clamp(20px, 2.5vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "14px",
+              marginBottom: "10px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Don&apos;t see your specific role listed?
           </h2>
           <p
+            className="wsd-careers-cta-desc"
             style={{
-              fontSize: "15px",
+              fontSize: "14px",
               color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
               maxWidth: "600px",
-              margin: "0 auto 28px",
-              lineHeight: 1.6,
+              margin: "0 auto 20px",
+              lineHeight: 1.55,
             }}
           >
             We are always interested in connecting with world-class engineers, architects, and designers. Send an open application directly to our talent team.
@@ -589,21 +599,22 @@ export default function CareersPage() {
 
           <a
             href={`mailto:${contactInfo.email}?subject=General Application / Portfolio Submission`}
+            className="wsd-careers-cta-btn"
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding: "13px 32px",
+              padding: "11px 26px",
               borderRadius: "9999px",
-              fontSize: "14.5px",
+              fontSize: "13.5px",
               fontWeight: 700,
               color: "#ffffff",
               background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
               textDecoration: "none",
-              boxShadow: "0 8px 24px -4px rgba(37, 99, 235, 0.4)",
+              boxShadow: "0 6px 20px -4px rgba(37, 99, 235, 0.4)",
             }}
           >
-            Send General Application <Send size={16} />
+            Send General Application <Send size={15} />
           </a>
         </div>
       </div>
@@ -612,6 +623,139 @@ export default function CareersPage() {
         .wsd-job-card:hover {
           border-color: rgba(37, 99, 235, 0.35) !important;
           transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+          .wsd-careers-page {
+            padding-top: 70px !important;
+            padding-bottom: 24px !important;
+          }
+          .wsd-careers-hero-title {
+            font-size: 18px !important;
+            line-height: 1.18 !important;
+            margin-bottom: 4px !important;
+          }
+          .wsd-careers-hero-desc {
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 10px !important;
+          }
+          .wsd-careers-hero-btns {
+            gap: 6px !important;
+            margin-bottom: 16px !important;
+          }
+          .wsd-careers-btn-primary, .wsd-careers-btn-secondary {
+            padding: 7px 14px !important;
+            font-size: 10.5px !important;
+          }
+          .wsd-section-heading {
+            font-size: 15px !important;
+            margin-bottom: 2px !important;
+          }
+          .wsd-section-subtext {
+            font-size: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          .wsd-perks-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            margin-bottom: 18px !important;
+          }
+          .wsd-perk-card {
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+          }
+          .wsd-perk-icon-box {
+            width: 24px !important;
+            height: 24px !important;
+            margin-bottom: 4px !important;
+          }
+          .wsd-perk-title {
+            font-size: 11px !important;
+            margin-bottom: 3px !important;
+          }
+          .wsd-perk-desc {
+            font-size: 9px !important;
+            line-height: 1.25 !important;
+          }
+          .wsd-dept-tabs {
+            flex-wrap: wrap !important;
+            overflow-x: visible !important;
+            justify-content: center !important;
+            width: 100% !important;
+            gap: 4px !important;
+            margin-bottom: 12px !important;
+          }
+          .wsd-dept-tab-btn {
+            padding: 4px 10px !important;
+            font-size: 10.5px !important;
+          }
+          .wsd-job-card {
+            grid-template-columns: 1fr !important;
+            padding: 10px 8px !important;
+            gap: 8px !important;
+            border-radius: 10px !important;
+          }
+          .wsd-role-title {
+            font-size: 12.5px !important;
+            margin-bottom: 3px !important;
+          }
+          .wsd-role-desc {
+            font-size: 9.5px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 6px !important;
+          }
+          .wsd-role-tag {
+            font-size: 9px !important;
+            padding: 2px 5px !important;
+          }
+          .wsd-role-action {
+            justify-content: stretch !important;
+          }
+          .wsd-role-apply-btn {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 7px 12px !important;
+            font-size: 10.5px !important;
+          }
+          .wsd-steps-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            margin-bottom: 18px !important;
+          }
+          .wsd-step-card {
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+          }
+          .wsd-step-number {
+            font-size: 16px !important;
+            margin-bottom: 2px !important;
+          }
+          .wsd-step-title {
+            font-size: 11px !important;
+            margin-bottom: 2px !important;
+          }
+          .wsd-step-desc {
+            font-size: 9px !important;
+            line-height: 1.25 !important;
+          }
+          .wsd-careers-cta {
+            margin-top: 14px !important;
+            padding: 14px 10px !important;
+            border-radius: 12px !important;
+          }
+          .wsd-careers-cta-title {
+            font-size: 15px !important;
+            margin-bottom: 4px !important;
+          }
+          .wsd-careers-cta-desc {
+            font-size: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          .wsd-careers-cta-btn {
+            padding: 8px 16px !important;
+            font-size: 11px !important;
+          }
         }
       `}</style>
     </div>

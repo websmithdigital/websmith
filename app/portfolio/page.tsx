@@ -10,6 +10,8 @@ import {
   CheckCircle2, 
   ArrowRight,
   Search,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { getPublishedProjects, Project } from "../projects/services/projectService";
 import { usePublicTheme } from "../providers/PublicThemeProvider";
@@ -22,6 +24,7 @@ export default function PortfolioPage() {
 
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileLayout, setMobileLayout] = useState<"compact-grid" | "compact-list">("compact-grid");
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,41 +72,25 @@ export default function PortfolioPage() {
 
   return (
     <div
+      className="wsd-portfolio-page"
       style={{
         minHeight: "100vh",
         backgroundColor: "transparent",
         color: isDark ? "#f8fafc" : "#0f172a",
-        paddingTop: "40px",
-        paddingBottom: "80px",
+        paddingTop: "24px",
+        paddingBottom: "50px",
       }}
     >
       {/* Hero Header */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)", textAlign: "center" }}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 16px",
-            borderRadius: "9999px",
-            backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
-            border: isDark ? "1px solid rgba(37, 99, 235, 0.3)" : "1px solid rgba(37, 99, 235, 0.2)",
-            color: "#3b82f6",
-            fontSize: "13px",
-            fontWeight: 600,
-            marginBottom: "20px",
-          }}
-        >
-          <Sparkles size={14} /> Proven Engineering &amp; Launches
-        </div>
-
+      <div className="portfolio-hero-wrap" style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(16px, 3.5vw, 48px)", textAlign: "center" }}>
         <h1
+          className="portfolio-hero-title"
           style={{
-            fontSize: "clamp(32px, 5vw, 54px)",
+            fontSize: "clamp(26px, 3.8vw, 42px)",
             fontWeight: 800,
             letterSpacing: "-0.03em",
             lineHeight: 1.15,
-            marginBottom: "18px",
+            marginBottom: "10px",
           }}
         >
           Engineered for Scale &amp;{" "}
@@ -122,12 +109,13 @@ export default function PortfolioPage() {
         </h1>
 
         <p
+          className="portfolio-hero-desc"
           style={{
-            fontSize: "clamp(15px, 2vw, 18px)",
+            fontSize: "clamp(13.5px, 1.4vw, 15px)",
             color: isDark ? "rgba(255, 255, 255, 0.65)" : "rgba(100, 116, 139, 0.9)",
-            maxWidth: "760px",
-            margin: "0 auto 36px",
-            lineHeight: 1.6,
+            maxWidth: "680px",
+            margin: "0 auto 20px",
+            lineHeight: 1.55,
           }}
         >
           Explore selected client launches, enterprise ERP systems, and cloud architectures built with precision, speed, and rock-solid reliability.
@@ -135,23 +123,24 @@ export default function PortfolioPage() {
 
         {/* Filter Bar & Search */}
         <div
+          className="portfolio-filter-bar"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "16px",
-            padding: "14px 22px",
-            borderRadius: "18px",
+            gap: "12px",
+            padding: "10px 16px",
+            borderRadius: "14px",
             backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
             border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-            boxShadow: isDark ? "none" : "0 4px 20px -4px rgba(0, 0, 0, 0.05)",
-            marginBottom: "48px",
+            boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(0, 0, 0, 0.04)",
+            marginBottom: "28px",
             width: "100%",
           }}
         >
           {/* Category Tabs */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <div className="portfolio-category-tabs" style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
             {categories.map((cat) => {
               const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
               return (
@@ -159,10 +148,11 @@ export default function PortfolioPage() {
                   key={cat}
                   type="button"
                   onClick={() => setActiveCategory(cat)}
+                  className="portfolio-category-btn"
                   style={{
-                    padding: "8px 18px",
+                    padding: "7px 16px",
                     borderRadius: "9999px",
-                    fontSize: "13px",
+                    fontSize: "12.5px",
                     fontWeight: 600,
                     border: "none",
                     cursor: "pointer",
@@ -185,42 +175,92 @@ export default function PortfolioPage() {
             })}
           </div>
 
-          {/* Search Box */}
-          <div style={{ position: "relative", minWidth: "260px" }}>
-            <Search
-              size={15}
-              style={{
-                position: "absolute",
-                left: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(100, 116, 139, 0.7)",
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search technologies, clients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px 8px 34px",
-                borderRadius: "10px",
-                fontSize: "13px",
-                backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9",
-                border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #cbd5e1",
-                color: isDark ? "#ffffff" : "#0f172a",
-                outline: "none",
-              }}
-            />
+          {/* Search Box & Mobile View Mode Toggle */}
+          <div className="portfolio-search-and-toggle" style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: "260px" }}>
+            <div className="portfolio-search-box" style={{ position: "relative", flex: 1, minWidth: 0 }}>
+              <Search
+                size={14}
+                style={{
+                  position: "absolute",
+                  left: "11px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(100, 116, 139, 0.7)",
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Search technologies, clients..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="portfolio-search-input"
+                style={{
+                  width: "100%",
+                  padding: "8px 12px 8px 32px",
+                  borderRadius: "10px",
+                  fontSize: "13px",
+                  backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9",
+                  border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #cbd5e1",
+                  color: isDark ? "#ffffff" : "#0f172a",
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {/* Mobile Layout Mode Switcher (2-Column Grid vs Compact List) */}
+            <div className="portfolio-layout-toggle" style={{ display: "flex", alignItems: "center", gap: "2px", backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#f1f5f9", padding: "2px", borderRadius: "8px", border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e2e8f0" }}>
+              <button
+                type="button"
+                onClick={() => setMobileLayout("compact-grid")}
+                aria-label="2-Column Compact Grid View"
+                title="2-Column Compact Grid"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: mobileLayout === "compact-grid" ? "#2563eb" : "transparent",
+                  color: mobileLayout === "compact-grid" ? "#ffffff" : isDark ? "rgba(255,255,255,0.6)" : "#64748b",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <LayoutGrid size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileLayout("compact-list")}
+                aria-label="Compact List View"
+                title="Compact List"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: mobileLayout === "compact-list" ? "#2563eb" : "transparent",
+                  color: mobileLayout === "compact-list" ? "#ffffff" : isDark ? "rgba(255,255,255,0.6)" : "#64748b",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <List size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Projects Grid */}
-      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)" }}>
+      <div className="portfolio-grid-wrap" style={{ width: "100%", maxWidth: "100%", margin: "0 auto", padding: "0 clamp(20px, 4vw, 64px)" }}>
         {loading ? (
           <div
+            className={`portfolio-grid ${mobileLayout === "compact-grid" ? "mobile-layout-grid" : "mobile-layout-list"}`}
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
@@ -231,8 +271,8 @@ export default function PortfolioPage() {
               <div
                 key={i}
                 style={{
-                  height: "380px",
-                  borderRadius: "20px",
+                  height: "480px",
+                  borderRadius: "22px",
                   backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "#e2e8f0",
                 }}
               />
@@ -255,6 +295,7 @@ export default function PortfolioPage() {
           </div>
         ) : (
           <div
+            className={`portfolio-grid ${mobileLayout === "compact-grid" ? "mobile-layout-grid" : "mobile-layout-list"}`}
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
@@ -265,21 +306,24 @@ export default function PortfolioPage() {
               <div
                 key={project._id || project.name}
                 style={{
-                  borderRadius: "20px",
+                  borderRadius: "22px",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
+                  minHeight: "520px",
                 }}
-                className="wsd-portfolio-card wsd-unified-card"
+                className="wsd-portfolio-card wsd-unified-card portfolio-card"
               >
                 {/* Visual Banner */}
                 <div
+                  className="portfolio-card-banner"
                   style={{
                     position: "relative",
-                    height: "190px",
+                    height: "235px",
                     width: "100%",
                     backgroundColor: isDark ? "#0f172a" : "#e2e8f0",
                     overflow: "hidden",
+                    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                   }}
                 >
                   <Image
@@ -290,17 +334,9 @@ export default function PortfolioPage() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
                     style={{ objectFit: "cover" }}
                   />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: isDark
-                        ? "linear-gradient(to top, rgba(13, 19, 34, 0.95) 0%, transparent 60%)"
-                        : "linear-gradient(to top, rgba(255, 255, 255, 0.9) 0%, transparent 60%)",
-                    }}
-                  />
                   {project.category && (
                     <div
+                      className="portfolio-card-tag"
                       style={{
                         position: "absolute",
                         top: "12px",
@@ -322,47 +358,52 @@ export default function PortfolioPage() {
                 </div>
 
                 {/* Card Content */}
-                <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: isDark ? "rgba(255, 255, 255, 0.45)" : "#64748b",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.04em",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    {project.clientCompany || project.client || "Client Project"}
+                <div className="portfolio-card-content" style={{ padding: "24px 24px 22px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <div>
+                    <div
+                      className="portfolio-card-client"
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: isDark ? "rgba(255, 255, 255, 0.45)" : "#64748b",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {project.clientCompany || project.client || "Client Project"}
+                    </div>
+
+                    <h3
+                      className="portfolio-card-title"
+                      style={{
+                        fontSize: "19px",
+                        fontWeight: 700,
+                        lineHeight: 1.35,
+                        marginBottom: "10px",
+                        color: isDark ? "#ffffff" : "#0f172a",
+                      }}
+                    >
+                      {project.name}
+                    </h3>
+
+                    <p
+                      className="portfolio-card-desc"
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: 1.55,
+                        color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569",
+                        marginBottom: "18px",
+                      }}
+                    >
+                      {project.description}
+                    </p>
                   </div>
-
-                  <h3
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      lineHeight: 1.3,
-                      marginBottom: "10px",
-                      color: isDark ? "#ffffff" : "#0f172a",
-                    }}
-                  >
-                    {project.name}
-                  </h3>
-
-                  <p
-                    style={{
-                      fontSize: "13.5px",
-                      lineHeight: 1.5,
-                      color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569",
-                      marginBottom: "16px",
-                      flex: 1,
-                    }}
-                  >
-                    {project.description}
-                  </p>
 
                   {/* Measurable ROI Metric */}
                   {project.metrics && (
                     <div
+                      className="portfolio-card-metrics"
                       style={{
                         padding: "8px 12px",
                         borderRadius: "10px",
@@ -385,6 +426,7 @@ export default function PortfolioPage() {
                   {/* Tech Stack Chips */}
                   {Array.isArray(project.techStack) && project.techStack.length > 0 && (
                     <div
+                      className="portfolio-tech-stack"
                       style={{
                         display: "flex",
                         flexWrap: "wrap",
@@ -395,6 +437,7 @@ export default function PortfolioPage() {
                       {project.techStack.map((tech, idx) => (
                         <span
                           key={idx}
+                          className="portfolio-tech-chip"
                           style={{
                             padding: "3px 8px",
                             borderRadius: "6px",
@@ -413,6 +456,7 @@ export default function PortfolioPage() {
 
                   {/* Action Buttons */}
                   <div
+                    className="portfolio-actions"
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -426,7 +470,7 @@ export default function PortfolioPage() {
                         href={project.publicUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="wsd-visit-project-link"
+                        className="wsd-visit-project-link portfolio-visit-link"
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -452,7 +496,7 @@ export default function PortfolioPage() {
 
                     <button
                       type="button"
-                      className="wsd-build-similar-btn"
+                      className="wsd-build-similar-btn portfolio-build-btn"
                       onClick={() =>
                         openLeadServicesModal({
                           service: {
@@ -484,38 +528,41 @@ export default function PortfolioPage() {
 
         {/* Bottom Call to Action Card */}
         <div
+          className="portfolio-cta-banner"
           style={{
-            marginTop: "80px",
-            padding: "56px clamp(24px, 5vw, 64px)",
-            borderRadius: "28px",
+            marginTop: "40px",
+            padding: "32px clamp(20px, 4vw, 44px)",
+            borderRadius: "20px",
             textAlign: "center",
             background: isDark
               ? "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(13, 19, 34, 0.8) 100%)"
               : "linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, #ffffff 100%)",
             border: isDark ? "1px solid rgba(37, 99, 235, 0.3)" : "1px solid rgba(37, 99, 235, 0.15)",
             boxShadow: isDark
-              ? "0 24px 60px -15px rgba(0, 0, 0, 0.6)"
-              : "0 20px 50px -15px rgba(37, 99, 235, 0.12)",
+              ? "0 20px 48px -15px rgba(0, 0, 0, 0.6)"
+              : "0 14px 36px -12px rgba(37, 99, 235, 0.12)",
           }}
         >
           <h2
+            className="portfolio-cta-title"
             style={{
-              fontSize: "clamp(24px, 3.5vw, 36px)",
+              fontSize: "clamp(20px, 2.5vw, 28px)",
               fontWeight: 800,
               letterSpacing: "-0.02em",
-              marginBottom: "14px",
+              marginBottom: "8px",
               color: isDark ? "#ffffff" : "#0f172a",
             }}
           >
             Have a custom software or ERP project in mind?
           </h2>
           <p
+            className="portfolio-cta-desc"
             style={{
-              fontSize: "15px",
+              fontSize: "13.5px",
               color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
-              maxWidth: "600px",
-              margin: "0 auto 28px",
-              lineHeight: 1.6,
+              maxWidth: "560px",
+              margin: "0 auto 18px",
+              lineHeight: 1.55,
             }}
           >
             Schedule a technical architecture consultation to discuss timelines, tech stack, and deliverable specifications.
@@ -523,24 +570,25 @@ export default function PortfolioPage() {
 
           <button
             type="button"
+            className="portfolio-cta-btn"
             onClick={() => openLeadServicesModal()}
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "8px",
-              padding: "13px 32px",
+              gap: "7px",
+              padding: "9px 24px",
               borderRadius: "9999px",
-              fontSize: "14.5px",
+              fontSize: "13px",
               fontWeight: 700,
               color: "#ffffff",
               background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 8px 24px -4px rgba(37, 99, 235, 0.4)",
+              boxShadow: "0 6px 18px -3px rgba(37, 99, 235, 0.4)",
               transition: "transform 0.15s ease, box-shadow 0.15s ease",
             }}
           >
-            Get Started <ArrowRight size={16} />
+            Get Started <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -615,6 +663,321 @@ export default function PortfolioPage() {
         }
         .wsd-portfolio-card:hover .wsd-visit-project-link:hover {
           text-decoration: underline !important;
+        }
+
+        @media (min-width: 769px) {
+          .portfolio-layout-toggle {
+            display: none !important;
+          }
+        }
+
+        /* ============================================================
+           MOBILE VIEW: ULTRA-COMPACT & STREAMLINED (<= 768px)
+           ============================================================ */
+        @media (max-width: 768px) {
+          /* Fixed mobile navbar clearance */
+          .wsd-portfolio-page {
+            padding-top: 70px !important;
+            padding-bottom: 24px !important;
+          }
+
+          .portfolio-hero-wrap, .portfolio-grid-wrap {
+            padding: 0 8px !important;
+          }
+
+          /* Hero header compact */
+          .portfolio-hero-title {
+            font-size: 18px !important;
+            line-height: 1.15 !important;
+            margin-bottom: 4px !important;
+          }
+
+          .portfolio-hero-desc {
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 8px !important;
+          }
+
+          /* Filter bar compact with all-in-screen category pills like services */
+          .portfolio-filter-bar {
+            padding: 4px 6px !important;
+            border-radius: 10px !important;
+            gap: 5px !important;
+            margin-bottom: 10px !important;
+          }
+
+          .portfolio-category-tabs {
+            width: 100% !important;
+            overflow-x: visible !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            padding-bottom: 0 !important;
+          }
+          .portfolio-category-tabs::-webkit-scrollbar {
+            display: none !important;
+          }
+
+          .portfolio-category-btn {
+            padding: 3.5px 8px !important;
+            font-size: 9.5px !important;
+            font-weight: 600 !important;
+            border-radius: 6px !important;
+            white-space: normal !important;
+            flex-shrink: 0 !important;
+            text-align: center !important;
+          }
+
+          .portfolio-search-and-toggle {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            width: 100% !important;
+          }
+
+          .portfolio-search-box {
+            flex: 1 !important;
+            min-width: 0 !important;
+            width: auto !important;
+          }
+
+          .portfolio-search-input {
+            height: 29px !important;
+            padding: 4px 8px 4px 26px !important;
+            font-size: 11px !important;
+            border-radius: 6px !important;
+          }
+
+          .portfolio-layout-toggle {
+            display: inline-flex !important;
+            flex-shrink: 0 !important;
+            padding: 2px !important;
+            border-radius: 7px !important;
+          }
+
+          .portfolio-layout-toggle button {
+            width: 25px !important;
+            height: 25px !important;
+          }
+
+          /* ------------------------------------------------------------
+             MODE 1: 2-COLUMN COMPACT GRID (DEFAULT ON MOBILE)
+             ------------------------------------------------------------ */
+          .portfolio-grid.mobile-layout-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card {
+            border-radius: 14px !important;
+            min-height: 370px !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-banner {
+            height: 145px !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-tag {
+            top: 8px !important;
+            left: 8px !important;
+            padding: 2.5px 7px !important;
+            font-size: 9px !important;
+            border-radius: 5px !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-content {
+            padding: 10px 10px 12px !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-client {
+            font-size: 8.5px !important;
+            margin-bottom: 3px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-title {
+            font-size: 12px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 5px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            white-space: normal !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-desc {
+            font-size: 10px !important;
+            line-height: 1.4 !important;
+            margin-bottom: 8px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-card-metrics {
+            padding: 4px 7px !important;
+            font-size: 9px !important;
+            border-radius: 6px !important;
+            margin-bottom: 8px !important;
+            gap: 4px !important;
+            white-space: normal !important;
+            line-height: 1.3 !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-tech-stack {
+            display: none !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-actions {
+            padding-top: 8px !important;
+            flex-direction: column !important;
+            gap: 5px !important;
+            align-items: stretch !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-visit-link {
+            font-size: 9.5px !important;
+            justify-content: center !important;
+            margin-bottom: 2px !important;
+          }
+
+          .portfolio-grid.mobile-layout-grid .portfolio-build-btn {
+            padding: 5px 10px !important;
+            font-size: 9.5px !important;
+            justify-content: center !important;
+            width: 100% !important;
+            text-align: center !important;
+            border-radius: 6px !important;
+          }
+
+          /* ------------------------------------------------------------
+             MODE 2: COMPACT HORIZONTAL LIST VIEW (ROW CARDS)
+             ------------------------------------------------------------ */
+          .portfolio-grid.mobile-layout-list {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card {
+            flex-direction: row !important;
+            border-radius: 10px !important;
+            min-height: 95px !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-banner {
+            width: 100px !important;
+            min-width: 100px !important;
+            height: auto !important;
+            min-height: 100% !important;
+            flex-shrink: 0 !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-tag {
+            top: 4px !important;
+            left: 4px !important;
+            padding: 1.5px 5px !important;
+            font-size: 7.5px !important;
+            border-radius: 4px !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-content {
+            padding: 7px 9px !important;
+            flex: 1 !important;
+            justify-content: center !important;
+            min-width: 0 !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-client {
+            font-size: 8px !important;
+            margin-bottom: 1px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-title {
+            font-size: 12px !important;
+            line-height: 1.2 !important;
+            margin-bottom: 3px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-desc {
+            font-size: 9.5px !important;
+            line-height: 1.25 !important;
+            margin-bottom: 4px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-card-metrics {
+            padding: 2px 5px !important;
+            font-size: 8.5px !important;
+            border-radius: 4px !important;
+            margin-bottom: 4px !important;
+            gap: 3px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-tech-stack {
+            display: none !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-actions {
+            padding-top: 4px !important;
+            gap: 6px !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-visit-link {
+            font-size: 9.5px !important;
+          }
+
+          .portfolio-grid.mobile-layout-list .portfolio-build-btn {
+            padding: 3px 7px !important;
+            font-size: 9px !important;
+            border-radius: 4px !important;
+          }
+
+          /* Bottom CTA compact */
+          .portfolio-cta-banner {
+            margin-top: 14px !important;
+            padding: 12px 10px !important;
+            border-radius: 10px !important;
+          }
+
+          .portfolio-cta-title {
+            font-size: 13.5px !important;
+            line-height: 1.2 !important;
+            margin-bottom: 2px !important;
+          }
+
+          .portfolio-cta-desc {
+            font-size: 10px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 8px !important;
+          }
+
+          .portfolio-cta-btn {
+            padding: 5px 14px !important;
+            font-size: 10.5px !important;
+          }
         }
       `}</style>
     </div>

@@ -148,7 +148,37 @@ export function PhoneInputWithCountry({
 
   return (
     <div style={{ position: "relative", width: "100%" }} ref={dropdownRef}>
+      <style>{`
+        @media (max-width: 768px) {
+          .phone-input-root {
+            border-radius: 7px !important;
+          }
+          .phone-country-btn {
+            padding: 5px 6px 5px 8px !important;
+            font-size: 11px !important;
+            gap: 4px !important;
+          }
+          .phone-country-flag {
+            font-size: 13px !important;
+          }
+          .phone-country-dial {
+            font-size: 11px !important;
+          }
+          .phone-number-input {
+            padding: 5px 8px 5px 26px !important;
+            font-size: 11.5px !important;
+          }
+          .phone-icon-span {
+            left: 8px !important;
+          }
+          .phone-icon-span svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+        }
+      `}</style>
       <div
+        className="phone-input-root"
         style={{
           display: "flex",
           alignItems: "center",
@@ -166,6 +196,7 @@ export function PhoneInputWithCountry({
           type="button"
           disabled={disabled}
           onClick={() => setIsDropdownOpen((prev) => !prev)}
+          className="phone-country-btn"
           style={{
             display: "flex",
             alignItems: "center",
@@ -186,8 +217,8 @@ export function PhoneInputWithCountry({
           aria-haspopup="listbox"
           aria-expanded={isDropdownOpen}
         >
-          <span style={{ fontSize: "18px", lineHeight: 1 }}>{selectedCountry.flag}</span>
-          <span style={{ fontWeight: 600, color: "var(--text-primary, #0f172a)" }}>
+          <span className="phone-country-flag" style={{ fontSize: "18px", lineHeight: 1 }}>{selectedCountry.flag}</span>
+          <span className="phone-country-dial" style={{ fontWeight: 600, color: "var(--text-primary, #0f172a)" }}>
             {selectedCountry.dial}
           </span>
           <ChevronDown
@@ -204,6 +235,7 @@ export function PhoneInputWithCountry({
         <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center" }}>
           {icon && (
             <span
+              className="phone-icon-span"
               style={{
                 position: "absolute",
                 left: "12px",
@@ -227,6 +259,7 @@ export function PhoneInputWithCountry({
             placeholder={placeholder}
             aria-label={ariaLabel}
             onChange={handlePhoneInputChange}
+            className="phone-number-input"
             style={{
               width: "100%",
               padding: icon ? "10px 14px 10px 36px" : "10px 14px",

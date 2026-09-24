@@ -83,12 +83,12 @@ export default function DevelopersPage() {
       {/* Header */}
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>Developers</h1>
-          <p style={styles.subtitle}>Manage your development team and their profiles</p>
+          <h1 style={styles.title}>Team</h1>
+          <p style={styles.subtitle}>Manage your team and their profiles</p>
         </div>
         <button onClick={handleAddDeveloper} style={styles.addBtn} className="admin-primary-btn add-btn">
           <Plus size={18} />
-          <span>New Developer</span>
+          <span>New Member</span>
         </button>
       </div>
 

@@ -42,7 +42,7 @@ import { validatePhoneNumber } from "@/core/utils/phoneValidation";
 import { useMediaAsset } from "../hooks/useMediaAsset";
 
 const defaultContactInfo = {
-  headquarters: "T-35, Rajarhat Main Road, Diamond Enclave,kolkata-700157",
+  headquarters: "T-35, Rajarhat Main Road, Diamond Enclave, Kolkata - 700157",
   email: "support@websmithdigital.com",
   sales_email: "",
   no_reply_email: "",
@@ -95,6 +95,7 @@ type HorizontalCardStripProps<T> = {
   speed?: number;
   outerPadding?: string;
   cardsPerView?: number;
+  mobileCardsPerView?: number;
 };
 
 function HorizontalCardStrip<T>({
@@ -107,9 +108,10 @@ function HorizontalCardStrip<T>({
   dragThreshold = 0,
   direction = "right-to-left",
   scale = 1,
-  speed = 0.5,
+  speed = 1.0,
   outerPadding,
   cardsPerView,
+  mobileCardsPerView,
 }: HorizontalCardStripProps<T>) {
   const { publicTheme } = usePublicTheme();
   const isDark = publicTheme === "dark";
@@ -140,67 +142,89 @@ function HorizontalCardStrip<T>({
     return () => ro.disconnect();
   }, []);
 
+  const effectiveGap = useMemo(() => {
+    if (containerWidth > 0 && containerWidth < 640) return Math.min(gap, 12);
+    if (containerWidth >= 640 && containerWidth < 960) return Math.min(gap, 14);
+    return gap;
+  }, [containerWidth, gap]);
+
   // Compute card width when cardsPerView is specified
   const computedCardWidth = useMemo(() => {
     if (!cardsPerView) return undefined;
     if (containerWidth > 0) {
       let cols = cardsPerView;
-      if (cardsPerView >= 5) {
-        if (containerWidth < 640) cols = 2.2;
-        else if (containerWidth < 960) cols = 3.5;
-        else if (containerWidth < 1280) cols = 4.8;
-        else cols = cardsPerView;
+      if (containerWidth < 440) {
+        // Mobile phone: configurable cards per view (default 2.15)
+        cols = mobileCardsPerView || 2.15;
+      } else if (containerWidth < 640) {
+        // Larger mobile
+        cols = mobileCardsPerView ? Math.min(mobileCardsPerView * 1.08, 2.25) : 2.25;
+      } else if (containerWidth < 960) {
+        // Tablet: 3.2 cards
+        cols = 3.2;
+      } else if (containerWidth < 1280) {
+        cols = Math.min(cardsPerView, 4.2);
       } else {
-        if (containerWidth < 640) cols = 1.2;
-        else if (containerWidth < 960) cols = 2.2;
-        else if (containerWidth < 1280) cols = 3.2;
-        else cols = cardsPerView;
+        cols = cardsPerView;
       }
-      const calculated = Math.floor((containerWidth - (Math.floor(cols) - 1) * gap) / cols);
-      return `${Math.max(160, calculated)}px`;
+      const calculated = Math.floor((containerWidth - (Math.floor(cols) - 1) * effectiveGap) / cols);
+      return `${Math.max(130, calculated)}px`;
     }
     return undefined;
-  }, [cardsPerView, containerWidth, gap]);
+  }, [cardsPerView, containerWidth, effectiveGap, mobileCardsPerView]);
 
-  // We use triple items for seamless looping
-  const renderedItems = autoLoop ? [...items, ...items, ...items] : items;
+  // We repeat items sufficiently and use triple blocks for seamless infinite looping
+  const renderedItems = useMemo(() => {
+    if (!autoLoop || items.length === 0) return items;
+    let base = [...items];
+    while (base.length < 12) {
+      base = [...base, ...items];
+    }
+    return [...base, ...base, ...base];
+  }, [autoLoop, items]);
   
   useEffect(() => {
     const outer = outerRef.current;
     if (!outer || !autoLoop) return;
 
     let initialized = false;
+    let scrollPos = 0;
     let frameId: number;
 
     const step = () => {
       if (!dragState.current.active && outer) {
         const singleLoopWidth = outer.scrollWidth / 3;
         
-        if (singleLoopWidth > 0) {
+        if (singleLoopWidth > 20) {
           if (!initialized) {
-            outer.scrollLeft = (direction === "left-to-right") ? singleLoopWidth * 1.5 : singleLoopWidth;
+            scrollPos = (direction === "left-to-right") ? singleLoopWidth * 1.5 : singleLoopWidth;
+            outer.scrollLeft = scrollPos;
             initialized = true;
           }
 
           if (direction === "left-to-right") {
-            outer.scrollLeft -= speed;
-            if (outer.scrollLeft <= singleLoopWidth * 0.5) {
-              outer.scrollLeft += singleLoopWidth;
+            scrollPos -= speed;
+            if (scrollPos <= singleLoopWidth * 0.25) {
+              scrollPos += singleLoopWidth;
             }
           } else {
-            outer.scrollLeft += speed;
-            if (outer.scrollLeft >= singleLoopWidth * 2) {
-              outer.scrollLeft -= singleLoopWidth;
+            scrollPos += speed;
+            if (scrollPos >= singleLoopWidth * 2.25) {
+              scrollPos -= singleLoopWidth;
             }
           }
+
+          outer.scrollLeft = scrollPos;
         }
+      } else if (dragState.current.active && outer) {
+        scrollPos = outer.scrollLeft;
       }
       frameId = requestAnimationFrame(step);
     };
 
     frameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frameId);
-  }, [autoLoop, items.length, direction, speed]);
+  }, [autoLoop, renderedItems.length, direction, speed]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     const outer = outerRef.current;
@@ -212,7 +236,9 @@ function HorizontalCardStrip<T>({
       lastX: event.clientX,
       velocity: 0
     };
-    outer.setPointerCapture(event.pointerId);
+    try {
+      outer.setPointerCapture(event.pointerId);
+    } catch (_) {}
     outer.style.cursor = "grabbing";
     outer.style.scrollSnapType = "none"; // Disable snapping while dragging
   };
@@ -228,7 +254,7 @@ function HorizontalCardStrip<T>({
     const singleLoopWidth = outer.scrollWidth / 3;
     if (outer.scrollLeft >= singleLoopWidth * 2) {
       outer.scrollLeft -= singleLoopWidth;
-      dragState.current.startX += singleLoopWidth; // Adjust startX to maintain delta
+      dragState.current.startX += singleLoopWidth;
     } else if (outer.scrollLeft <= singleLoopWidth * 0.5) {
       outer.scrollLeft += singleLoopWidth;
       dragState.current.startX -= singleLoopWidth;
@@ -239,7 +265,11 @@ function HorizontalCardStrip<T>({
     const outer = outerRef.current;
     dragState.current.active = false;
     if (!outer) return;
-    outer.releasePointerCapture(event.pointerId);
+    try {
+      if (outer.hasPointerCapture(event.pointerId)) {
+        outer.releasePointerCapture(event.pointerId);
+      }
+    } catch (_) {}
     outer.style.cursor = "grab";
     outer.style.scrollSnapType = "none";
   };
@@ -266,7 +296,7 @@ function HorizontalCardStrip<T>({
       <div
         style={{ 
           ...styles.hScrollInner, 
-          gap: `${gap * scale}px`,
+          gap: `${effectiveGap * scale}px`,
           padding: "10px 0" 
         }}
       >
@@ -645,12 +675,12 @@ function FloatingTechnologyBanner() {
 
   return (
     <section aria-label="Built With the Right Technology" style={styles.techSection} className="landing-section-tech">
-      <div style={styles.techIntro}>
-        <p style={styles.techEyebrow}>Powered by 50+ technologies</p>
-        <h2 style={styles.techHeading}>
+      <div style={styles.techIntro} className="tech-intro">
+        <p style={styles.techEyebrow} className="tech-eyebrow">Powered by 50+ technologies</p>
+        <h2 style={styles.techHeading} className="tech-heading">
           Built With the <span style={styles.techHighlight}>Right Technology</span>
         </h2>
-        <p style={styles.techSub}>From proven foundations to emerging technologies, we choose the right tools to turn your ideas into scalable digital solutions.</p>
+        <p style={styles.techSub} className="tech-sub">From proven foundations to emerging technologies, we choose the right tools to turn your ideas into scalable digital solutions.</p>
       </div>
       <div ref={fieldRef} className="tech-field">
         {TECHNOLOGIES.map((tech, i) => {
@@ -1150,11 +1180,11 @@ export default function LandingPage() {
           <p style={styles.heroSubtitle} className="landing-hero-subtitle">
             We architect high-performance web applications, enterprise ERP systems, and universal licensing infrastructure for high-growth businesses.
           </p>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px", flexWrap: "wrap" }} className="landing-hero-cta-group">
             <button
               onClick={handleGetStarted}
               style={styles.ctaButton}
-              className="cta-hover"
+              className="cta-hover landing-hero-primary-btn"
             >
               Get Started <ArrowRight size={17} />
             </button>
@@ -1177,7 +1207,7 @@ export default function LandingPage() {
                 textDecoration: "none",
                 transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
-              className="hero-secondary-btn"
+              className="hero-secondary-btn landing-hero-secondary-btn"
             >
               Explore Portfolio
             </Link>
@@ -1187,37 +1217,57 @@ export default function LandingPage() {
 
       {/* Enterprise Trust & Security Strip */}
       <div
+        className="enterprise-trust-wrapper"
         style={{
           width: "100%",
-          padding: "16px clamp(16px, 4vw, 40px)",
+          padding: "14px 0",
           backgroundColor: isDark ? "#161617" : "#f5f5f7",
           borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #d2d2d7",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "clamp(16px, 3vw, 40px)",
-          flexWrap: "wrap",
           fontSize: "12px",
           fontWeight: 500,
           letterSpacing: "-0.01em",
           color: isDark ? "#a1a1a6" : "#424245",
+          overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ color: "#3b82f6" }}>🔒</span>
-          <span>AES-256-GCM Credential Encryption</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ color: "#10b981" }}>🔑</span>
-          <span>HMAC-SHA256 Cryptographic API Gate</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ color: "#8b5cf6" }}>⚡</span>
-          <span>99.99% High-Availability Cloud Architecture</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ color: "#06b6d4" }}>🌍</span>
-          <span>418 World Timezones Live Support</span>
+        <div className="enterprise-trust-track">
+          <div className="enterprise-trust-group">
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#3b82f6" }}>🔒</span>
+              <span>AES-256-GCM Credential Encryption</span>
+            </div>
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#10b981" }}>🔑</span>
+              <span>HMAC-SHA256 Cryptographic API Gate</span>
+            </div>
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#8b5cf6" }}>⚡</span>
+              <span>99.99% High-Availability Cloud Architecture</span>
+            </div>
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#06b6d4" }}>🌍</span>
+              <span>418 World Timezones Live Support</span>
+            </div>
+          </div>
+          {/* Duplicate group for continuous seamless single-row loop on mobile */}
+          <div className="enterprise-trust-group enterprise-trust-group-duplicate" aria-hidden="true">
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#3b82f6" }}>🔒</span>
+              <span>AES-256-GCM Credential Encryption</span>
+            </div>
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#10b981" }}>🔑</span>
+              <span>HMAC-SHA256 Cryptographic API Gate</span>
+            </div>
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#8b5cf6" }}>⚡</span>
+              <span>99.99% High-Availability Cloud Architecture</span>
+            </div>
+            <div className="enterprise-trust-item">
+              <span style={{ color: "#06b6d4" }}>🌍</span>
+              <span>418 World Timezones Live Support</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1240,14 +1290,25 @@ export default function LandingPage() {
                 textTransform: "uppercase",
                 marginBottom: "16px",
               }}
+              className="landing-section-badge"
             >
               <Sparkles size={13} /> Core Capabilities &amp; Standards
             </div>
-          <h2 style={styles.sectionTitle}>Why Choose Websmith</h2>
-          <p style={styles.sectionSubtitle}>Everything you need to build exceptional digital products</p>
+          <h2 style={styles.sectionTitle} className="landing-section-title">Why Choose Websmith</h2>
+          <p style={styles.sectionSubtitle} className="landing-section-subtitle">Everything you need to build exceptional digital products</p>
         </div>
-        <div style={styles.featuresGrid} className="landing-features-grid">
-          {features.map((feature, index) => (
+        {/* Why Choose Websmith Moving Carousel (Normal Desktop & Mobile View) */}
+        <HorizontalCardStrip
+          items={features}
+          ariaLabel="Why Choose Websmith capabilities"
+          cardsPerView={4}
+          mobileCardsPerView={2.15}
+          gap={18}
+          autoLoopCount={1}
+          direction="left-to-right"
+          scale={1}
+          speed={1.0}
+          renderItem={(feature, index) => (
             <button
               key={index} 
               type="button"
@@ -1258,21 +1319,24 @@ export default function LandingPage() {
                 }
               }}
               style={{
-                ...styles.featureCard,
+                ...styles.horizontalCardSurface,
+                ...styles.sliderCard,
+                width: "100%",
+                maxWidth: "100%",
                 backgroundImage: featureCardBgs[index % 5]?.managed
                   ? `linear-gradient(color-mix(in srgb, var(--bg-secondary) 92%, transparent), color-mix(in srgb, var(--bg-secondary) 92%, transparent)), url(${featureCardBgs[index % 5].url})`
                   : FEATURE_GRADIENTS[index % 5],
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-              className={`feature-card landing-feature-grid-card feature-card-${['blue', 'blue', 'cyan', 'green', 'green'][index % 5]}`}
+              className={`feature-card landing-feature-card landing-feature-grid-card feature-card-${['blue', 'blue', 'cyan', 'green', 'green'][index % 5]}`}
             >
-              <div style={styles.featureIcon} className="landing-card-icon">{<feature.icon size={28} />}</div>
+              <div style={styles.featureIcon} className="landing-card-icon"><feature.icon size={22} /></div>
               <h3 style={styles.featureTitle} className="landing-card-title">{feature.title}</h3>
               <p style={styles.featureDesc} className="landing-card-desc">{feature.description}</p>
             </button>
-          ))}
-        </div>
+          )}
+        />
       </section>
 
       {/* Built With the Right Technology — floating technology banner */}
@@ -1297,30 +1361,32 @@ export default function LandingPage() {
                 border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)",
                 color: isDark ? "#2997ff" : "#0071e3",
               }}
+              className="landing-section-badge"
             >
               <BarChart3 size={13} />
               Proven Engineering Velocity
             </span>
           </div>
-          <h2 style={styles.statsHeading}>Momentum you can see</h2>
-          <p style={styles.statsSub}>Real numbers that reflect how modern engineering teams ship with Websmith.</p>
+          <h2 style={styles.statsHeading} className="landing-section-title">Momentum you can see</h2>
+          <p style={styles.statsSub} className="landing-section-subtitle">Real numbers that reflect how modern engineering teams ship with Websmith.</p>
         </div>
         <StatsStrip items={statsCarouselItems} />
       </section>
 
       {effectiveProjects.length > 0 && (
         <section id="projects" style={styles.section} className="landing-section-projects">
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "24px" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "24px" }} className="landing-portfolio-header">
             <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }} className="landing-section-badge">
                 <Briefcase size={13} />
                 Production Systems &amp; Case Studies
               </div>
-              <h2 style={{ ...styles.sectionTitle, textAlign: "left", marginBottom: "8px" }}>Portfolio &amp; Case Studies</h2>
-              <p style={{ ...styles.sectionSubtitle, textAlign: "left", marginBottom: 0 }}>Selected launches and enterprise delivery work with public-facing architecture details.</p>
+              <h2 style={{ ...styles.sectionTitle, textAlign: "left", marginBottom: "8px" }} className="landing-section-title">Portfolio &amp; Case Studies</h2>
+              <p style={{ ...styles.sectionSubtitle, textAlign: "left", marginBottom: 0 }} className="landing-section-subtitle">Selected launches and enterprise delivery work with public-facing architecture details.</p>
             </div>
             <Link
               href="/portfolio"
+              className="landing-portfolio-btn"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -1344,8 +1410,9 @@ export default function LandingPage() {
             items={effectiveProjects}
             ariaLabel="Published projects"
             cardsPerView={4}
+            mobileCardsPerView={1.35}
             gap={18}
-            autoLoopCount={6}
+            autoLoopCount={1}
             direction="right-to-left"
             scale={1}
             renderItem={(project: any) => (
@@ -1381,10 +1448,10 @@ export default function LandingPage() {
 
 
       {/* Global Diversity & Collaboration — Full Screen + Edge-to-Edge 16:9 Video Frame */}
-      <section className="relative w-full overflow-hidden" style={{ ...styles.section, padding: "clamp(36px, 5vw, 64px) clamp(8px, 2vw, 28px)" }}>
+      <section className="relative w-full overflow-hidden landing-section-global-collab" style={{ ...styles.section, padding: "clamp(36px, 5vw, 64px) clamp(8px, 2vw, 28px)" }}>
         <div className="w-full">
           <div
-            className="w-full rounded-[28px]"
+            className="w-full rounded-[28px] landing-collab-card"
             style={{
               backgroundColor: isDark ? "#161617" : "#ffffff",
               backdropFilter: isDark ? "blur(20px)" : "none",
@@ -1396,28 +1463,28 @@ export default function LandingPage() {
               overflow: "hidden",
             }}
           >
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "20px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "20px" }} className="landing-section-badge landing-collab-badge">
               <Globe size={13} />
               Global Engineering Culture
             </div>
-            <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-10 mb-8">
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-10 mb-8 landing-collab-header-row">
               <div className="flex flex-col items-start w-full lg:w-1/2">
-                <h2 className={`text-3xl sm:text-4xl font-bold mb-4 ${isDark ? "text-[#f5f5f7]" : "text-[#1d1d1f]"}`} style={{ letterSpacing: "-0.025em" }}>Global Collaboration &amp; Technical Excellence</h2>
-                <p className={`text-base leading-relaxed ${isDark ? "text-[#a1a1a6]" : "text-[#86868b]"}`}>
+                <h2 className={`text-3xl sm:text-4xl font-bold mb-4 ${isDark ? "text-[#f5f5f7]" : "text-[#1d1d1f]"} landing-collab-title`} style={{ letterSpacing: "-0.025em" }}>Global Collaboration &amp; Technical Excellence</h2>
+                <p className={`text-base leading-relaxed ${isDark ? "text-[#a1a1a6]" : "text-[#86868b]"} landing-collab-text`}>
                   Our team brings together diverse perspectives and world-class expertise to solve complex challenges.
                   We believe in the power of inclusive collaboration to build the next generation of digital products.
                 </p>
               </div>
               <div className="flex flex-col items-start w-full lg:w-1/2">
-                <p className={`text-base leading-relaxed ${isDark ? "text-[#a1a1a6]" : "text-[#86868b]"}`}>
+                <p className={`text-base leading-relaxed ${isDark ? "text-[#a1a1a6]" : "text-[#86868b]"} landing-collab-text`}>
                   Why Websmith? Because we pair global talent with enterprise-grade delivery and round-the-clock support.
                   One dedicated team that builds faster, ships smarter, and stays by your side long after launch —
                   that is why clients choose Websmith, and why they stay.
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 w-full items-center">
-              <div className="w-full aspect-video rounded-[20px] overflow-hidden shadow-md">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-6 lg:gap-8 w-full items-center">
+              <div className="w-full aspect-video rounded-[12px] sm:rounded-[20px] overflow-hidden shadow-md">
                 <img
                   src={globalCollabImage.url}
                   alt="Global Technical Team"
@@ -1425,7 +1492,7 @@ export default function LandingPage() {
                   style={{ border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.06)" }}
                 />
               </div>
-              <div className="relative w-full aspect-video rounded-[20px] overflow-hidden bg-black shadow-md group">
+              <div className="relative w-full aspect-video rounded-[12px] sm:rounded-[20px] overflow-hidden bg-black shadow-md group">
                 <video
                   ref={diversityVideoRef}
                   autoPlay
@@ -1443,7 +1510,7 @@ export default function LandingPage() {
                   }}
                 />
                 {/* Sleek Floating Apple Fullscreen & Mute Controls */}
-                <div className="absolute bottom-3 right-3 flex items-center gap-2 z-10">
+                <div className="absolute bottom-1.5 right-1.5 sm:bottom-3 sm:right-3 flex items-center gap-1 sm:gap-2 z-10">
                   <button
                     type="button"
                     onClick={() => {
@@ -1451,7 +1518,7 @@ export default function LandingPage() {
                         diversityVideoRef.current.muted = !diversityVideoRef.current.muted;
                       }
                     }}
-                    className="p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-all text-xs flex items-center justify-center cursor-pointer shadow-sm"
+                    className="p-1 sm:p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-all text-[10px] sm:text-xs flex items-center justify-center cursor-pointer shadow-sm"
                     aria-label="Toggle sound"
                     title="Toggle sound"
                   >
@@ -1468,7 +1535,7 @@ export default function LandingPage() {
                         }
                       }
                     }}
-                    className="p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-all text-xs flex items-center justify-center cursor-pointer shadow-sm"
+                    className="p-1 sm:p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-all text-[10px] sm:text-xs flex items-center justify-center cursor-pointer shadow-sm"
                     aria-label="Full screen video"
                     title="Full screen video"
                   >
@@ -1485,19 +1552,19 @@ export default function LandingPage() {
       {publicClients.length > 0 && (
         <section id="clients" ref={clientsRef} style={styles.section} className="landing-section-clients">
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }} className="landing-section-badge">
               <Building2 size={13} />
               Trusted Enterprise Partnerships
             </div>
-            <h2 style={styles.sectionTitle}>Our Satisfied Clients</h2>
-            <p style={styles.sectionSubtitle}>Recognized organizations scaling their mission-critical applications with Websmith.</p>
+            <h2 style={styles.sectionTitle} className="landing-section-title">Our Satisfied Clients</h2>
+            <p style={styles.sectionSubtitle} className="landing-section-subtitle">Recognized organizations scaling their mission-critical applications with Websmith.</p>
           </div>
           <HorizontalCardStrip
             items={publicClients}
             ariaLabel="Satisfied clients"
             cardsPerView={4}
             gap={18}
-            autoLoopCount={6}
+            autoLoopCount={1}
             direction="left-to-right"
             scale={1}
             renderItem={(client, index) => (
@@ -1519,19 +1586,19 @@ export default function LandingPage() {
       {publicDevelopers.length > 0 && (
         <section id="developers" ref={developersRef} style={styles.section} className="landing-section-developers">
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }} className="landing-section-badge">
               <Users size={13} />
               Technical Architects &amp; Leadership
             </div>
-            <h2 style={styles.sectionTitle}>Meet Our Expert Developers</h2>
-            <p style={styles.sectionSubtitle}>The senior systems architects and product engineers driving your digital transformation.</p>
+            <h2 style={styles.sectionTitle} className="landing-section-title">Meet Our Expert Developers</h2>
+            <p style={styles.sectionSubtitle} className="landing-section-subtitle">The senior systems architects and product engineers driving your digital transformation.</p>
           </div>
           <HorizontalCardStrip
             items={publicDevelopers}
             ariaLabel="Expert developers"
             cardsPerView={4}
             gap={18}
-            autoLoopCount={6}
+            autoLoopCount={1}
             direction="right-to-left"
             scale={1}
             renderItem={(dev) => (
@@ -1559,19 +1626,19 @@ export default function LandingPage() {
       {reviewCards.length > 0 && (
         <section id="testimonials" style={styles.section} className="landing-section-testimonials">
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }} className="landing-section-badge">
               <Star size={13} />
               Client Endorsements &amp; SLAs
             </div>
-            <h2 style={styles.sectionTitle}>What Our Clients Say</h2>
-            <p style={styles.sectionSubtitle}>Continuous feedback highlights from across enterprise delivery teams and executive sponsors.</p>
+            <h2 style={styles.sectionTitle} className="landing-section-title">What Our Clients Say</h2>
+            <p style={styles.sectionSubtitle} className="landing-section-subtitle">Continuous feedback highlights from across enterprise delivery teams and executive sponsors.</p>
           </div>
           <HorizontalCardStrip
             items={reviewCards}
             ariaLabel="Client testimonials"
             cardsPerView={4}
             gap={18}
-            autoLoopCount={6}
+            autoLoopCount={1}
             direction="left-to-right"
             scale={1}
             renderItem={(testimonial) => (
@@ -1595,70 +1662,78 @@ export default function LandingPage() {
       {/* Contact Section */}
       <section id="contact" ref={contactFormRef} style={styles.contactSection} className="landing-section-contact">
         <div style={styles.contactContainer}>
-          <div style={styles.contactHeader}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }}>
+          <div style={styles.contactHeader} className="landing-contact-header">
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)", border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)", color: isDark ? "#2997ff" : "#0071e3", marginBottom: "12px" }} className="landing-section-badge">
               <MessageSquare size={13} />
               Direct Architecture Inquiry
             </div>
-            <h2 style={styles.sectionTitle}>Get in Touch</h2>
-            <p style={styles.sectionSubtitle}>Have a project or high-scale platform in mind? Let&apos;s build something exceptional together.</p>
+            <h2 style={styles.sectionTitle} className="landing-section-title">Get in Touch</h2>
+            <p style={styles.sectionSubtitle} className="landing-section-subtitle">Have a project or high-scale platform in mind? Let&apos;s build something exceptional together.</p>
           </div>
           
           <div style={styles.contactGrid} className="contact-grid-layout w-full">
-            <div style={styles.contactInfo}>
-              <h3 style={styles.contactInfoTitle}>Contact Information</h3>
-              <p style={styles.contactInfoDesc}>Fill out the form and our team will get back to you within 24 hours.</p>
+            <div style={styles.contactInfo} className="landing-contact-info">
+              <h3 style={styles.contactInfoTitle} className="landing-contact-info-title">Contact Information</h3>
+              <p style={styles.contactInfoDesc} className="landing-contact-info-desc">Fill out the form and our team will get back to you within 24 hours.</p>
               
-              <div style={styles.infoItems}>
-                <div style={styles.infoItem}>
-                  <div style={styles.infoIcon}>📍</div>
+              <div style={styles.infoItems} className="landing-contact-info-items">
+                <div style={styles.infoItem} className="landing-contact-info-item">
+                  <div style={styles.infoIcon} className="landing-contact-info-icon">
+                    <Building2 size={16} color={isDark ? "#2997ff" : "#0071e3"} />
+                  </div>
                   <div>
-                    <h4 style={styles.infoLabel}>Headquarters</h4>
-                    <p style={styles.infoValue} className="whitespace-pre-wrap">{contactInfo.headquarters}</p>
+                    <h4 style={styles.infoLabel} className="landing-contact-info-label">Headquarters</h4>
+                    <p style={styles.infoValue} className="whitespace-pre-wrap landing-contact-info-value">{contactInfo.headquarters}</p>
                   </div>
                 </div>
-                <div style={styles.infoItem}>
-                  <div style={styles.infoIcon}>📧</div>
+                <div style={styles.infoItem} className="landing-contact-info-item">
+                  <div style={styles.infoIcon} className="landing-contact-info-icon">
+                    <Mail size={16} color={isDark ? "#2997ff" : "#0071e3"} />
+                  </div>
                   <div style={{ minWidth: 0 }}>
-                    <h4 style={styles.infoLabel}>Email</h4>
-                    <div style={styles.infoValueRow}>
+                    <h4 style={styles.infoLabel} className="landing-contact-info-label">Email</h4>
+                    <div style={styles.infoValueRow} className="landing-contact-info-value-row">
                       {contactEmails.length > 0 ? (
                         contactEmails.map((email, index) => (
                           <span key={email} style={styles.infoValueRowItem}>
-                            {index > 0 && <span style={styles.infoValueSeparator}>|</span>}
+                            {index > 0 && <span className="landing-info-separator" style={styles.infoValueSeparator}>|</span>}
                             <a href={`mailto:${email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{email}</a>
                           </span>
                         ))
                       ) : (
-                        <p style={styles.infoValue}>—</p>
+                        <p style={styles.infoValue} className="landing-contact-info-value">—</p>
                       )}
                     </div>
                   </div>
                 </div>
-                <div style={styles.infoItem}>
-                  <div style={styles.infoIcon}>📞</div>
+                <div style={styles.infoItem} className="landing-contact-info-item">
+                  <div style={styles.infoIcon} className="landing-contact-info-icon">
+                    <Phone size={16} color={isDark ? "#2997ff" : "#0071e3"} />
+                  </div>
                   <div style={{ minWidth: 0 }}>
-                    <h4 style={styles.infoLabel}>Phone</h4>
-                    <div style={styles.infoValueRow}>
+                    <h4 style={styles.infoLabel} className="landing-contact-info-label">Phone</h4>
+                    <div style={styles.infoValueRow} className="landing-contact-info-value-row">
                       {contactPhones.length > 0 ? (
                         contactPhones.map((phone, index) => (
                           <span key={phone} style={styles.infoValueRowItem}>
-                            {index > 0 && <span style={styles.infoValueSeparator}>|</span>}
+                            {index > 0 && <span className="landing-info-separator" style={styles.infoValueSeparator}>|</span>}
                             <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} style={{ color: 'inherit', textDecoration: 'none' }}>{phone}</a>
                           </span>
                         ))
                       ) : (
-                        <p style={styles.infoValue}>—</p>
+                        <p style={styles.infoValue} className="landing-contact-info-value">—</p>
                       )}
                     </div>
                   </div>
                 </div>
                 {contactSocials.length > 0 && (
-                  <div style={styles.infoItem}>
-                    <div style={styles.infoIcon}>🌐</div>
+                  <div style={styles.infoItem} className="landing-contact-info-item">
+                    <div style={styles.infoIcon} className="landing-contact-info-icon">
+                      <Globe size={16} color={isDark ? "#2997ff" : "#0071e3"} />
+                    </div>
                     <div style={{ minWidth: 0 }}>
-                      <h4 style={styles.infoLabel}>Social Media</h4>
-                      <div style={styles.infoSocialRow}>
+                      <h4 style={styles.infoLabel} className="landing-contact-info-label">Social Media</h4>
+                      <div style={styles.infoSocialRow} className="landing-contact-info-social-row">
                         {contactSocials.map((social) => {
                           const Icon = social.icon;
                           return (
@@ -1670,6 +1745,7 @@ export default function LandingPage() {
                               aria-label={social.label}
                               title={social.label}
                               style={styles.infoSocialLink}
+                              className="landing-contact-social-link"
                             >
                               <Icon size={16} />
                             </a>
@@ -1683,9 +1759,10 @@ export default function LandingPage() {
             </div>
             
             <div style={styles.contactFormContainer}>
-              <div style={styles.contactGlassCard}>
+              <div style={styles.contactGlassCard} className="landing-contact-glass-card">
                 <form 
                   style={styles.contactForm}
+                  className="landing-contact-form"
                   noValidate
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -1762,9 +1839,9 @@ export default function LandingPage() {
                     }
                   }}
                 >
-                  <div style={styles.formRow}>
-                    <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-name">
+                  <div style={styles.formRow} className="landing-contact-form-row landing-form-row-2col">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
+                      <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-name">
                         Name <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <input 
@@ -1773,6 +1850,7 @@ export default function LandingPage() {
                         type="text" 
                         placeholder="Your Name" 
                         style={{ ...styles.formInput, ...(contactErrors.name ? styles.formInputError : {}) }}
+                        className="landing-form-input"
                         required
                         autoComplete="name"
                         aria-invalid={Boolean(contactErrors.name)}
@@ -1784,8 +1862,8 @@ export default function LandingPage() {
                         <p id="contact-name-error" role="alert" style={styles.fieldError}>{contactErrors.name}</p>
                       )}
                     </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-email">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
+                      <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-email">
                         Email <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <input 
@@ -1794,6 +1872,7 @@ export default function LandingPage() {
                         type="email" 
                         placeholder="john@example.com" 
                         style={{ ...styles.formInput, ...styles.emailInput, ...(contactErrors.email ? styles.formInputError : {}) }}
+                        className="landing-form-input"
                         required
                         autoComplete="email"
                         aria-invalid={Boolean(contactErrors.email)}
@@ -1808,9 +1887,9 @@ export default function LandingPage() {
                   </div>
 
                   {/* Calling Number & WhatsApp Number */}
-                  <div style={styles.formRow}>
-                    <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-calling-phone">
+                  <div style={styles.formRow} className="landing-contact-form-row">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
+                      <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-calling-phone">
                         Calling Number <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <PhoneInputWithCountry
@@ -1832,9 +1911,9 @@ export default function LandingPage() {
                       )}
                     </div>
 
-                    <div style={styles.formGroup}>
+                    <div style={styles.formGroup} className="landing-contact-form-group">
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: "20px" }}>
-                        <label style={styles.formLabel} htmlFor="contact-whatsapp-phone">
+                        <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-whatsapp-phone">
                           WhatsApp Number <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                         </label>
                         <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
@@ -1868,15 +1947,15 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Preferred Date, Time Slot & Timezone in ONE row */}
-                  <div style={styles.formRow}>
-                    <div style={styles.formGroup}>
+                  {/* Preferred Date & Time Slot in 2-column paired row */}
+                  <div style={styles.formRow} className="landing-contact-form-row landing-form-row-2col">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                        <label style={styles.formLabel} htmlFor="contact-preferred-date">
+                        <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-preferred-date">
                           Preferred Date <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                         </label>
-                        <span style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>
-                          Next 7 days only
+                        <span style={{ fontSize: "10px", color: "var(--text-secondary)", fontWeight: 500 }}>
+                          Next 7 days
                         </span>
                       </div>
                       <input 
@@ -1889,6 +1968,7 @@ export default function LandingPage() {
                           ...styles.formInput,
                           ...(contactErrors.preferredContactDate ? styles.formInputError : {}),
                         }}
+                        className="landing-form-input"
                         aria-invalid={Boolean(contactErrors.preferredContactDate)}
                         value={contactState.preferredContactDate}
                         onChange={(e) => handleContactChange("preferredContactDate", e.target.value)}
@@ -1898,8 +1978,8 @@ export default function LandingPage() {
                       )}
                     </div>
 
-                    <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-preferred-time">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
+                      <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-preferred-time">
                         Preferred Time Slot <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <div style={{ position: "relative", width: "100%" }}>
@@ -1912,12 +1992,13 @@ export default function LandingPage() {
                             ...(contactErrors.preferredContactTime ? styles.formInputError : {}),
                             color: contactState.preferredContactTime ? "var(--text-primary)" : "var(--text-secondary)",
                           }}
+                          className="landing-form-input landing-form-select"
                           aria-invalid={Boolean(contactErrors.preferredContactTime)}
                           value={contactState.preferredContactTime}
                           onChange={(e) => handleContactChange("preferredContactTime", e.target.value)}
                         >
                           <option value="" style={{ color: "var(--text-secondary)" }}>
-                            Select preferred slot...
+                            Select slot...
                           </option>
                           {CONTACT_TIME_SLOT_GROUPS.map((grp) => (
                             <optgroup key={grp.group} label={grp.group} style={{ fontWeight: 700, color: "var(--text-secondary)", backgroundColor: "var(--bg-secondary)" }}>
@@ -1945,10 +2026,13 @@ export default function LandingPage() {
                         <p role="alert" style={styles.fieldError}>{contactErrors.preferredContactTime}</p>
                       )}
                     </div>
+                  </div>
 
-                    <div style={styles.formGroup}>
+                  {/* Your Timezone in full width row */}
+                  <div style={styles.formRow} className="landing-contact-form-row">
+                    <div style={styles.formGroup} className="landing-contact-form-group w-full">
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", minHeight: "20px" }}>
-                        <label style={styles.formLabel} htmlFor="contact-timezone">
+                        <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-timezone">
                           Your Timezone <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                         </label>
                         {userTimeZoneInfo.badge && (
@@ -1978,6 +2062,7 @@ export default function LandingPage() {
                             ...(contactErrors.userTimeZone ? styles.formInputError : {}),
                             color: "var(--text-primary)",
                           }}
+                          className="landing-form-input landing-form-select"
                           aria-invalid={Boolean(contactErrors.userTimeZone)}
                           value={contactState.userTimeZone || userTimeZoneInfo.zone}
                           onChange={(e) => handleContactChange("userTimeZone", e.target.value)}
@@ -2013,6 +2098,7 @@ export default function LandingPage() {
                   {/* Dual-Timezone Live Conversion Card */}
                   {contactState.preferredContactTime && (
                     <div
+                      className="landing-timezone-box"
                       style={{
                         padding: "16px 20px",
                         borderRadius: "14px",
@@ -2084,16 +2170,17 @@ export default function LandingPage() {
                     </div>
                   )}
 
-                  {/* Company & Subject in ONE row */}
-                  <div style={styles.formRow}>
-                    <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-company">Company</label>
+                  {/* Company & Subject in 2-column paired row */}
+                  <div style={styles.formRow} className="landing-contact-form-row landing-form-row-2col">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
+                      <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-company">Company</label>
                       <input 
                         id="contact-company"
                         name="company"
                         type="text" 
                         placeholder="Company / Organization" 
                         style={{ ...styles.formInput, ...(contactErrors.company ? styles.formInputError : {}) }}
+                        className="landing-form-input"
                         autoComplete="organization"
                         aria-invalid={Boolean(contactErrors.company)}
                         aria-describedby={contactErrors.company ? "contact-company-error" : undefined}
@@ -2105,8 +2192,8 @@ export default function LandingPage() {
                       )}
                     </div>
 
-                    <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-subject">
+                    <div style={styles.formGroup} className="landing-contact-form-group">
+                      <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-subject">
                         Subject <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <div style={{ position: "relative", width: "100%" }}>
@@ -2119,6 +2206,7 @@ export default function LandingPage() {
                             ...(contactErrors.subject ? styles.formInputError : {}),
                             color: contactState.subject ? "var(--text-primary)" : "var(--text-secondary)",
                           }}
+                          className="landing-form-input landing-form-select"
                           required
                           aria-invalid={Boolean(contactErrors.subject)}
                           aria-describedby={contactErrors.subject ? "contact-subject-error" : undefined}
@@ -2152,8 +2240,8 @@ export default function LandingPage() {
                     </div>
                   </div>
                   
-                  <div style={styles.formGroup}>
-                    <label style={styles.formLabel} htmlFor="contact-message">
+                  <div style={styles.formGroup} className="landing-contact-form-group">
+                    <label style={styles.formLabel} className="landing-form-label" htmlFor="contact-message">
                       Message <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                     </label>
                     <textarea 
@@ -2161,6 +2249,7 @@ export default function LandingPage() {
                       name="message"
                       placeholder="Tell us about your project..." 
                       style={{ ...styles.formTextarea, ...(contactErrors.message ? styles.formInputError : {}) }}
+                      className="landing-form-textarea"
                       required
                       aria-invalid={Boolean(contactErrors.message)}
                       aria-describedby={contactErrors.message ? "contact-message-error" : undefined}
@@ -2173,13 +2262,14 @@ export default function LandingPage() {
                   </div>
                   
                   {/* Privacy / Consent Checkbox */}
-                  <div style={{ marginBottom: "20px", marginTop: "4px" }}>
+                  <div style={{ marginBottom: "10px", marginTop: "2px" }}>
                     <label
                       htmlFor="contact-consent"
+                      className="landing-consent-label"
                       style={{
                         display: "flex",
                         alignItems: "flex-start",
-                        gap: "10px",
+                        gap: "8px",
                         cursor: "pointer",
                         fontSize: "13px",
                         lineHeight: 1.5,
@@ -2191,6 +2281,7 @@ export default function LandingPage() {
                         type="checkbox"
                         id="contact-consent"
                         name="consent"
+                        className="landing-consent-checkbox"
                         checked={contactState.consent}
                         onChange={(e) => handleContactChange("consent", e.target.checked)}
                         aria-invalid={Boolean(contactErrors.consent)}
@@ -2232,7 +2323,7 @@ export default function LandingPage() {
                     type="submit" 
                     disabled={isSubmitting}
                     style={styles.submitBtn} 
-                    className="cta-hover"
+                    className="cta-hover landing-submit-btn"
                   >
                     {isSubmitting ? "Sending..." : (submitStatus === "success" ? "Message Sent!" : "Send Message")}
                   </button>
@@ -2257,6 +2348,85 @@ export default function LandingPage() {
 
 
       <style>{`
+        /* Enterprise Trust Strip (Row on desktop, continuous single row marquee on mobile) */
+        .enterprise-trust-wrapper {
+          position: relative;
+          width: 100%;
+        }
+        .enterprise-trust-track {
+          display: flex;
+          align-items: center;
+          justifyContent: center;
+          width: 100%;
+        }
+        .enterprise-trust-group {
+          display: flex;
+          align-items: center;
+          justifyContent: center;
+          gap: clamp(16px, 3vw, 40px);
+          flex-wrap: wrap;
+        }
+        .enterprise-trust-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .enterprise-trust-group-duplicate {
+          display: none;
+        }
+
+        @media (max-width: 900px) {
+          .enterprise-trust-wrapper {
+            mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+          }
+          .enterprise-trust-track {
+            display: flex;
+            align-items: center;
+            justifyContent: flex-start;
+            width: max-content;
+            animation: trustStripMarquee 22s linear infinite;
+            will-change: transform;
+          }
+          .enterprise-trust-track:hover,
+          .enterprise-trust-track:active {
+            animation-play-state: paused;
+          }
+          .enterprise-trust-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap !important;
+            gap: 28px !important;
+            padding-right: 28px;
+          }
+          .enterprise-trust-group-duplicate {
+            display: flex !important;
+          }
+        }
+
+        @keyframes trustStripMarquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        @media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+          .enterprise-trust-track {
+            animation: none !important;
+            overflow-x: auto;
+            width: 100%;
+            scrollbar-width: none;
+          }
+          .enterprise-trust-group-duplicate {
+            display: none !important;
+          }
+        }
+
         /* Contact Section 40% - 60% Split Layout */
         .contact-grid-layout {
           display: grid;
@@ -2341,6 +2511,610 @@ export default function LandingPage() {
         
         .landing-card-strip::-webkit-scrollbar {
           display: none;
+        }
+
+        /* ============================================================
+           BALANCED 2-CARD MOBILE CAROUSEL LAYOUT (<640px)
+           ============================================================ */
+        @media (max-width: 640px) {
+          .landing-card-strip {
+            padding-top: 10px !important;
+            padding-bottom: 16px !important;
+          }
+
+          /* Hero CTA buttons side-by-side in single row on mobile */
+          .landing-hero-cta-group {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+            max-width: 380px !important;
+            margin: 0 auto !important;
+          }
+          .landing-hero-primary-btn,
+          .landing-hero-secondary-btn {
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            padding: 10px 14px !important;
+            font-size: 13.5px !important;
+            white-space: nowrap !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            box-sizing: border-box !important;
+          }
+          .landing-hero-primary-btn svg {
+            width: 15px !important;
+            height: 15px !important;
+          }
+
+          /* Hide desktop features grid on mobile so ONLY the moving carousel displays */
+          .landing-features-grid {
+            display: none !important;
+          }
+
+          /* 0. Features / Capabilities Cards (Compact Mobile Strip like "Momentum you can see") */
+          .landing-feature-card {
+            padding: 10px 10px !important;
+            border-radius: 16px !important;
+            min-height: 105px !important;
+            height: auto !important;
+            text-align: left !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+          }
+          .landing-feature-card .landing-card-icon {
+            width: 28px !important;
+            height: 28px !important;
+            margin-bottom: 6px !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .landing-feature-card .landing-card-icon svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .landing-feature-card .landing-card-title {
+            font-size: 11.5px !important;
+            line-height: 1.2 !important;
+            margin-bottom: 3px !important;
+            font-weight: 700 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-feature-card .landing-card-desc {
+            font-size: 9.5px !important;
+            line-height: 1.3 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+
+          /* 1. Stats Cards */
+          .landing-stat-card {
+            padding: 16px 12px !important;
+            border-radius: 18px !important;
+            min-height: 105px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+          }
+          .landing-stat-value {
+            font-size: clamp(22px, 5.8vw, 28px) !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.03em !important;
+            margin: 0 0 4px 0 !important;
+            line-height: 1.1 !important;
+          }
+          .landing-stat-label {
+            font-size: 11.5px !important;
+            line-height: 1.3 !important;
+            font-weight: 500 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            text-align: center !important;
+          }
+
+          /* 2. Portfolio / Projects Cards — elongated & spacious on mobile */
+          .landing-project-card {
+            padding: 14px 12px !important;
+            border-radius: 18px !important;
+            min-height: 290px !important;
+            height: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .landing-project-img {
+            height: 115px !important;
+            border-radius: 12px !important;
+            margin-bottom: 10px !important;
+            object-fit: cover !important;
+          }
+          .landing-project-card .landing-card-icon {
+            display: none !important;
+          }
+          .landing-project-card .landing-card-title {
+            font-size: 13.5px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 4px !important;
+            white-space: normal !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+          .landing-project-card .landing-card-desc {
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            margin-bottom: 8px !important;
+          }
+          .landing-project-card .landing-card-subtitle {
+            font-size: 10.5px !important;
+            margin-top: auto !important;
+            margin-bottom: 4px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-project-card .landing-card-link {
+            font-size: 10px !important;
+            padding: 4px 8px !important;
+            border-radius: 6px !important;
+            margin-top: 2px !important;
+            gap: 4px !important;
+          }
+          .landing-project-card .landing-card-link svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .landing-project-card .landing-card-muted {
+            display: none !important;
+          }
+
+          /* 3. Client Cards */
+          .landing-client-card {
+            padding: 14px 10px !important;
+            border-radius: 18px !important;
+            min-height: 175px !important;
+            height: auto !important;
+          }
+          .landing-client-avatar {
+            width: 38px !important;
+            height: 38px !important;
+            margin: 0 auto 8px !important;
+          }
+          .landing-client-icon {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          .landing-client-card .landing-card-title {
+            font-size: 13px !important;
+            line-height: 1.25 !important;
+            margin-bottom: 3px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-client-card .landing-card-subtitle {
+            font-size: 10.5px !important;
+            margin-bottom: 6px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-client-card .landing-card-desc {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+
+          /* 4. Developer Cards */
+          .landing-developer-card {
+            padding: 14px 10px !important;
+            border-radius: 18px !important;
+            min-height: 195px !important;
+            height: auto !important;
+          }
+          .landing-dev-circle-mask {
+            width: 44px !important;
+            height: 44px !important;
+            margin: 0 auto 8px !important;
+          }
+          .landing-dev-circle-initial {
+            font-size: 16px !important;
+          }
+          .landing-developer-card .landing-card-title {
+            font-size: 13px !important;
+            line-height: 1.25 !important;
+            margin-bottom: 2px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-card-role {
+            font-size: 10.5px !important;
+            margin-bottom: 5px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-skill-tags {
+            gap: 3px !important;
+            margin-bottom: 5px !important;
+          }
+          .landing-skill-tag {
+            font-size: 8.5px !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+          }
+          .landing-card-experience {
+            font-size: 10px !important;
+            margin-bottom: 3px !important;
+          }
+          .landing-developer-card .landing-card-desc {
+            font-size: 9.5px !important;
+            line-height: 1.3 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+
+          /* 5. Testimonial Cards */
+          .landing-testimonial-card {
+            padding: 14px 10px !important;
+            border-radius: 18px !important;
+            min-height: 180px !important;
+            height: auto !important;
+          }
+          .landing-testimonial-avatar {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 12px !important;
+            margin: 0 auto 6px !important;
+          }
+          .landing-testimonial-stars {
+            gap: 2px !important;
+            margin-bottom: 5px !important;
+          }
+          .landing-testimonial-stars svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .landing-testimonial-quote {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            margin-bottom: 5px !important;
+          }
+          .landing-testimonial-card .landing-card-title {
+            font-size: 12px !important;
+            margin-bottom: 2px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .landing-testimonial-card .landing-card-subtitle {
+            font-size: 10px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          /* 6. Section Containers Compact Spacing */
+          .landing-section-features,
+          .landing-section-stats,
+          .landing-section-projects,
+          .landing-section-clients,
+          .landing-section-developers,
+          .landing-section-testimonials,
+          .landing-section-global-collab,
+          .landing-section-contact {
+            padding-top: 24px !important;
+            padding-bottom: 20px !important;
+            padding-left: 14px !important;
+            padding-right: 14px !important;
+          }
+
+          /* 7. Section Badges (Pills) */
+          .landing-section-badge {
+            padding: 4px 10px !important;
+            font-size: 10px !important;
+            letter-spacing: 0.05em !important;
+            margin-bottom: 8px !important;
+            gap: 5px !important;
+          }
+          .landing-section-badge svg {
+            width: 11px !important;
+            height: 11px !important;
+          }
+
+          /* 8. Section Headings & Subtitles */
+          .landing-section-title {
+            font-size: 21px !important;
+            line-height: 1.22 !important;
+            margin-bottom: 6px !important;
+            letter-spacing: -0.025em !important;
+          }
+          .landing-section-subtitle {
+            font-size: 11.5px !important;
+            line-height: 1.4 !important;
+            margin-bottom: 14px !important;
+            max-width: 95% !important;
+          }
+
+          /* 9. Portfolio Section View Full Portfolio Button right aligned */
+          .landing-portfolio-header {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            margin-bottom: 16px !important;
+          }
+          .landing-portfolio-btn {
+            align-self: flex-end !important;
+            margin-left: auto !important;
+            font-size: 11.5px !important;
+            padding: 6px 14px !important;
+            gap: 4px !important;
+          }
+
+          /* 10. Global Collaboration Card & Content */
+          .landing-collab-card {
+            padding: 16px 14px !important;
+            border-radius: 18px !important;
+          }
+          .landing-collab-header-row {
+            gap: 8px !important;
+            margin-bottom: 12px !important;
+          }
+          .landing-collab-title {
+            font-size: 19px !important;
+            line-height: 1.24 !important;
+            margin-bottom: 6px !important;
+          }
+          .landing-collab-text {
+            font-size: 11.5px !important;
+            line-height: 1.42 !important;
+          }
+
+          /* 11. Built With Right Technology Banner */
+          .landing-section-tech {
+            padding-top: 20px !important;
+            padding-bottom: 14px !important;
+            margin-bottom: 14px !important;
+          }
+          .tech-intro {
+            padding: 0 12px 14px !important;
+          }
+          .tech-eyebrow {
+            font-size: 10px !important;
+            letter-spacing: 0.06em !important;
+          }
+          .tech-heading {
+            font-size: 20px !important;
+            margin-top: 6px !important;
+            line-height: 1.22 !important;
+          }
+          .tech-sub {
+            font-size: 11.5px !important;
+            line-height: 1.4 !important;
+            margin-top: 6px !important;
+          }
+          .tech-field {
+            --tech-node: 36px !important;
+            height: 175px !important;
+            min-height: 160px !important;
+          }
+          .tech-node-mask {
+            padding: 4px !important;
+          }
+          .tech-node-mask img {
+            width: 18px !important;
+            height: 18px !important;
+          }
+
+          /* 12. Get in Touch & Contact Information */
+          .landing-section-contact {
+            padding-top: 22px !important;
+            padding-bottom: 18px !important;
+          }
+          .landing-contact-header {
+            margin-bottom: 16px !important;
+          }
+          .landing-contact-info {
+            padding: 14px 12px !important;
+            border-radius: 16px !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
+            margin-bottom: 18px !important;
+            box-sizing: border-box !important;
+          }
+          .dark-theme .landing-contact-info {
+            background: rgba(22, 22, 23, 0.65) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+          }
+          .landing-contact-info-title {
+            font-size: 15px !important;
+            margin-bottom: 3px !important;
+          }
+          .landing-contact-info-desc {
+            font-size: 11px !important;
+            line-height: 1.35 !important;
+            margin-bottom: 12px !important;
+          }
+          .landing-contact-info-items {
+            gap: 10px !important;
+          }
+          .landing-contact-info-item {
+            gap: 10px !important;
+            align-items: flex-start !important;
+          }
+          .landing-contact-info-icon {
+            width: 30px !important;
+            height: 30px !important;
+            min-width: 30px !important;
+            border-radius: 8px !important;
+            background: rgba(0, 113, 227, 0.08) !important;
+            border: 1px solid rgba(0, 113, 227, 0.16) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .dark-theme .landing-contact-info-icon {
+            background: rgba(41, 151, 255, 0.15) !important;
+            border: 1px solid rgba(41, 151, 255, 0.25) !important;
+          }
+          .landing-contact-info-label {
+            font-size: 9.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.05em !important;
+            margin-bottom: 2px !important;
+          }
+          .landing-contact-info-value {
+            font-size: 11.5px !important;
+            line-height: 1.35 !important;
+            word-break: break-word !important;
+          }
+          .landing-contact-info-value-row {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 3px !important;
+            font-size: 11.5px !important;
+            line-height: 1.35 !important;
+          }
+          .landing-info-separator {
+            display: none !important;
+          }
+          .landing-contact-social-row {
+            display: flex !important;
+            gap: 8px !important;
+            margin-top: 3px !important;
+          }
+          .landing-contact-social-link {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 11px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .landing-contact-social-link svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+
+          /* 13. Contact Form & Inputs - Ultra Compact on Mobile */
+          .landing-contact-glass-card {
+            padding: 10px 8px !important;
+            border-radius: 12px !important;
+          }
+          .landing-contact-form {
+            gap: 5px !important;
+          }
+          .landing-contact-form-row {
+            gap: 5px !important;
+            margin-bottom: 0 !important;
+          }
+          .landing-form-row-2col {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 5px !important;
+          }
+          .landing-form-row-2col .landing-contact-form-group {
+            min-width: 0 !important;
+            width: 100% !important;
+          }
+          .landing-contact-form-group {
+            gap: 2px !important;
+          }
+          .landing-form-label {
+            font-size: 10px !important;
+            margin-bottom: 1px !important;
+          }
+          .landing-form-input,
+          .landing-form-select {
+            padding: 3px 6px !important;
+            font-size: 11px !important;
+            border-radius: 6px !important;
+            min-height: 29px !important;
+            height: 29px !important;
+          }
+          .phone-input-root {
+            border-radius: 6px !important;
+            min-height: 29px !important;
+            height: 29px !important;
+          }
+          .phone-country-btn {
+            padding: 2px 5px !important;
+            font-size: 10.5px !important;
+            gap: 3px !important;
+            height: 100% !important;
+          }
+          .phone-country-flag {
+            font-size: 12px !important;
+          }
+          .phone-country-dial {
+            font-size: 10.5px !important;
+          }
+          .phone-number-input {
+            padding: 2px 6px 2px 24px !important;
+            font-size: 11px !important;
+            height: 100% !important;
+          }
+          .phone-icon-span {
+            left: 6px !important;
+          }
+          .phone-icon-span svg {
+            width: 11px !important;
+            height: 11px !important;
+          }
+          .landing-form-textarea {
+            padding: 4px 6px !important;
+            font-size: 11px !important;
+            border-radius: 6px !important;
+            min-height: 38px !important;
+            height: 38px !important;
+          }
+          .landing-timezone-box {
+            padding: 4px 6px !important;
+            gap: 4px !important;
+            border-radius: 6px !important;
+          }
+          .landing-timezone-box span {
+            font-size: 9.5px !important;
+          }
+          .landing-submit-btn {
+            padding: 6px 14px !important;
+            font-size: 11.5px !important;
+            margin-top: 1px !important;
+          }
         }
 
         /* ============================================================
@@ -3071,13 +3845,14 @@ export default function LandingPage() {
         }
         @media (max-width: 768px) {
           .tech-field {
-            --tech-node: 62px;
-            height: clamp(250px, 60vw, 320px);
+            --tech-node: 52px;
+            height: clamp(220px, 45vw, 280px);
           }
         }
-        @media (max-width: 520px) {
+        @media (max-width: 640px) {
           .tech-field {
-            --tech-node: 54px;
+            --tech-node: 36px !important;
+            height: 175px !important;
           }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -3210,10 +3985,6 @@ export default function LandingPage() {
           .landing-badges-row {
             flex-wrap: wrap;
           }
-          .landing-footer-content {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            gap: 24px !important;
-          }
         }
 
         @media (max-width: 520px) {
@@ -3226,10 +3997,8 @@ export default function LandingPage() {
           .landing-card-strip {
             --h-card-min-width: 150px !important;
           }
-          .landing-features-grid,
           .landing-client-grid,
           .landing-developer-grid,
-          .landing-footer-content,
           .landing-stats-grid {
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
             gap: 14px !important;

@@ -172,7 +172,7 @@ export default function Sidebar({
           {
             title: "TEAM",
             items: [
-              { name: "Developers", path: `${basePath}/team`, icon: Code2 },
+              { name: "Team", path: `${basePath}/team`, icon: Code2 },
               { name: "Admins", path: `${basePath}/admins`, icon: ShieldCheck },
               { name: "Queries", path: `${basePath}/messages`, icon: MessageSquare },
             ],

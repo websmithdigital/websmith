@@ -485,8 +485,8 @@ export default function DevelopersPage() {
     <div style={styles.container} className="wsd-page admin-panel-scope">
       <div style={styles.pageHeader} className="wsd-page-header">
         <div style={styles.headerTitleBlock}>
-          <h1 style={styles.pageTitle}>Developers</h1>
-          <p style={styles.pageSubtitle}>Manage your technical workforce and role-based access</p>
+          <h1 style={styles.pageTitle}>Team</h1>
+          <p style={styles.pageSubtitle}>Manage your team members and role-based access</p>
         </div>
 
         {/* Top & Middle Search */}
@@ -502,7 +502,7 @@ export default function DevelopersPage() {
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
           <NavbarVisibilityToggle
             sectionKey="developers"
-            label="Developers"
+            label="Team"
             variant="compact"
           />
           <button
@@ -513,7 +513,7 @@ export default function DevelopersPage() {
             style={styles.primaryBtn}
             className="admin-primary-btn"
           >
-            <Plus size={16} /> Add Developer
+            <Plus size={16} /> Add Member
           </button>
         </div>
       </div>
