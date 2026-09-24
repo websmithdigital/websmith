@@ -14,10 +14,11 @@ import {
 import { type BlogPost } from "../../../../core/config/publicSite";
 import { usePublicTheme } from "../../../providers/PublicThemeProvider";
 import { useLeadFunnel } from "../../../providers/LeadFunnelProvider";
+import MarkdownRenderer from "@/components/blog/MarkdownRenderer";
 
 interface BlogPostClientProps {
-  post: BlogPost;
-  relatedPosts: BlogPost[];
+  post: any;
+  relatedPosts: any[];
 }
 
 export default function BlogPostClient({ post, relatedPosts }: BlogPostClientProps) {
@@ -203,64 +204,80 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
           </div>
         </div>
 
-        {/* Article Body Sections */}
-        <div className="wsd-post-body" style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "36px" }}>
-          {post.content.map((section, idx) => (
+        {/* Article Body */}
+        <div className="wsd-post-body" style={{ marginBottom: "36px" }}>
+          {typeof post.content === "string" ? (
             <div
-              key={idx}
-              className="wsd-post-section-card"
+              className="wsd-post-content-card"
               style={{
-                padding: "24px clamp(16px, 2.5vw, 28px)",
+                padding: "36px clamp(18px, 3.5vw, 44px)",
                 borderRadius: "16px",
                 backgroundColor: isDark ? "rgba(13, 19, 34, 0.75)" : "#ffffff",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                 boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(0, 0, 0, 0.04)",
               }}
             >
-              <h2
-                className="wsd-section-heading"
+              <MarkdownRenderer content={post.content} />
+            </div>
+          ) : Array.isArray(post.content) ? (
+            (post.content as any[]).map((section, idx) => (
+              <div
+                key={idx}
+                className="wsd-post-section-card"
                 style={{
-                  fontSize: "clamp(16px, 2vw, 19px)",
-                  fontWeight: 700,
-                  letterSpacing: "-0.01em",
-                  marginBottom: "12px",
-                  color: isDark ? "#ffffff" : "#0f172a",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
+                  padding: "24px clamp(16px, 2.5vw, 28px)",
+                  borderRadius: "16px",
+                  backgroundColor: isDark ? "rgba(13, 19, 34, 0.75)" : "#ffffff",
+                  border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                  boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(0, 0, 0, 0.04)",
+                  marginBottom: "16px",
                 }}
               >
-                <span
+                <h2
+                  className="wsd-section-heading"
                   style={{
-                    width: "5px",
-                    height: "16px",
-                    borderRadius: "3px",
-                    backgroundColor: "#3b82f6",
-                    display: "inline-block",
-                    flexShrink: 0,
+                    fontSize: "clamp(16px, 2vw, 19px)",
+                    fontWeight: 700,
+                    letterSpacing: "-0.01em",
+                    marginBottom: "12px",
+                    color: isDark ? "#ffffff" : "#0f172a",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
                   }}
-                />
-                {section.heading}
-              </h2>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {section.body.map((paragraph, pIdx) => (
-                  <p
-                    key={pIdx}
-                    className="wsd-section-paragraph"
+                >
+                  <span
                     style={{
-                      fontSize: "13.5px",
-                      lineHeight: 1.65,
-                      color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
-                      margin: 0,
+                      width: "5px",
+                      height: "16px",
+                      borderRadius: "3px",
+                      backgroundColor: "#3b82f6",
+                      display: "inline-block",
+                      flexShrink: 0,
                     }}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                  />
+                  {section.heading}
+                </h2>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {section.body?.map((paragraph: string, pIdx: number) => (
+                    <p
+                      key={pIdx}
+                      className="wsd-section-paragraph"
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: 1.65,
+                        color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
+                        margin: 0,
+                      }}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : null}
         </div>
 
         {/* Consultation Callout */}

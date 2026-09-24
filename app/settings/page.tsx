@@ -26,9 +26,14 @@ import {
   validateStrongPassword,
 } from "@/core/utils/validation";
 
+import { usePersistedTab } from "@/hooks/usePersistedTab";
+
 export default function SettingsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = usePersistedTab<string>("profile", {
+    paramName: "tab",
+    allowedTabs: ["profile", "password", "features"],
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");

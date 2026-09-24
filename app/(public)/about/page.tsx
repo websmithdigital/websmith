@@ -11,11 +11,16 @@ import {
   ArrowRight, 
   Award, 
   Globe2, 
-  Lock 
+  Lock,
+  Compass,
+  Target,
+  Check
 } from "lucide-react";
 import { useLeadFunnel } from "../../providers/LeadFunnelProvider";
 import { usePublicTheme } from "../../providers/PublicThemeProvider";
 import { getPublishedDevelopers } from "../../../core/services/userService";
+import API from "@/core/services/apiService";
+import { DEFAULT_ABOUT_CONTENT, type AboutPageContent } from "@/lib/about-settings";
 import HorizontalCardStrip from "@/components/ui/HorizontalCardStrip";
 
 interface TeamMember {
@@ -133,6 +138,7 @@ export default function AboutPage() {
   ];
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(DEFAULT_TEAM_MEMBERS);
+  const [aboutContent, setAboutContent] = useState<AboutPageContent>(DEFAULT_ABOUT_CONTENT);
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -170,7 +176,20 @@ export default function AboutPage() {
         console.warn("Failed to fetch published team members:", err);
       }
     };
+
+    const fetchAboutContent = async () => {
+      try {
+        const res = await API.get("/settings/public/about_page");
+        if (res.data?.data) {
+          setAboutContent({ ...DEFAULT_ABOUT_CONTENT, ...res.data.data });
+        }
+      } catch (err) {
+        console.warn("Failed to fetch about page settings:", err);
+      }
+    };
+
     fetchTeam();
+    fetchAboutContent();
   }, []);
 
   return (
@@ -291,6 +310,118 @@ export default function AboutPage() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Brand Story & Origin Section */}
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div
+          className="wsd-about-origin-card"
+          style={{
+            padding: "clamp(24px, 3.5vw, 36px)",
+            borderRadius: "20px",
+            backgroundColor: isDark ? "rgba(13, 19, 34, 0.75)" : "#ffffff",
+            border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "28px",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "4px 12px",
+                borderRadius: "9999px",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)",
+                border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)",
+                color: isDark ? "#2997ff" : "#0071e3",
+                marginBottom: "12px",
+              }}
+            >
+              <Compass size={13} />
+              {aboutContent.story_badge}
+            </div>
+            <h2
+              style={{
+                fontSize: "clamp(20px, 2.8vw, 30px)",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.25,
+                marginBottom: "14px",
+                color: isDark ? "#ffffff" : "#0f172a",
+              }}
+            >
+              {aboutContent.story_title}
+            </h2>
+            <p
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: isDark ? "rgba(255, 255, 255, 0.9)" : "#1e293b",
+                lineHeight: 1.6,
+                marginBottom: "12px",
+              }}
+            >
+              {aboutContent.story_lead}
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569",
+                lineHeight: 1.65,
+                margin: 0,
+              }}
+            >
+              {aboutContent.story_body}
+            </p>
+          </div>
+
+          <div
+            style={{
+              padding: "24px",
+              borderRadius: "16px",
+              background: isDark
+                ? "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)"
+                : "linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(6, 182, 212, 0.04) 100%)",
+              border: isDark ? "1px solid rgba(37, 99, 235, 0.2)" : "1px solid rgba(37, 99, 235, 0.12)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            <div style={{ fontSize: "28px", color: "#3b82f6", lineHeight: 1 }}>“</div>
+            <blockquote
+              style={{
+                fontSize: "13.5px",
+                fontStyle: "italic",
+                lineHeight: 1.6,
+                color: isDark ? "#e2e8f0" : "#334155",
+                margin: 0,
+              }}
+            >
+              {aboutContent.story_quote}
+            </blockquote>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "#3b82f6",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                marginTop: "4px",
+              }}
+            >
+              — {aboutContent.story_quote_author}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -437,6 +568,123 @@ export default function AboutPage() {
               >
                 {m.description}
               </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Who We Serve & Problems We Solve Section */}
+      <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "4px 12px",
+              borderRadius: "9999px",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              backgroundColor: isDark ? "rgba(41, 151, 255, 0.15)" : "rgba(0, 113, 227, 0.08)",
+              border: isDark ? "1px solid rgba(41, 151, 255, 0.25)" : "1px solid rgba(0, 113, 227, 0.16)",
+              color: isDark ? "#2997ff" : "#0071e3",
+              marginBottom: "8px",
+            }}
+          >
+            <Target size={13} />
+            Target Audience &amp; Value
+          </div>
+          <h2
+            className="wsd-section-heading"
+            style={{
+              fontSize: "clamp(20px, 3vw, 28px)",
+              fontWeight: 800,
+              letterSpacing: "-0.02em",
+              marginBottom: "6px",
+              color: isDark ? "#ffffff" : "#0f172a",
+            }}
+          >
+            {aboutContent.who_we_serve_title}
+          </h2>
+          <p className="wsd-section-subtext" style={{ fontSize: "13.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", maxWidth: "640px", margin: "0 auto" }}>
+            {aboutContent.who_we_serve_subtitle}
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "14px",
+          }}
+        >
+          {aboutContent.who_we_serve_items.map((item, idx) => (
+            <div
+              key={item.id || idx}
+              style={{
+                padding: "20px 18px",
+                borderRadius: "16px",
+                backgroundColor: isDark ? "rgba(13, 19, 34, 0.75)" : "#ffffff",
+                border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color: "#3b82f6",
+                }}
+              >
+                {item.tag}
+              </span>
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  color: isDark ? "#ffffff" : "#0f172a",
+                  margin: 0,
+                  lineHeight: 1.3,
+                }}
+              >
+                {item.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "12.5px",
+                  lineHeight: 1.5,
+                  color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569",
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                {item.description}
+              </p>
+              {item.benefits && item.benefits.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                    paddingTop: "10px",
+                    borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid #f1f5f9",
+                    marginTop: "4px",
+                  }}
+                >
+                  {item.benefits.map((b, bIdx) => (
+                    <div key={bIdx} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px", color: isDark ? "#cbd5e1" : "#334155" }}>
+                      <Check size={12} color="#10b981" />
+                      <span>{b}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

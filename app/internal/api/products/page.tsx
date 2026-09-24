@@ -13,6 +13,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { usePersistedTab } from '@/hooks/usePersistedTab';
 
 // Types
 interface Product {
@@ -90,7 +91,10 @@ export default function AdminProductsPage() {
   const [activeProducts, setActiveProducts] = useState<Product[]>([]);
   const [archivedProducts, setArchivedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('active');
+  const [activeTab, setActiveTab] = usePersistedTab<TabType>('active', {
+    paramName: 'tab',
+    allowedTabs: ['active', 'archived'],
+  });
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [createdProductId, setCreatedProductId] = useState<string>('');

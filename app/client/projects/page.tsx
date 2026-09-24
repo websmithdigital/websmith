@@ -17,9 +17,10 @@ import {
   TrendingUp,
   Link as LinkIcon,
   Flag,
-  Timer
+  Timer,
 } from "lucide-react";
 import API from "../../../core/services/apiService";
+import { usePersistedTab } from "@/hooks/usePersistedTab";
 import { getProjectFeedback, Project, submitProjectFeedback } from "../../projects/services/projectService";
 import { getStoredUser } from "../../../lib/auth";
 
@@ -30,7 +31,12 @@ export default function ClientProjectsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'kanban'>('grid');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'feedback'>('details');
+  const PROJECT_TABS = ['details', 'feedback'] as const;
+  type ProjectTab = typeof PROJECT_TABS[number];
+  const [activeTab, setActiveTab] = usePersistedTab<ProjectTab>('details', {
+    paramName: 'tab',
+    allowedTabs: PROJECT_TABS,
+  });
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackRating, setFeedbackRating] = useState(5);
   const [projectFeedback, setProjectFeedback] = useState<any[]>([]);

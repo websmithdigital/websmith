@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
+import { usePersistedTab } from "@/hooks/usePersistedTab";
 import {
   Briefcase,
   Calendar,
@@ -584,7 +585,10 @@ export default function AdminMessagesClient() {
   // Never touched by the 1-second auto-poll — the poll is fully silent.
   const [threadLoading, setThreadLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [scope, setScope] = useState<Scope>("active");
+  const [scope, setScope] = usePersistedTab<Scope>("active", {
+    paramName: "scope",
+    allowedTabs: ["active", "closed"],
+  });
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [reply, setReply] = useState("");
   const [resolution, setResolution] = useState("");

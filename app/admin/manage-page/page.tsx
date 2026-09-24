@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import API from '../../../core/services/apiService';
-import { Save, Mail, Phone, Smartphone, PhoneCall, MapPin, Upload, Film, Image as ImageIcon } from 'lucide-react';
+import { Save, Mail, Phone, Smartphone, PhoneCall, MapPin, Upload, Film, Image as ImageIcon, Briefcase, Share2, BookOpen, Layers } from 'lucide-react';
+import CareerManageSection from '@/components/admin/CareerManageSection';
+import { usePersistedTab } from '@/hooks/usePersistedTab';
 import {
   DEFAULT_SITE_SETTINGS,
   SOCIAL_URL_FIELDS,
@@ -16,6 +18,7 @@ import {
 import { SOCIAL_PLATFORM_META } from '../../../lib/social-platforms';
 import { MEDIA_SLOTS, MAX_MEDIA_FILE_SIZE, type MediaAsset } from '../../../lib/media';
 import { refreshMediaAssets } from '../../../hooks/useMediaAsset';
+import { DEFAULT_ABOUT_CONTENT, type AboutPageContent, type WhoWeServeItem } from '../../../lib/about-settings';
 
 const EMAIL_FIELDS: Array<{ key: 'email' | 'sales_email' | 'no_reply_email' | 'hr_email'; label: string; placeholder: string }> = [
   { key: 'email', label: 'Contact Email', placeholder: 'e.g. support@websmithdigital.com' },
@@ -194,6 +197,22 @@ export default function ManagePage() {
     </div>
   );
 
+  const MANAGE_TAB_IDS = ['contact', 'social', 'about', 'careers', 'media', 'all'] as const;
+  type ManageTab = typeof MANAGE_TAB_IDS[number];
+  const [activeTab, setActiveTab] = usePersistedTab<ManageTab>('contact', {
+    paramName: 'tab',
+    allowedTabs: MANAGE_TAB_IDS,
+  });
+
+  const MANAGE_TABS = [
+    { id: 'contact', label: 'Contact Information', icon: PhoneCall },
+    { id: 'social', label: 'Social Media Links', icon: Share2 },
+    { id: 'about', label: 'About Page Content', icon: BookOpen },
+    { id: 'careers', label: 'Careers & Hiring', icon: Briefcase },
+    { id: 'media', label: 'Website Media', icon: Film },
+    { id: 'all', label: 'All Sections', icon: Layers },
+  ] as const;
+
   return (
     <div className="wsd-page admin-panel-scope">
       <style>{`
@@ -212,87 +231,147 @@ export default function ManagePage() {
           }
         }
       `}</style>
-      <header style={styles.header}>
-        <div>
-          <h1 style={styles.title}>Manage Page</h1>
-          <p style={styles.subtitle}>Configure and manage global website information</p>
-        </div>
-      </header>
+      {/* Top Section-wise Tabs */}
+      <div style={styles.tabContainer} className="manage-page-tabs">
+        {MANAGE_TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                ...styles.tabButton,
+                backgroundColor: isActive ? '#007AFF' : 'transparent',
+                color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                boxShadow: isActive ? '0 2px 8px rgba(0, 122, 255, 0.28)' : 'none',
+              }}
+            >
+              <Icon size={15} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       {isLoading ? (
-        <div style={styles.loading}>Loading...</div>
+        <div style={styles.loading}>Loading settings...</div>
       ) : (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.contactSocialGrid} className="manage-page-grid">
-            <div style={{ ...styles.card, height: '100%', boxSizing: 'border-box' }} className="admin-card">
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardTitle}>Contact Information</h2>
-                <p style={styles.cardSubtitle}>This information is displayed publicly on the landing page and contact page.</p>
-              </div>
-
-              <div style={styles.formGroup}>
-                <div style={styles.fieldLabelRow}>
-                  <MapPin size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
-                  <label style={styles.label}>Headquarters Address</label>
+        <>
+          {/* Section: Contact Information */}
+          {(activeTab === 'contact' || activeTab === 'all') && (
+            <form onSubmit={handleSubmit} style={styles.form}>
+              <div style={{ ...styles.card, ...(activeTab === 'all' ? { marginBottom: '0px' } : {}) }} className="admin-card">
+                <div style={styles.cardHeader}>
+                  <h2 style={styles.cardTitle}>Contact Information</h2>
+                  <p style={styles.cardSubtitle}>This information is displayed publicly on the landing page, contact page, and footer.</p>
                 </div>
-                <textarea
-                  style={styles.textarea}
-                  value={contactInfo.headquarters}
-                  onChange={(e) => setField('headquarters', e.target.value)}
-                  placeholder="e.g. 123 Tech Street, Silicon Valley, CA 94000"
-                />
-              </div>
 
-              <div style={styles.formGroup}>
-                <div style={styles.fieldLabelRow}>
-                  <Mail size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
-                  <label style={styles.label}>Email Addresses</label>
+                <div style={styles.formGroup}>
+                  <div style={styles.fieldLabelRow}>
+                    <MapPin size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
+                    <label style={styles.label}>Headquarters Address</label>
+                  </div>
+                  <textarea
+                    style={styles.textarea}
+                    value={contactInfo.headquarters}
+                    onChange={(e) => setField('headquarters', e.target.value)}
+                    placeholder="e.g. 123 Tech Street, Silicon Valley, CA 94000"
+                  />
                 </div>
-                {renderEmailFields()}
-              </div>
 
-              <div style={styles.formGroup}>
-                <div style={styles.fieldLabelRow}>
-                  <Phone size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
-                  <label style={styles.label}>Phone Numbers</label>
+                <div style={styles.formGroup}>
+                  <div style={styles.fieldLabelRow}>
+                    <Mail size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
+                    <label style={styles.label}>Email Addresses</label>
+                  </div>
+                  {renderEmailFields()}
                 </div>
-                {renderPhoneFields()}
+
+                <div style={styles.formGroup}>
+                  <div style={styles.fieldLabelRow}>
+                    <Phone size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
+                    <label style={styles.label}>Phone Numbers</label>
+                  </div>
+                  {renderPhoneFields()}
+                </div>
+
+                <div style={styles.formActions}>
+                  {saveMessage && (
+                    <span style={{
+                      color: saveMessage.type === 'success' ? '#34C759' : '#FF3B30',
+                      fontSize: '14px',
+                      fontWeight: 500
+                    }}>
+                      {saveMessage.text}
+                    </span>
+                  )}
+                  <button type="submit" style={styles.saveButton} disabled={isSaving}>
+                    <Save size={16} />
+                    {isSaving ? 'Saving...' : 'Save Contact Information'}
+                  </button>
+                </div>
               </div>
+            </form>
+          )}
+
+          {/* Section: Social Media Links */}
+          {(activeTab === 'social' || activeTab === 'all') && (
+            <form onSubmit={handleSubmit} style={{ ...styles.form, ...(activeTab === 'all' ? { marginTop: '28px' } : {}) }}>
+              <div style={styles.card} className="admin-card">
+                <div style={styles.cardHeader}>
+                  <h2 style={styles.cardTitle}>Social Media Links</h2>
+                  <p style={styles.cardSubtitle}>Manage official social media profiles displayed on the website. Leave a link empty to hide that platform.</p>
+                </div>
+                {renderSocialFields()}
+
+                <div style={styles.formActions}>
+                  {saveMessage && (
+                    <span style={{
+                      color: saveMessage.type === 'success' ? '#34C759' : '#FF3B30',
+                      fontSize: '14px',
+                      fontWeight: 500
+                    }}>
+                      {saveMessage.text}
+                    </span>
+                  )}
+                  <button type="submit" style={styles.saveButton} disabled={isSaving}>
+                    <Save size={16} />
+                    {isSaving ? 'Saving...' : 'Save Social Media Links'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {/* Section: About Page Content */}
+          {(activeTab === 'about' || activeTab === 'all') && (
+            <div style={activeTab === 'all' ? { marginTop: '28px' } : {}}>
+              <AboutPageManageCard isStandalone={activeTab === 'about'} />
             </div>
+          )}
 
-            <div style={{ ...styles.card, height: '100%', boxSizing: 'border-box' }} className="admin-card">
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardTitle}>Social Media Links</h2>
-                <p style={styles.cardSubtitle}>Manage official social media profiles displayed on the website. Leave a link empty to hide that platform.</p>
-              </div>
-              {renderSocialFields()}
+          {/* Section: Careers & Hiring */}
+          {(activeTab === 'careers' || activeTab === 'all') && (
+            <div style={activeTab === 'all' ? { marginTop: '28px' } : {}}>
+              <CareerManageSection />
             </div>
-          </div>
+          )}
 
-          <div style={styles.formActions}>
-            {saveMessage && (
-              <span style={{
-                color: saveMessage.type === 'success' ? '#34C759' : '#FF3B30',
-                fontSize: '14px',
-                fontWeight: 500
-              }}>
-                {saveMessage.text}
-              </span>
-            )}
-            <button type="submit" style={styles.saveButton} disabled={isSaving}>
-              <Save size={16} />
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
+          {/* Section: Website Media */}
+          {(activeTab === 'media' || activeTab === 'all') && (
+            <div style={activeTab === 'all' ? { marginTop: '28px' } : {}}>
+              <WebsiteMediaCard isStandalone={activeTab === 'media'} />
+            </div>
+          )}
+        </>
       )}
-
-      <WebsiteMediaCard />
     </div>
   );
 }
 
-function WebsiteMediaCard() {
+function WebsiteMediaCard({ isStandalone }: { isStandalone?: boolean }) {
   const [mediaMap, setMediaMap] = useState<Record<string, MediaAsset>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
@@ -388,7 +467,7 @@ function WebsiteMediaCard() {
   };
 
   return (
-    <div style={styles.card} className="admin-card">
+    <div style={{ ...styles.card, marginTop: isStandalone ? '0px' : '28px' }} className="admin-card">
       <div style={styles.cardHeader}>
         <h2 style={styles.cardTitle}>Website Media</h2>
         <p style={styles.cardSubtitle}>
@@ -455,9 +534,322 @@ function WebsiteMediaCard() {
   );
 }
 
+function AboutPageManageCard({ isStandalone }: { isStandalone?: boolean }) {
+  const [content, setContent] = useState<AboutPageContent>(DEFAULT_ABOUT_CONTENT);
+  const ABOUT_SUBTAB_IDS = ['origin', 'audiences'] as const;
+  type AboutSubTab = typeof ABOUT_SUBTAB_IDS[number];
+  const [activeTab, setActiveTab] = usePersistedTab<AboutSubTab>('origin', {
+    paramName: 'subtab',
+    allowedTabs: ABOUT_SUBTAB_IDS,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    fetchAboutContent();
+  }, []);
+
+  const fetchAboutContent = async () => {
+    try {
+      setIsLoading(true);
+      const res = await API.get('/settings/public/about_page');
+      if (res.data?.data) {
+        setContent({ ...DEFAULT_ABOUT_CONTENT, ...res.data.data });
+      }
+    } catch (err) {
+      console.error('Failed to fetch about content settings', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      await API.put('/settings/public/about_page', { value: content });
+      setSaveMessage({ type: 'success', text: 'About page content updated successfully.' });
+    } catch (err) {
+      console.error('Failed to save about page settings', err);
+      setSaveMessage({ type: 'error', text: 'Failed to update about page content.' });
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveMessage(null), 3500);
+    }
+  };
+
+  const updateAudienceItem = (index: number, field: keyof WhoWeServeItem, val: any) => {
+    const next = [...content.who_we_serve_items];
+    next[index] = { ...next[index], [field]: val };
+    setContent({ ...content, who_we_serve_items: next });
+  };
+
+  return (
+    <div style={{ ...styles.card, marginTop: isStandalone ? '0px' : '28px' }} className="admin-card">
+      <div style={styles.cardHeader}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h2 style={styles.cardTitle}>About Page Content</h2>
+            <p style={styles.cardSubtitle}>Manage Origin Story and Who We Serve sections displayed on the public /about page.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '10px' }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('origin')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: activeTab === 'origin' ? '#007AFF' : 'transparent',
+                color: activeTab === 'origin' ? '#ffffff' : 'var(--text-secondary)',
+              }}
+            >
+              Origin Story
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('audiences')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: activeTab === 'audiences' ? '#007AFF' : 'transparent',
+                color: activeTab === 'audiences' ? '#ffffff' : 'var(--text-secondary)',
+              }}
+            >
+              Who We Serve
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading about page content...</div>
+      ) : (
+        <form onSubmit={handleSave}>
+          {activeTab === 'origin' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={styles.fieldRow}>
+                <div style={styles.fieldCell}>
+                  <label style={styles.label}>Badge Tag</label>
+                  <input
+                    type="text"
+                    style={styles.input}
+                    value={content.story_badge}
+                    onChange={(e) => setContent({ ...content, story_badge: e.target.value })}
+                    placeholder="e.g. Origin & Company Thesis"
+                  />
+                </div>
+                <div style={styles.fieldCell}>
+                  <label style={styles.label}>Heading Title</label>
+                  <input
+                    type="text"
+                    style={styles.input}
+                    value={content.story_title}
+                    onChange={(e) => setContent({ ...content, story_title: e.target.value })}
+                    placeholder="e.g. Why WebSmith Digital Was Founded"
+                  />
+                </div>
+              </div>
+
+              <div style={styles.fieldCell}>
+                <label style={styles.label}>Lead Statement (Problem Hook)</label>
+                <textarea
+                  style={{ ...styles.textarea, minHeight: '60px' }}
+                  value={content.story_lead}
+                  onChange={(e) => setContent({ ...content, story_lead: e.target.value })}
+                  placeholder="The core frustration or problem in the industry..."
+                />
+              </div>
+
+              <div style={styles.fieldCell}>
+                <label style={styles.label}>Origin Story Narrative (How & Why)</label>
+                <textarea
+                  style={{ ...styles.textarea, minHeight: '90px' }}
+                  value={content.story_body}
+                  onChange={(e) => setContent({ ...content, story_body: e.target.value })}
+                  placeholder="Detailed narrative on why the company was formed and principles..."
+                />
+              </div>
+
+              <div style={styles.fieldRow}>
+                <div style={styles.fieldCell}>
+                  <label style={styles.label}>Pull Quote</label>
+                  <input
+                    type="text"
+                    style={styles.input}
+                    value={content.story_quote}
+                    onChange={(e) => setContent({ ...content, story_quote: e.target.value })}
+                    placeholder="Inspiring quote summarizing commitment..."
+                  />
+                </div>
+                <div style={styles.fieldCell}>
+                  <label style={styles.label}>Quote Attributed To</label>
+                  <input
+                    type="text"
+                    style={styles.input}
+                    value={content.story_quote_author}
+                    onChange={(e) => setContent({ ...content, story_quote_author: e.target.value })}
+                    placeholder="e.g. WebSmith Engineering Leadership"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div style={styles.fieldRow}>
+                <div style={styles.fieldCell}>
+                  <label style={styles.label}>Section Title</label>
+                  <input
+                    type="text"
+                    style={styles.input}
+                    value={content.who_we_serve_title}
+                    onChange={(e) => setContent({ ...content, who_we_serve_title: e.target.value })}
+                    placeholder="Who We Serve & Problems We Solve"
+                  />
+                </div>
+                <div style={styles.fieldCell}>
+                  <label style={styles.label}>Section Subtitle</label>
+                  <input
+                    type="text"
+                    style={styles.input}
+                    value={content.who_we_serve_subtitle}
+                    onChange={(e) => setContent({ ...content, who_we_serve_subtitle: e.target.value })}
+                    placeholder="Purpose-built engineering partnerships..."
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <label style={{ ...styles.label, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#007AFF' }}>
+                  Audience &amp; Client Segments
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                  {content.who_we_serve_items.map((item, idx) => (
+                    <div
+                      key={item.id || idx}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-secondary)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                      }}
+                    >
+                      <div style={styles.fieldCell}>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Tag / Segment</label>
+                        <input
+                          type="text"
+                          style={{ ...styles.input, padding: '8px 12px', fontSize: '13px' }}
+                          value={item.tag}
+                          onChange={(e) => updateAudienceItem(idx, 'tag', e.target.value)}
+                          placeholder="e.g. High-Growth & Venture"
+                        />
+                      </div>
+                      <div style={styles.fieldCell}>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Client Type Title</label>
+                        <input
+                          type="text"
+                          style={{ ...styles.input, padding: '8px 12px', fontSize: '13px' }}
+                          value={item.title}
+                          onChange={(e) => updateAudienceItem(idx, 'title', e.target.value)}
+                          placeholder="e.g. SaaS Platforms & Scale-Ups"
+                        />
+                      </div>
+                      <div style={styles.fieldCell}>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Pain Point / Solution</label>
+                        <textarea
+                          style={{ ...styles.textarea, minHeight: '60px', padding: '8px 12px', fontSize: '13px' }}
+                          value={item.description}
+                          onChange={(e) => updateAudienceItem(idx, 'description', e.target.value)}
+                          placeholder="The specific architectural problems solved..."
+                        />
+                      </div>
+                      <div style={styles.fieldCell}>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Key Capabilities (comma-separated)</label>
+                        <input
+                          type="text"
+                          style={{ ...styles.input, padding: '8px 12px', fontSize: '13px' }}
+                          value={item.benefits.join(', ')}
+                          onChange={(e) =>
+                            updateAudienceItem(
+                              idx,
+                              'benefits',
+                              e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                            )
+                          }
+                          placeholder="Capability 1, Capability 2, Capability 3"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ ...styles.formActions, marginTop: '20px' }}>
+            {saveMessage && (
+              <span
+                style={{
+                  color: saveMessage.type === 'success' ? '#34C759' : '#FF3B30',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                }}
+              >
+                {saveMessage.text}
+              </span>
+            )}
+            <button type="submit" style={styles.saveButton} disabled={isSaving}>
+              <Save size={16} />
+              {isSaving ? 'Saving...' : 'Save About Page Content'}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
 const styles: any = {
   header: {
-    marginBottom: '32px',
+    marginBottom: '24px',
+  },
+  tabContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    marginBottom: '26px',
+    overflowX: 'auto',
+    padding: '5px',
+    borderRadius: '12px',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border-color)',
+    width: 'fit-content',
+    maxWidth: '100%',
+  },
+  tabButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: 'none',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    whiteSpace: 'nowrap',
   },
   contactSocialGrid: {
     display: 'grid',

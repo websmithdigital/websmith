@@ -23,6 +23,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import API from '../../../core/services/apiService';
+import { usePersistedTab } from '@/hooks/usePersistedTab';
 
 // Types
 interface ProjectStatus {
@@ -89,7 +90,12 @@ export default function ProjectStatusPage() {
   const [editingProgress, setEditingProgress] = useState(false);
   const [tempProgress, setTempProgress] = useState(0);
   const [updatingProgress, setUpdatingProgress] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'messages' | 'feedback' | 'settings'>('overview');
+  const STATUS_TABS = ['overview', 'messages', 'feedback', 'settings'] as const;
+  type StatusTab = typeof STATUS_TABS[number];
+  const [activeTab, setActiveTab] = usePersistedTab<StatusTab>('overview', {
+    paramName: 'tab',
+    allowedTabs: STATUS_TABS,
+  });
 
   useEffect(() => {
     fetchStatus();

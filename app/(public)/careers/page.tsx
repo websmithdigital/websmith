@@ -12,77 +12,16 @@ import {
   Laptop, 
   HeartHandshake, 
   GraduationCap, 
-  Send
+  Send,
+  X,
+  DollarSign,
+  Check,
+  AlertCircle
 } from "lucide-react";
 import API from "../../../core/services/apiService";
 import { usePublicTheme } from "../../providers/PublicThemeProvider";
 import { useLeadFunnel } from "../../providers/LeadFunnelProvider";
-
-type Department = "All" | "Engineering" | "Design" | "Product & Operations";
-
-interface JobRole {
-  id: string;
-  title: string;
-  department: Department;
-  location: string;
-  type: string;
-  experience: string;
-  description: string;
-  tags: string[];
-}
-
-const OPEN_ROLES: JobRole[] = [
-  {
-    id: "fe-lead",
-    title: "Senior Full-Stack Engineer (Next.js & TypeScript)",
-    department: "Engineering",
-    location: "Remote / Hybrid (Kolkata HQ)",
-    type: "Full-Time",
-    experience: "4+ Years",
-    description: "Architect and deliver high-scale digital platforms, serverless APIs, and interactive client portals using Next.js 16, TypeScript, and Neon PostgreSQL.",
-    tags: ["Next.js", "TypeScript", "PostgreSQL", "Node.js", "Tailwind CSS"],
-  },
-  {
-    id: "erp-arch",
-    title: "Enterprise ERP & Systems Architect",
-    department: "Engineering",
-    location: "Remote",
-    type: "Full-Time",
-    experience: "5+ Years",
-    description: "Design custom resource planning engines, real-time inventory synchronization systems, and high-throughput background queues for global retail brands.",
-    tags: ["Distributed Systems", "Redis", "Docker", "Database Optimization", "Go/Node"],
-  },
-  {
-    id: "uiux-sr",
-    title: "Lead UI/UX Product Designer",
-    department: "Design",
-    location: "Remote",
-    type: "Full-Time",
-    experience: "3+ Years",
-    description: "Create state-of-the-art interactive web applications, design systems, and mobile interfaces. Turn complex enterprise workflows into intuitive, breathtaking UIs.",
-    tags: ["Figma", "Design Systems", "Prototyping", "Design Ops", "Micro-interactions"],
-  },
-  {
-    id: "devops-eng",
-    title: "Cloud Infrastructure & DevOps Engineer",
-    department: "Engineering",
-    location: "Remote",
-    type: "Full-Time",
-    experience: "3+ Years",
-    description: "Maintain zero-downtime deployment pipelines, edge CDN caching, Kubernetes clusters, and automated security penetration scanning.",
-    tags: ["AWS / GCP", "CI/CD", "Docker", "Kubernetes", "Terraform", "Security"],
-  },
-  {
-    id: "prod-coord",
-    title: "Technical Project Manager / Client Partner",
-    department: "Product & Operations",
-    location: "Remote / Hybrid",
-    type: "Full-Time",
-    experience: "3+ Years",
-    description: "Drive agile sprint cadences, client milestone roadmaps, deliverable tracking, and quality assurance alongside senior engineering leads.",
-    tags: ["Agile/Scrum", "Client Success", "Technical Specs", "Sprint Planning"],
-  },
-];
+import { DEFAULT_JOB_ROLES, type JobRole, type Department } from "@/lib/careers-data";
 
 const PERKS = [
   {
@@ -135,7 +74,10 @@ export default function CareersPage() {
   const isDark = publicTheme === "dark";
   const { openLeadServicesModal } = useLeadFunnel();
 
-  const [activeDepartment, setActiveDepartment] = useState<Department>("All");
+  const [roles, setRoles] = useState<JobRole[]>(DEFAULT_JOB_ROLES);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<JobRole | null>(null);
+  const [activeDepartment, setActiveDepartment] = useState<string>("All");
   const [contactInfo, setContactInfo] = useState({
     email: "careers@websmithdigital.com",
     support_email: "support@websmithdigital.com",
@@ -157,14 +99,30 @@ export default function CareersPage() {
         // Fallback to default
       }
     };
+
+    const fetchCareers = async () => {
+      try {
+        setIsLoading(true);
+        const res = await API.get("/careers");
+        if (res.data?.data && Array.isArray(res.data.data)) {
+          setRoles(res.data.data);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch careers from API, using default roles:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchSettings();
+    fetchCareers();
   }, []);
 
-  const filteredRoles = activeDepartment === "All"
-    ? OPEN_ROLES
-    : OPEN_ROLES.filter((r) => r.department === activeDepartment);
+  const departments: string[] = ["All", ...Array.from(new Set(roles.map((r) => r.department).filter(Boolean)))];
 
-  const departments: Department[] = ["All", "Engineering", "Design", "Product & Operations"];
+  const filteredRoles = activeDepartment === "All"
+    ? roles
+    : roles.filter((r) => r.department === activeDepartment);
 
   return (
     <div
@@ -399,67 +357,384 @@ export default function CareersPage() {
           </div>
         </div>
 
-        {/* Job Cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          {filteredRoles.map((role) => (
+        {/* Job Cards or Empty State */}
+        {filteredRoles.length === 0 ? (
+          <div
+            style={{
+              padding: "48px 24px",
+              textAlign: "center",
+              borderRadius: "20px",
+              backgroundColor: isDark ? "rgba(13, 19, 34, 0.7)" : "#ffffff",
+              border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+              boxShadow: isDark ? "none" : "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
+              maxWidth: "680px",
+              margin: "0 auto",
+            }}
+          >
             <div
-              key={role.id}
               style={{
-                borderRadius: "16px",
-                padding: "20px clamp(16px, 2.5vw, 28px)",
-                backgroundColor: isDark ? "rgba(13, 19, 34, 0.8)" : "#ffffff",
-                border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(15, 23, 42, 0.04)",
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "18px",
+                width: "60px",
+                height: "60px",
+                borderRadius: "18px",
+                backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
+                color: "#3b82f6",
+                display: "flex",
                 alignItems: "center",
-                transition: "transform 0.2s ease, border-color 0.2s ease",
+                justifyContent: "center",
+                margin: "0 auto 16px",
               }}
-              className="wsd-job-card"
             >
+              <Briefcase size={28} />
+            </div>
+
+            <h3
+              style={{
+                fontSize: "20px",
+                fontWeight: 800,
+                color: isDark ? "#ffffff" : "#0f172a",
+                marginBottom: "8px",
+              }}
+            >
+              No Open Roles Currently
+            </h3>
+
+            <p
+              style={{
+                fontSize: "14px",
+                lineHeight: 1.6,
+                color: isDark ? "rgba(255, 255, 255, 0.65)" : "#64748b",
+                marginBottom: "24px",
+              }}
+            >
+              We are not actively hiring for this category right now, but we are always eager to discover exceptional software engineers, distributed systems architects, and product designers.
+            </p>
+
+            <a
+              href={`mailto:${contactInfo.email}?subject=General Application / Resume for WebSmith Digital`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 24px",
+                borderRadius: "9999px",
+                fontSize: "13.5px",
+                fontWeight: 700,
+                color: "#ffffff",
+                background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
+                textDecoration: "none",
+                boxShadow: "0 6px 20px -4px rgba(37, 99, 235, 0.4)",
+              }}
+            >
+              Submit Open Application <Send size={14} />
+            </a>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {filteredRoles.map((role) => (
+              <div
+                key={role.id}
+                onClick={() => setSelectedJob(role)}
+                style={{
+                  borderRadius: "16px",
+                  padding: "20px clamp(16px, 2.5vw, 28px)",
+                  backgroundColor: isDark ? "rgba(13, 19, 34, 0.8)" : "#ffffff",
+                  border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                  boxShadow: isDark ? "none" : "0 4px 16px -2px rgba(15, 23, 42, 0.04)",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                  gap: "18px",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease, border-color 0.2s ease",
+                }}
+                className="wsd-job-card"
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
+                    <span
+                      style={{
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
+                        color: "#3b82f6",
+                      }}
+                    >
+                      {role.department}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
+                      <MapPin size={12} /> {role.location}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
+                      <Clock size={12} /> {role.type} • {role.experience}
+                    </div>
+                    {role.salary && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "#34d399" : "#059669", fontWeight: 600 }}>
+                        <DollarSign size={12} /> {role.salary}
+                      </div>
+                    )}
+                  </div>
+
+                  <h3 className="wsd-role-title" style={{ fontSize: "16px", fontWeight: 700, marginBottom: "6px", color: isDark ? "#ffffff" : "#0f172a" }}>
+                    {role.title}
+                  </h3>
+
+                  <p className="wsd-role-desc" style={{ fontSize: "12.5px", lineHeight: 1.5, color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569", marginBottom: "12px" }}>
+                    {role.description}
+                  </p>
+
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                    {role.tags.map((tag, tIdx) => (
+                      <span
+                        key={tIdx}
+                        className="wsd-role-tag"
+                        style={{
+                          padding: "2px 8px",
+                          borderRadius: "5px",
+                          fontSize: "10.5px",
+                          fontWeight: 500,
+                          backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "#f1f5f9",
+                          color: isDark ? "#94a3b8" : "#334155",
+                          border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="wsd-role-action" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedJob(role);
+                    }}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "10px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: isDark ? "#ffffff" : "#0f172a",
+                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9",
+                      border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1",
+                      cursor: "pointer",
+                    }}
+                  >
+                    View Details
+                  </button>
+
+                  <a
+                    href={`mailto:${role.applyEmail || contactInfo.email}?subject=Application for ${role.title}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="wsd-role-apply-btn"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "9px 18px",
+                      borderRadius: "10px",
+                      fontSize: "12.5px",
+                      fontWeight: 600,
+                      color: "#ffffff",
+                      backgroundColor: "#2563eb",
+                      textDecoration: "none",
+                      boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    Apply Now <ArrowRight size={13} />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Role Details Modal */}
+      {selectedJob && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px",
+          }}
+          onClick={() => setSelectedJob(null)}
+        >
+          <div
+            style={{
+              backgroundColor: isDark ? "#0f172a" : "#ffffff",
+              color: isDark ? "#ffffff" : "#0f172a",
+              borderRadius: "20px",
+              border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #e2e8f0",
+              width: "100%",
+              maxWidth: "720px",
+              maxHeight: "88vh",
+              overflowY: "auto",
+              padding: "32px",
+              boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.4)",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
                   <span
                     style={{
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                      fontSize: "11px",
+                      padding: "4px 10px",
+                      borderRadius: "8px",
+                      fontSize: "12px",
                       fontWeight: 700,
-                      backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
+                      backgroundColor: isDark ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.08)",
                       color: "#3b82f6",
                     }}
                   >
-                    {role.department}
+                    {selectedJob.department}
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
-                    <MapPin size={12} /> {role.location}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11.5px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
-                    <Clock size={12} /> {role.type} • {role.experience}
-                  </div>
+                  <span style={{ fontSize: "12.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <MapPin size={13} /> {selectedJob.location}
+                  </span>
+                  <span style={{ fontSize: "12.5px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <Clock size={13} /> {selectedJob.type} • {selectedJob.experience}
+                  </span>
+                  {selectedJob.salary && (
+                    <span style={{ fontSize: "12.5px", color: isDark ? "#34d399" : "#059669", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "2px" }}>
+                      <DollarSign size={13} /> {selectedJob.salary}
+                    </span>
+                  )}
                 </div>
 
-                <h3 className="wsd-role-title" style={{ fontSize: "16px", fontWeight: 700, marginBottom: "6px", color: isDark ? "#ffffff" : "#0f172a" }}>
-                  {role.title}
-                </h3>
+                <h2 style={{ fontSize: "22px", fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>
+                  {selectedJob.title}
+                </h2>
+              </div>
 
-                <p className="wsd-role-desc" style={{ fontSize: "12.5px", lineHeight: 1.5, color: isDark ? "rgba(255, 255, 255, 0.65)" : "#475569", marginBottom: "12px" }}>
-                  {role.description}
-                </p>
+              <button
+                type="button"
+                onClick={() => setSelectedJob(null)}
+                style={{
+                  border: "none",
+                  background: isDark ? "rgba(255, 255, 255, 0.08)" : "#f1f5f9",
+                  color: isDark ? "#ffffff" : "#0f172a",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
 
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-                  {role.tags.map((tag, tIdx) => (
+            {/* Overview */}
+            <div style={{ marginBottom: "22px" }}>
+              <h4 style={{ fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.05em", color: "#3b82f6", margin: "0 0 6px 0", fontWeight: 700 }}>
+                Role Overview
+              </h4>
+              <p style={{ fontSize: "14px", lineHeight: 1.6, color: isDark ? "rgba(255, 255, 255, 0.75)" : "#475569", margin: 0 }}>
+                {selectedJob.description}
+              </p>
+            </div>
+
+            {/* Responsibilities */}
+            {selectedJob.responsibilities && selectedJob.responsibilities.length > 0 && (
+              <div style={{ marginBottom: "22px" }}>
+                <h4 style={{ fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.05em", color: "#3b82f6", margin: "0 0 10px 0", fontWeight: 700 }}>
+                  Key Responsibilities
+                </h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {selectedJob.responsibilities.map((item, idx) => (
+                    <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                      <div
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(52, 199, 89, 0.12)",
+                          color: "#34C759",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          marginTop: "2px",
+                        }}
+                      >
+                        <Check size={11} strokeWidth={3} />
+                      </div>
+                      <span style={{ fontSize: "13.5px", lineHeight: 1.5, color: isDark ? "rgba(255, 255, 255, 0.85)" : "#334155" }}>
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Requirements */}
+            {selectedJob.requirements && selectedJob.requirements.length > 0 && (
+              <div style={{ marginBottom: "22px" }}>
+                <h4 style={{ fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.05em", color: "#3b82f6", margin: "0 0 10px 0", fontWeight: 700 }}>
+                  Requirements &amp; Qualifications
+                </h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {selectedJob.requirements.map((item, idx) => (
+                    <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                      <div
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(59, 130, 246, 0.12)",
+                          color: "#3b82f6",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          marginTop: "2px",
+                        }}
+                      >
+                        <Check size={11} strokeWidth={3} />
+                      </div>
+                      <span style={{ fontSize: "13.5px", lineHeight: 1.5, color: isDark ? "rgba(255, 255, 255, 0.85)" : "#334155" }}>
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {selectedJob.tags && selectedJob.tags.length > 0 && (
+              <div style={{ marginBottom: "26px" }}>
+                <h4 style={{ fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.05em", color: "#3b82f6", margin: "0 0 8px 0", fontWeight: 700 }}>
+                  Tech Stack &amp; Skills
+                </h4>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {selectedJob.tags.map((tag, idx) => (
                     <span
-                      key={tIdx}
-                      className="wsd-role-tag"
+                      key={idx}
                       style={{
-                        padding: "2px 8px",
-                        borderRadius: "5px",
-                        fontSize: "10.5px",
-                        fontWeight: 500,
-                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "#f1f5f9",
-                        color: isDark ? "#94a3b8" : "#334155",
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9",
+                        color: isDark ? "#cbd5e1" : "#334155",
                         border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                       }}
                     >
@@ -468,33 +743,59 @@ export default function CareersPage() {
                   ))}
                 </div>
               </div>
+            )}
 
-              <div className="wsd-role-action" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-                <a
-                  href={`mailto:${contactInfo.email}?subject=Application for ${role.title}`}
-                  className="wsd-role-apply-btn"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "9px 20px",
-                    borderRadius: "10px",
-                    fontSize: "12.5px",
-                    fontWeight: 600,
-                    color: "#ffffff",
-                    backgroundColor: "#2563eb",
-                    textDecoration: "none",
-                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  Apply via Email <ArrowRight size={13} />
-                </a>
-              </div>
+            {/* Modal Actions */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "12px",
+                paddingTop: "18px",
+                borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #e2e8f0",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedJob(null)}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: "10px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  border: isDark ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid #cbd5e1",
+                  backgroundColor: "transparent",
+                  color: isDark ? "#ffffff" : "#0f172a",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+
+              <a
+                href={`mailto:${selectedJob.applyEmail || contactInfo.email}?subject=Application for ${selectedJob.title}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "11px 24px",
+                  borderRadius: "10px",
+                  fontSize: "13.5px",
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
+                  textDecoration: "none",
+                  boxShadow: "0 6px 20px -4px rgba(37, 99, 235, 0.4)",
+                }}
+              >
+                Apply for this Role <ArrowRight size={14} />
+              </a>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Hiring Process */}
       <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 40px", padding: "0 clamp(16px, 4vw, 64px)" }}>

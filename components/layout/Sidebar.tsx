@@ -24,6 +24,7 @@ import {
   Database,
   Monitor,
   Building2,
+  BookOpen,
 } from "lucide-react";
 import API from "../../core/services/apiService";
 import { getUnreadCount } from "../../core/services/notificationService";
@@ -159,6 +160,7 @@ export default function Sidebar({
             items: [
               { name: "Industries", path: `${basePath}/industries`, icon: Building2 },
               { name: "Services", path: `${basePath}/services`, icon: Wrench },
+              { name: "Blogs", path: `${basePath}/blogs`, icon: BookOpen },
             ],
           },
           {
@@ -294,9 +296,12 @@ export default function Sidebar({
         </button>
       </div>
 
-      {menu.map((section) => (
-        <div key={section.title} style={styles.section}>
-          <p style={styles.sectionTitle}>{section.title}</p>
+      {menu.map((section, idx) => (
+        <div key={section.title || idx} style={{ ...styles.section, ...(role === "admin" ? { marginBottom: "0px" } : {}) }}>
+          {/* Section header labels (MAIN, WEBSITE CMS, WORK, TEAM, FINANCE, SYSTEM) removed in admin panel as requested */}
+          {role !== "admin" && section.title && (
+            <p style={styles.sectionTitle}>{section.title}</p>
+          )}
 
           {section.items.map((item) => {
             const isActive = pathname === item.path;

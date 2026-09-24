@@ -16,16 +16,17 @@ import { getPublicServiceCategories } from "@/lib/cms/cmsService";
 import type { CmsServiceCategory, CmsServiceItem } from "@/lib/cms/types";
 import LucideIcon from "@/components/shared/LucideIcon";
 
+import { usePersistedTab } from "@/hooks/usePersistedTab";
+
 function ServicesContent() {
   const { publicTheme } = usePublicTheme();
   const isDark = publicTheme === "dark";
   const { openLeadServicesModal } = useLeadFunnel();
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab") || searchParams.get("category");
-
   const [categories, setCategories] = useState<CmsServiceCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeTab, setActiveTab] = usePersistedTab<string>("all", {
+    paramName: "tab",
+  });
 
   useEffect(() => {
     let isCancelled = false;
@@ -36,9 +37,6 @@ function ServicesContent() {
         if (!isCancelled) {
           const list = Array.isArray(data) ? data : [];
           setCategories(list);
-          if (tabParam && (tabParam === "all" || list.some((c) => c.slug === tabParam))) {
-            setActiveTab(tabParam);
-          }
         }
       } catch (err) {
         console.error("Failed to load CMS service categories:", err);
@@ -50,7 +48,7 @@ function ServicesContent() {
     return () => {
       isCancelled = true;
     };
-  }, [tabParam]);
+  }, []);
 
   const filteredCategories = activeTab === "all"
     ? categories

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -23,24 +23,41 @@ export default function BlogPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [posts, setPosts] = useState<any[]>(blogPosts);
 
-  const categories = useMemo(() => {
-    const set = new Set(blogPosts.map((p) => p.category));
-    return ["All", ...Array.from(set)];
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/blogs")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && data?.data && Array.isArray(data.data) && data.data.length > 0) {
+          setPosts(data.data);
+        }
+      })
+      .catch((err) => console.error("Error fetching live blogs", err));
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  const categories = useMemo(() => {
+    const set = new Set(posts.map((p) => p.category));
+    return ["All", ...Array.from(set)];
+  }, [posts]);
+
   const filteredPosts = useMemo(() => {
-    return blogPosts.filter((post) => {
+    return posts.filter((post) => {
       const matchesCategory =
-        selectedCategory === "All" || post.category.toLowerCase() === selectedCategory.toLowerCase();
+        selectedCategory === "All" || post.category?.toLowerCase() === selectedCategory.toLowerCase();
       const matchesSearch =
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+        post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (Array.isArray(post.tags) && post.tags.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase())));
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [posts, searchQuery, selectedCategory]);
 
-  const featuredPost = blogPosts[0];
+  const featuredPost = filteredPosts[0] || posts[0];
 
   return (
     <div
