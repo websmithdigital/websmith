@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 :root {
   --bg-primary: #ffffff;
@@ -2333,3 +2333,47 @@ html:not(.dark-theme) .admin-panel-scope .listRow,
   --surface-muted: rgba(255, 255, 255, 0.04);
   --surface-border: rgba(255, 255, 255, 0.08);
 }
+
+/* Modals & Lead Funnel Static Compact Styling (No green hover, no transform jumps) */
+.wsd-responsive-modal .wsd-unified-card,
+.lead-funnel-wizard-content .wsd-unified-card,
+.lead-modal-compact-card,
+.lead-form-clean-container {
+  cursor: default !important;
+  transform: none !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.wsd-responsive-modal .wsd-unified-card:hover,
+.lead-funnel-wizard-content .wsd-unified-card:hover,
+.lead-modal-compact-card:hover,
+.lead-form-clean-container:hover {
+  transform: none !important;
+  background-color: var(--bg-primary) !important;
+  background-image: none !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  border-color: var(--border-color) !important;
+}
+
+.wsd-responsive-modal .wsd-unified-card:hover h1,
+.wsd-responsive-modal .wsd-unified-card:hover h2,
+.wsd-responsive-modal .wsd-unified-card:hover h3,
+.wsd-responsive-modal .wsd-unified-card:hover h4,
+.wsd-responsive-modal .wsd-unified-card:hover p,
+.wsd-responsive-modal .wsd-unified-card:hover span,
+.wsd-responsive-modal .wsd-unified-card:hover label,
+.lead-funnel-wizard-content .wsd-unified-card:hover h1,
+.lead-funnel-wizard-content .wsd-unified-card:hover h2,
+.lead-funnel-wizard-content .wsd-unified-card:hover h3,
+.lead-funnel-wizard-content .wsd-unified-card:hover p,
+.lead-funnel-wizard-content .wsd-unified-card:hover span,
+.lead-funnel-wizard-content .wsd-unified-card:hover label {
+  color: inherit !important;
+}
+
+.wsd-responsive-modal .wsd-unified-card:hover svg,
+.lead-funnel-wizard-content .wsd-unified-card:hover svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+

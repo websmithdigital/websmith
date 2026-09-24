@@ -305,48 +305,61 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
         </div>
       )}
       <div style={isWizard ? { ...styles.header, ...styles.headerWizard } : styles.header}>
-        <p style={styles.eyebrow}>Step 2 of 3</p>
-        <h1 style={styles.title}>Share a few details and we&apos;ll take it from there</h1>
-        <p style={styles.subtitle}>
+        <p style={isWizard ? { ...styles.eyebrow, ...styles.eyebrowWizard } : styles.eyebrow}>Step 2 of 3</p>
+        <h1 style={isWizard ? { ...styles.title, ...styles.titleWizard } : styles.title}>Share a few details and we&apos;ll take it from there</h1>
+        <p style={isWizard ? { ...styles.subtitle, ...styles.subtitleWizard } : styles.subtitle}>
           Your answers help our sales team respond with the right scope, timeline, and consultation scheduling.
         </p>
       </div>
 
-      <Card>
-        <div style={styles.selectedWrap}>
+      <div style={isWizard ? styles.formCardWizard : styles.formCard} className="lead-form-clean-container">
+        <div style={isWizard ? { ...styles.selectedWrap, marginBottom: "12px", gap: "6px" } : styles.selectedWrap}>
           {selectedServices.map((service) => (
-            <span key={service.id} style={styles.selectedChip}>{service.name}</span>
+            <span key={service.id} style={isWizard ? { ...styles.selectedChip, padding: "4px 10px", fontSize: "12px" } : styles.selectedChip}>{service.name}</span>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className={isWizard ? "lead-form-compact-inputs" : undefined}>
           {/* Name, Email, Company */}
-          <div style={styles.grid}>
-            <Input
-              label="Full Name *"
-              value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
-              error={errors.name}
-            />
-            <Input
-              label="Email *"
-              type="email"
-              value={form.email}
-              onChange={(e) => setField("email", e.target.value)}
-              error={errors.email}
-            />
-            <Input
-              label="Company Name"
-              value={form.company}
-              onChange={(e) => setField("company", e.target.value)}
-              error={errors.company}
-            />
+          <div style={isWizard ? styles.gridWizard : styles.grid}>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Full Name *</label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setField("name", e.target.value)}
+                style={isWizard ? { ...styles.selectModal, borderColor: errors.name ? "#FF3B30" : "var(--border-color)" } : styles.select}
+                placeholder="Your full name"
+              />
+              {errors.name && <p style={styles.error}>{errors.name}</p>}
+            </div>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Email *</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setField("email", e.target.value)}
+                style={isWizard ? { ...styles.selectModal, borderColor: errors.email ? "#FF3B30" : "var(--border-color)" } : styles.select}
+                placeholder="name@company.com"
+              />
+              {errors.email && <p style={styles.error}>{errors.email}</p>}
+            </div>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Company Name</label>
+              <input
+                type="text"
+                value={form.company}
+                onChange={(e) => setField("company", e.target.value)}
+                style={isWizard ? styles.selectModal : styles.select}
+                placeholder="Company or agency"
+              />
+            </div>
           </div>
 
           {/* Dual Phone: Calling Number & WhatsApp Number */}
-          <div style={{ ...styles.grid, marginTop: "16px" }}>
-            <div style={styles.field}>
-              <label style={styles.label}>Calling Number *</label>
+          <div style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Calling Number *</label>
               <PhoneInputWithCountry
                 id="lead-calling-phone"
                 name="callingPhone"
@@ -361,15 +374,15 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                 }}
                 placeholder="Phone number"
                 error={errors.callingPhone}
-                icon={<Phone size={15} />}
+                icon={<Phone size={14} />}
               />
               {errors.callingPhone && <p style={styles.error}>{errors.callingPhone}</p>}
             </div>
 
-            <div style={styles.field}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: "22px", marginBottom: "8px" }}>
-                <label style={{ ...styles.label, marginBottom: 0 }}>WhatsApp Number</label>
-                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: isWizard ? "18px" : "22px", marginBottom: isWizard ? "4px" : "8px" }}>
+                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>WhatsApp Number</label>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11.5px", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
                   <input
                     type="checkbox"
                     checked={form.sameAsCalling}
@@ -394,18 +407,18 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                 }}
                 placeholder="WhatsApp number"
                 error={errors.whatsappPhone}
-                icon={<MessageSquare size={15} />}
+                icon={<MessageSquare size={14} />}
               />
               {errors.whatsappPhone && <p style={styles.error}>{errors.whatsappPhone}</p>}
             </div>
           </div>
 
           {/* Consultation Scheduling: Date, Time Slot & Timezone */}
-          <div style={{ ...styles.grid3, marginTop: "16px" }}>
-            <div style={styles.field}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
-                <label style={{ ...styles.label, marginBottom: 0 }}>Preferred Date</label>
-                <span style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>Next 7 days</span>
+          <div style={{ ...(isWizard ? styles.grid3Wizard : styles.grid3), marginTop: isWizard ? "10px" : "16px" }}>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: isWizard ? "4px" : "8px" }}>
+                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Preferred Date</label>
+                <span style={{ fontSize: "10.5px", color: "var(--text-secondary)", fontWeight: 500 }}>Next 7 days</span>
               </div>
               <input
                 type="date"
@@ -414,21 +427,21 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                 value={form.preferredContactDate}
                 onChange={(e) => setField("preferredContactDate", e.target.value)}
                 style={{
-                  ...styles.select,
+                  ...(isWizard ? styles.selectModal : styles.select),
                   borderColor: errors.preferredContactDate ? "#FF3B30" : "var(--border-color)",
                 }}
               />
               {errors.preferredContactDate && <p style={styles.error}>{errors.preferredContactDate}</p>}
             </div>
 
-            <div style={styles.field}>
-              <label style={styles.label}>Preferred Time Slot</label>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Preferred Time Slot</label>
               <div style={{ position: "relative", width: "100%" }}>
                 <select
                   value={form.preferredContactTime}
                   onChange={(e) => setField("preferredContactTime", e.target.value)}
                   style={{
-                    ...styles.select,
+                    ...(isWizard ? styles.selectModal : styles.select),
                     paddingRight: "36px",
                     color: form.preferredContactTime ? "var(--text-primary)" : "var(--text-secondary)",
                   }}
@@ -445,10 +458,10 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                   ))}
                 </select>
                 <ChevronDown
-                  size={18}
+                  size={16}
                   style={{
                     position: "absolute",
-                    right: "14px",
+                    right: "12px",
                     top: "50%",
                     transform: "translateY(-50%)",
                     pointerEvents: "none",
@@ -458,22 +471,22 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
               </div>
             </div>
 
-            <div style={styles.field}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", minHeight: "22px", marginBottom: "8px" }}>
-                <label style={{ ...styles.label, marginBottom: 0 }}>Your Timezone</label>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", minHeight: isWizard ? "18px" : "22px", marginBottom: isWizard ? "4px" : "8px" }}>
+                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Your Timezone</label>
                 {userTimeZoneInfo.badge && (
                   <span
                     style={{
-                      fontSize: "11px",
+                      fontSize: "10.5px",
                       color: "var(--accent-primary, #007AFF)",
                       fontWeight: 500,
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "4px",
+                      gap: "3px",
                     }}
                     title={`Detected system timezone: ${userTimeZoneInfo.zone}`}
                   >
-                    <Globe size={11} /> Detected
+                    <Globe size={10} /> Detected
                   </span>
                 )}
               </div>
@@ -482,7 +495,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                   value={form.userTimeZone}
                   onChange={(e) => setField("userTimeZone", e.target.value)}
                   style={{
-                    ...styles.select,
+                    ...(isWizard ? styles.selectModal : styles.select),
                     paddingRight: "36px",
                     color: form.userTimeZone ? "var(--text-primary)" : "var(--text-secondary)",
                   }}
@@ -498,10 +511,10 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                   ))}
                 </select>
                 <ChevronDown
-                  size={18}
+                  size={16}
                   style={{
                     position: "absolute",
-                    right: "14px",
+                    right: "12px",
                     top: "50%",
                     transform: "translateY(-50%)",
                     pointerEvents: "none",
@@ -518,41 +531,45 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                padding: "12px 16px",
-                borderRadius: "12px",
+                gap: "8px",
+                padding: isWizard ? "8px 12px" : "12px 16px",
+                borderRadius: "10px",
                 background: "color-mix(in srgb, #007AFF 8%, var(--bg-secondary))",
                 border: "1px solid color-mix(in srgb, #007AFF 22%, transparent)",
-                marginTop: "12px",
-                marginBottom: "18px",
-                fontSize: "13px",
+                marginTop: isWizard ? "8px" : "12px",
+                marginBottom: isWizard ? "10px" : "18px",
+                fontSize: isWizard ? "12px" : "13px",
                 color: "var(--text-primary)",
               }}
             >
-              <Clock size={16} color="#007AFF" />
+              <Clock size={14} color="#007AFF" />
               <div>
-                <strong>Dual-Time Sync:</strong> Your selected slot corresponds to{" "}
-                <span style={{ color: "#007AFF", fontWeight: 600 }}>{calculatedISTRange}</span> for our agency team.
+                <strong>Dual-Time Sync:</strong> Selected slot is{" "}
+                <span style={{ color: "#007AFF", fontWeight: 600 }}>{calculatedISTRange}</span> for agency team.
               </div>
             </div>
           )}
 
           {/* Budget & Timeline */}
-          <div style={{ ...styles.grid, marginTop: "16px" }}>
-            <Input
-              label="Estimated Budget ($)"
-              value={form.budget}
-              onChange={(e) => setField("budget", e.target.value)}
-              error={errors.budget}
-              placeholder="e.g. 5000"
-            />
-            <div style={styles.field}>
-              <label style={styles.label}>Timeline</label>
+          <div style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Estimated Budget ($)</label>
+              <input
+                type="number"
+                value={form.budget}
+                onChange={(e) => setField("budget", e.target.value)}
+                style={isWizard ? styles.selectModal : styles.select}
+                placeholder="e.g. 5000"
+              />
+              {errors.budget && <p style={styles.error}>{errors.budget}</p>}
+            </div>
+            <div style={isWizard ? styles.fieldWizard : styles.field}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Timeline</label>
               <select
                 value={form.timeline}
                 onChange={(e) => setField("timeline", e.target.value)}
                 style={{
-                  ...styles.select,
+                  ...(isWizard ? styles.selectModal : styles.select),
                   borderColor: errors.timeline ? "#FF3B30" : "var(--border-color)",
                 }}
               >
@@ -568,25 +585,28 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           </div>
 
           {needsCms && (
-            <div style={{ marginTop: "16px" }}>
-              <Input
-                label="CMS Requirement"
-                value={form.cmsRequirement}
-                onChange={(e) => setField("cmsRequirement", e.target.value)}
-                error={errors.cmsRequirement}
-                placeholder="e.g. WordPress, Strapi, Custom Headless, None"
-              />
+            <div style={{ marginTop: isWizard ? "10px" : "16px" }}>
+              <div style={isWizard ? styles.fieldWizard : styles.field}>
+                <label style={isWizard ? styles.labelWizard : styles.label}>CMS Requirement</label>
+                <input
+                  type="text"
+                  value={form.cmsRequirement}
+                  onChange={(e) => setField("cmsRequirement", e.target.value)}
+                  style={isWizard ? styles.selectModal : styles.select}
+                  placeholder="e.g. WordPress, Strapi, Custom Headless, None"
+                />
+              </div>
             </div>
           )}
 
           {needsPlatform && (
-            <div style={{ ...styles.field, marginTop: "16px" }}>
-              <label style={styles.label}>Preferred Platform</label>
+            <div style={{ ...(isWizard ? styles.fieldWizard : styles.field), marginTop: isWizard ? "10px" : "16px" }}>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Preferred Platform</label>
               <select
                 value={form.appPlatform}
                 onChange={(e) => setField("appPlatform", e.target.value)}
                 style={{
-                  ...styles.select,
+                  ...(isWizard ? styles.selectModal : styles.select),
                   borderColor: errors.appPlatform ? "#FF3B30" : "var(--border-color)",
                 }}
               >
@@ -599,30 +619,30 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
             </div>
           )}
 
-          <div style={{ ...styles.field, marginTop: "16px" }}>
-            <label style={styles.label}>Project Scope & Additional Notes</label>
+          <div style={{ ...(isWizard ? styles.fieldWizard : styles.field), marginTop: isWizard ? "10px" : "16px" }}>
+            <label style={isWizard ? styles.labelWizard : styles.label}>Project Scope & Additional Notes</label>
             <textarea
               value={form.notes}
               onChange={(e) => setField("notes", e.target.value)}
-              style={styles.textarea}
-              placeholder="Goals, deadlines, integrations, current pain points, or any context you'd like to share."
-              rows={4}
+              style={isWizard ? styles.textareaModal : styles.textarea}
+              placeholder="Goals, deadlines, integrations, or any context you'd like to share."
+              rows={isWizard ? 2 : 4}
             />
           </div>
 
           {errors.services && <p style={styles.error}>{errors.services}</p>}
           {submitError && <p style={{ ...styles.error, marginBottom: "16px" }}>{submitError}</p>}
 
-          <div style={styles.footer}>
-            <p style={styles.footerText}>
+          <div style={isWizard ? { ...styles.footer, marginTop: "12px", paddingTop: "12px" } : styles.footer}>
+            <p style={isWizard ? { ...styles.footerText, fontSize: "12px" } : styles.footerText}>
               Your consultation schedule and inquiry will be dispatched immediately to our agency team.
             </p>
-            <Button type="submit" size="lg" isLoading={submitting}>
+            <Button type="submit" size={isWizard ? "md" : "lg"} isLoading={submitting} style={isWizard ? { height: "42px", padding: "0 24px", borderRadius: "10px", fontSize: "14px", fontWeight: 600 } : undefined}>
               Schedule & Submit Lead
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -637,8 +657,24 @@ const styles: any = {
     gap: "24px",
   },
   wrapperWizard: {
-    padding: "0 0 12px",
-    gap: "16px",
+    padding: "0 0 8px",
+    gap: "10px",
+  },
+  formCard: {
+    backgroundColor: "var(--bg-secondary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "20px",
+    padding: "24px 28px",
+    color: "var(--text-primary)",
+    position: "relative",
+  },
+  formCardWizard: {
+    backgroundColor: "var(--bg-secondary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "14px",
+    padding: "14px 16px",
+    color: "var(--text-primary)",
+    position: "relative",
   },
   header: {
     padding: "32px",
@@ -647,8 +683,8 @@ const styles: any = {
     border: "1px solid var(--border-color)",
   },
   headerWizard: {
-    padding: "20px 22px",
-    borderRadius: "18px",
+    padding: "12px 14px",
+    borderRadius: "14px",
   },
   eyebrow: {
     margin: 0,
@@ -658,6 +694,11 @@ const styles: any = {
     letterSpacing: "0.08em",
     textTransform: "uppercase",
   },
+  eyebrowWizard: {
+    margin: 0,
+    fontSize: "10.5px",
+    fontWeight: 700,
+  },
   title: {
     margin: "12px 0 10px",
     fontSize: "28px",
@@ -665,11 +706,22 @@ const styles: any = {
     color: "var(--text-primary)",
     letterSpacing: "-0.02em",
   },
+  titleWizard: {
+    margin: "3px 0 3px",
+    fontSize: "16px",
+    fontWeight: 700,
+    letterSpacing: "-0.01em",
+  },
   subtitle: {
     margin: 0,
     color: "var(--text-secondary)",
     fontSize: "16px",
     lineHeight: 1.7,
+  },
+  subtitleWizard: {
+    margin: 0,
+    fontSize: "12px",
+    lineHeight: 1.35,
   },
   selectedWrap: {
     display: "flex",
@@ -691,13 +743,26 @@ const styles: any = {
     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
     gap: "16px",
   },
+  gridWizard: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+    gap: "10px",
+  },
   grid3: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
     gap: "16px",
   },
+  grid3Wizard: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+    gap: "10px",
+  },
   field: {
     marginBottom: "8px",
+  },
+  fieldWizard: {
+    marginBottom: "2px",
   },
   label: {
     display: "block",
@@ -705,6 +770,13 @@ const styles: any = {
     fontWeight: 500,
     color: "var(--text-primary)",
     marginBottom: "8px",
+  },
+  labelWizard: {
+    display: "block",
+    fontSize: "12px",
+    fontWeight: 500,
+    color: "var(--text-primary)",
+    marginBottom: "4px",
   },
   select: {
     width: "100%",
@@ -715,6 +787,18 @@ const styles: any = {
     border: "1px solid var(--border-color)",
     borderRadius: "12px",
     outline: "none",
+  },
+  selectModal: {
+    width: "100%",
+    padding: "7px 11px",
+    fontSize: "13px",
+    background: "var(--bg-primary)",
+    color: "var(--text-primary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "10px",
+    outline: "none",
+    height: "36px",
+    boxSizing: "border-box" as const,
   },
   textarea: {
     width: "100%",
@@ -729,10 +813,24 @@ const styles: any = {
     fontFamily: "inherit",
     minHeight: "110px",
   },
+  textareaModal: {
+    width: "100%",
+    padding: "7px 11px",
+    fontSize: "13px",
+    background: "var(--bg-primary)",
+    color: "var(--text-primary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "10px",
+    outline: "none",
+    resize: "vertical" as const,
+    fontFamily: "inherit",
+    minHeight: "52px",
+    boxSizing: "border-box" as const,
+  },
   error: {
-    fontSize: "12px",
+    fontSize: "11.5px",
     color: "#FF3B30",
-    marginTop: "6px",
+    marginTop: "3px",
     marginBottom: 0,
   },
   footer: {

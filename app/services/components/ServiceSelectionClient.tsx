@@ -66,17 +66,17 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
     fetchServices();
   }, [selectedServices, setSelectedServices]);
 
-  const wrapperStyle =
-    variant === "modal" || variant === "wizard"
-      ? { ...styles.wrapper, ...styles.wrapperModal }
-      : styles.wrapper;
+  const isModal = variant === "modal" || variant === "wizard";
+  const wrapperStyle = isModal
+    ? { ...styles.wrapper, ...styles.wrapperModal }
+    : styles.wrapper;
 
   return (
     <div style={wrapperStyle}>
-      <div style={styles.heroCard}>
-        <p style={styles.eyebrow}>Step 1 of 3</p>
-        <h1 style={styles.title}>Choose the services you want help with</h1>
-        <p style={styles.subtitle}>
+      <div style={isModal ? { ...styles.heroCard, ...styles.heroCardModal } : styles.heroCard}>
+        <p style={isModal ? { ...styles.eyebrow, ...styles.eyebrowModal } : styles.eyebrow}>Step 1 of 3</p>
+        <h1 style={isModal ? { ...styles.title, ...styles.titleModal } : styles.title}>Choose the services you want help with</h1>
+        <p style={isModal ? { ...styles.subtitle, ...styles.subtitleModal } : styles.subtitle}>
           Select one or more services. We&apos;ll use them to personalize the next step and qualify your lead properly.
         </p>
       </div>
@@ -102,7 +102,7 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
 
       {!loading && !error && services.length > 0 && (
         <>
-          <div style={styles.grid}>
+          <div style={isModal ? { ...styles.grid, ...styles.gridModal } : styles.grid}>
             {services.map((service) => {
               const selected = selectedServices.some(
                 (item) => item.id === service.id || item.name.toLowerCase() === service.name.toLowerCase()
@@ -115,37 +115,47 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                   onClick={() => toggleService({ id: service.id, name: service.name })}
                   style={{
                     ...styles.serviceButton,
+                    ...(isModal ? styles.serviceButtonModal : {}),
                     ...(selected ? styles.serviceButtonSelected : {}),
                   }}
                 >
-                  <Card style={{ 
-                    borderColor: selected ? '#007AFF' : 'var(--border-color)',
-                    backgroundColor: selected ? 'rgba(0, 122, 255, 0.05)' : 'var(--bg-primary)',
-                    boxShadow: selected ? '0 12px 32px rgba(0,122,255,0.12)' : '0 4px 12px rgba(0,0,0,0.02)',
-                    transition: 'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-                  }}>
-                    <div style={styles.cardTop}>
+                  <div
+                    className="lead-modal-compact-card"
+                    style={{
+                      padding: isModal ? "12px 14px" : "20px",
+                      borderRadius: isModal ? "14px" : "20px",
+                      borderColor: selected ? "#007AFF" : "var(--border-color)",
+                      backgroundColor: selected ? "rgba(0, 122, 255, 0.05)" : "var(--bg-primary)",
+                      boxShadow: selected ? "0 8px 24px rgba(0,122,255,0.12)" : "0 2px 8px rgba(0,0,0,0.02)",
+                      borderWidth: "1.5px",
+                      borderStyle: "solid",
+                      transition: "border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                  >
+                    <div style={isModal ? { ...styles.cardTop, marginBottom: "8px" } : styles.cardTop}>
                       <div style={{
-                        ...styles.iconWrap,
-                        background: selected ? 'linear-gradient(135deg, #007AFF 0%, #34C759 100%)' : 'var(--bg-secondary)',
-                        border: selected ? 'none' : '1px solid var(--border-color)'
+                        ...(isModal ? styles.iconWrapModal : styles.iconWrap),
+                        background: selected ? "linear-gradient(135deg, #007AFF 0%, #34C759 100%)" : "var(--bg-secondary)",
+                        border: selected ? "none" : "1px solid var(--border-color)"
                       }}>
-                        <Layers3 size={18} color={selected ? "#FFFFFF" : "#007AFF"} />
+                        <Layers3 size={isModal ? 15 : 18} color={selected ? "#FFFFFF" : "#007AFF"} />
                       </div>
-                      <CheckCircle2 size={20} color={selected ? "#34C759" : "var(--border-color)"} fill={selected ? "#34C75922" : "transparent"} />
+                      <CheckCircle2 size={isModal ? 18 : 20} color={selected ? "#34C759" : "var(--border-color)"} fill={selected ? "#34C75922" : "transparent"} />
                     </div>
-                    <h3 style={styles.serviceTitle}>{service.name}</h3>
-                    <p style={styles.serviceDescription}>{service.description}</p>
+                    <h3 style={isModal ? { ...styles.serviceTitle, fontSize: "14.5px", marginBottom: "4px" } : styles.serviceTitle}>{service.name}</h3>
+                    <p style={isModal ? { ...styles.serviceDescription, fontSize: "12px", lineHeight: 1.35, minHeight: "32px" } : styles.serviceDescription}>{service.description}</p>
 
                     {service.subServices && service.subServices.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "12px" }}>
-                        {service.subServices.slice(0, 4).map((sub, sIdx) => (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: isModal ? "8px" : "12px" }}>
+                        {service.subServices.slice(0, 3).map((sub, sIdx) => (
                           <span
                             key={sub.id || sIdx}
                             style={{
-                              fontSize: "11px",
+                              fontSize: isModal ? "10px" : "11px",
                               fontWeight: 600,
-                              padding: "3px 8px",
+                              padding: isModal ? "2px 6px" : "3px 8px",
                               borderRadius: "6px",
                               backgroundColor: selected ? "rgba(0, 122, 255, 0.1)" : "var(--bg-secondary)",
                               color: selected ? "#007AFF" : "var(--text-secondary)",
@@ -155,33 +165,33 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                             {sub.name}
                           </span>
                         ))}
-                        {service.subServices.length > 4 && (
+                        {service.subServices.length > 3 && (
                           <span
                             style={{
-                              fontSize: "11px",
+                              fontSize: "10px",
                               fontWeight: 600,
-                              padding: "3px 6px",
+                              padding: "2px 4px",
                               color: "var(--text-secondary)",
                             }}
                           >
-                            +{service.subServices.length - 4} more
+                            +{service.subServices.length - 3} more
                           </span>
                         )}
                       </div>
                     )}
-                  </Card>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          <div style={variant === "modal" || variant === "wizard" ? { ...styles.footerCard, ...styles.footerCardModal } : styles.footerCard}>
+          <div style={isModal ? { ...styles.footerCard, ...styles.footerCardModal } : styles.footerCard}>
             <div style={styles.footerInfo}>
-              <p style={styles.footerLabel}>Selected Services</p>
+              <p style={isModal ? { ...styles.footerLabel, margin: "0 0 6px", fontSize: "11px" } : styles.footerLabel}>Selected Services</p>
               <div style={styles.selectedList}>
                 {selectedServices.length > 0 ? (
                   selectedServices.map((service) => (
-                    <span key={service.id} style={styles.selectedChip}>{service.name}</span>
+                    <span key={service.id} style={isModal ? { ...styles.selectedChip, padding: "5px 12px", fontSize: "12px", borderRadius: "10px" } : styles.selectedChip}>{service.name}</span>
                   ))
                 ) : (
                   <span style={styles.emptyText}>Select one or more services to proceed to the next step.</span>
@@ -190,7 +200,7 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
             </div>
 
             <Button
-              size="lg"
+              size={isModal ? "md" : "lg"}
               onClick={() => {
                 if (selectedServices.length === 0) return;
                 if (variant === "wizard" && onWizardContinue) {
@@ -201,8 +211,8 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                 onRequestClose?.();
               }}
               disabled={selectedServices.length === 0}
-              rightIcon={<ArrowRight size={20} />}
-              style={{ padding: '0 36px', height: '58px', borderRadius: '16px', fontSize: '16px', fontWeight: 700 }}
+              rightIcon={<ArrowRight size={isModal ? 16 : 20} />}
+              style={isModal ? { padding: '0 24px', height: '42px', borderRadius: '12px', fontSize: '14px', fontWeight: 600 } : { padding: '0 36px', height: '58px', borderRadius: '16px', fontSize: '16px', fontWeight: 700 }}
             >
               Continue to Details
             </Button>
@@ -229,8 +239,8 @@ const styles: any = {
     color: 'var(--text-primary)',
   },
   wrapperModal: {
-    padding: "0 0 8px",
-    gap: "16px",
+    padding: "0 0 4px",
+    gap: "10px",
     backgroundColor: "transparent",
   },
   heroCard: {
@@ -243,6 +253,10 @@ const styles: any = {
     border: "1px solid var(--border-color)",
     boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
   },
+  heroCardModal: {
+    padding: "12px 16px",
+    borderRadius: "14px",
+  },
   eyebrow: {
     margin: "0 0 12px 0",
     color: "#007AFF",
@@ -250,6 +264,10 @@ const styles: any = {
     fontWeight: 800,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
+  },
+  eyebrowModal: {
+    margin: "0 0 4px 0",
+    fontSize: "11px",
   },
   title: {
     margin: "0 0 12px",
@@ -259,6 +277,11 @@ const styles: any = {
     letterSpacing: "-0.02em",
     lineHeight: 1.2,
   },
+  titleModal: {
+    margin: "0 0 4px",
+    fontSize: "17px",
+    letterSpacing: "-0.01em",
+  },
   subtitle: {
     margin: 0,
     maxWidth: "840px",
@@ -266,6 +289,10 @@ const styles: any = {
     fontSize: "15px",
     lineHeight: 1.5,
     fontWeight: 500,
+  },
+  subtitleModal: {
+    fontSize: "12.5px",
+    lineHeight: 1.4,
   },
   messageCard: {
     padding: "64px",
@@ -297,14 +324,23 @@ const styles: any = {
     gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
     gap: "20px",
   },
+  gridModal: {
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "10px",
+  },
   serviceButton: {
     background: "transparent",
     border: "none",
     padding: 0,
     textAlign: "left",
     cursor: "pointer",
-    borderRadius: "24px",
+    borderRadius: "16px",
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+    transform: "none !important",
+  },
+  serviceButtonModal: {
+    borderRadius: "14px",
+    transform: "none !important",
   },
   serviceButtonSelected: {},
   cardTop: {
@@ -317,6 +353,14 @@ const styles: any = {
     width: "42px",
     height: "42px",
     borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconWrapModal: {
+    width: "30px",
+    height: "30px",
+    borderRadius: "8px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -364,10 +408,12 @@ const styles: any = {
   footerCardModal: {
     position: "static",
     bottom: "auto",
-    padding: "16px 20px",
-    marginTop: "8px",
+    padding: "10px 14px",
+    marginTop: "4px",
     backdropFilter: "none",
-    boxShadow: "var(--card-shadow)",
+    boxShadow: "none",
+    borderRadius: "14px",
+    gap: "12px",
   },
   footerInfo: {
     flex: 1,

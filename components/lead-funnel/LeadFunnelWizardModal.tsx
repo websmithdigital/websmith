@@ -34,14 +34,7 @@ export default function LeadFunnelWizardModal({ isOpen, onClose }: LeadFunnelWiz
         ) : undefined
       }
     >
-      <div
-        style={{
-          maxHeight: "min(78dvh, 820px)",
-          overflowY: "auto",
-          paddingRight: "4px",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
+      <div className="lead-funnel-wizard-content" style={{ width: "100%" }}>
         {leadWizardStep === "services" && (
           <ServiceSelectionClient variant="wizard" onWizardContinue={() => setLeadWizardStep("details")} />
         )}
@@ -63,7 +56,6 @@ export default function LeadFunnelWizardModal({ isOpen, onClose }: LeadFunnelWiz
             </p>
           </div>
         )}
-
       </div>
     </Modal>
   );
