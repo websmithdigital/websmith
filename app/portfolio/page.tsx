@@ -451,7 +451,15 @@ export default function PortfolioPage() {
 
                     <button
                       type="button"
-                      onClick={() => openLeadServicesModal()}
+                      onClick={() =>
+                        openLeadServicesModal({
+                          service: {
+                            id: project._id || project.name.toLowerCase().replace(/\s+/g, "-"),
+                            name: `${project.name} (Build Similar)`,
+                          },
+                          initialStep: "details",
+                        })
+                      }
                       style={{
                         display: "inline-flex",
                         alignItems: "center",

@@ -293,7 +293,14 @@ function ServicesContent() {
 
       {/* Service Categories Grid */}
       <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto 80px", padding: "0 clamp(20px, 4vw, 64px)" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
+            gap: "24px",
+            alignItems: "stretch",
+          }}
+        >
           {filteredCategories.map((category) => {
             const subServices = category.services || [];
             // Extract unique tech stack tags across subservices
@@ -307,36 +314,37 @@ function ServicesContent() {
                 id={category.slug}
                 style={{
                   scrollMarginTop: "120px",
-                  borderRadius: "24px",
-                  padding: "36px clamp(24px, 3.5vw, 44px)",
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
-                  gap: "32px",
-                  alignItems: "flex-start",
+                  borderRadius: "18px",
+                  padding: "24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                  boxSizing: "border-box",
                 }}
                 className="wsd-service-pillar-card wsd-unified-card"
               >
-                {/* Left Overview */}
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                {/* Header Row: Icon + Badge + Module Count */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "14px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <div
                       style={{
-                        width: "44px",
-                        height: "44px",
-                        borderRadius: "12px",
+                        width: "38px",
+                        height: "38px",
+                        borderRadius: "10px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
                         color: "#3b82f6",
+                        flexShrink: 0,
                       }}
                     >
-                      <LucideIcon name={category.icon || "Layers"} size={22} color="#3b82f6" />
+                      <LucideIcon name={category.icon || "Layers"} size={20} color="#3b82f6" />
                     </div>
                     {category.badge && (
                       <span
                         style={{
-                          padding: "4px 10px",
+                          padding: "3px 9px",
                           borderRadius: "9999px",
                           fontSize: "11px",
                           fontWeight: 700,
@@ -349,165 +357,196 @@ function ServicesContent() {
                       </span>
                     )}
                   </div>
-
-                  <h2
-                    style={{
-                      fontSize: "clamp(22px, 3vw, 26px)",
-                      fontWeight: 700,
-                      lineHeight: 1.3,
-                      marginBottom: "12px",
-                      color: isDark ? "#ffffff" : "#0f172a",
-                    }}
-                  >
-                    {category.name}
-                  </h2>
-
-                  <p
-                    style={{
-                      fontSize: "14.5px",
-                      lineHeight: 1.6,
-                      color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
-                      marginBottom: "24px",
-                    }}
-                  >
-                    {category.description}
-                  </p>
-
-                  {/* Subservices Badges */}
                   {subServices.length > 0 && (
-                    <div style={{ marginBottom: "20px" }}>
-                      <div
-                        style={{
-                          fontSize: "11.5px",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.04em",
-                          color: isDark ? "rgba(255, 255, 255, 0.45)" : "#64748b",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        Specialized Solutions ({subServices.length})
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                        {subServices.map((sub, sIdx) => (
-                          <span
-                            key={sIdx}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "6px",
-                              padding: "5px 12px",
-                              borderRadius: "8px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              backgroundColor: isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.06)",
-                              color: "#3b82f6",
-                              border: isDark ? "1px solid rgba(37, 99, 235, 0.25)" : "1px solid rgba(37, 99, 235, 0.15)",
-                            }}
-                          >
-                            <LucideIcon name={sub.icon || "Check"} size={13} color="#3b82f6" />
-                            {sub.name || sub.title}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tech Stack Tags */}
-                  {allTech.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                      {allTech.map((tech, tIdx) => (
-                        <span
-                          key={tIdx}
-                          style={{
-                            padding: "4px 10px",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                            fontWeight: 500,
-                            backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "#f1f5f9",
-                            color: isDark ? "#94a3b8" : "#475569",
-                            border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                          }}
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
+                    <span style={{ fontSize: "11px", fontWeight: 600, color: isDark ? "rgba(255, 255, 255, 0.45)" : "#64748b" }}>
+                      {subServices.length} Solutions
+                    </span>
                   )}
                 </div>
 
-                {/* Right Deliverables & Subservices Breakdown */}
-                <div
+                {/* Title & Short Description */}
+                <h2
                   style={{
-                    padding: "24px",
-                    borderRadius: "18px",
-                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.02)" : "rgba(248, 250, 252, 0.8)",
-                    border: isDark ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid #e2e8f0",
+                    fontSize: "clamp(18px, 2vw, 21px)",
+                    fontWeight: 700,
+                    lineHeight: 1.3,
+                    marginBottom: "8px",
+                    color: isDark ? "#ffffff" : "#0f172a",
                   }}
                 >
-                  <h3
+                  {category.name}
+                </h2>
+
+                <p
+                  style={{
+                    fontSize: "13px",
+                    lineHeight: 1.5,
+                    color: isDark ? "rgba(255, 255, 255, 0.7)" : "#475569",
+                    marginBottom: "16px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {category.description}
+                </p>
+
+                {/* Specialized Solutions Pills */}
+                {subServices.length > 0 && (
+                  <div style={{ marginBottom: "14px" }}>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                        color: isDark ? "rgba(255, 255, 255, 0.45)" : "#64748b",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Specialized Solutions
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      {subServices.slice(0, 4).map((sub, sIdx) => (
+                        <span
+                          key={sIdx}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "3px 9px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            backgroundColor: isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.06)",
+                            color: "#3b82f6",
+                            border: isDark ? "1px solid rgba(37, 99, 235, 0.25)" : "1px solid rgba(37, 99, 235, 0.15)",
+                          }}
+                        >
+                          <LucideIcon name={sub.icon || "Check"} size={11} color="#3b82f6" />
+                          {sub.name || sub.title}
+                        </span>
+                      ))}
+                      {subServices.length > 4 && (
+                        <span
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b",
+                          }}
+                        >
+                          +{subServices.length - 4} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Deliverables Breakdown */}
+                <div
+                  style={{
+                    padding: "14px 16px",
+                    borderRadius: "12px",
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.02)" : "rgba(248, 250, 252, 0.75)",
+                    border: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
+                    marginBottom: "14px",
+                  }}
+                >
+                  <div
                     style={{
-                      fontSize: "14px",
+                      fontSize: "11px",
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.04em",
                       color: isDark ? "rgba(255, 255, 255, 0.45)" : "#64748b",
-                      marginBottom: "16px",
+                      marginBottom: "10px",
                     }}
                   >
                     Key Architecture &amp; Deliverables
-                  </h3>
+                  </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "24px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {subServices.length > 0 ? (
-                      subServices.slice(0, 5).map((sub, dIdx) => (
-                        <div key={dIdx} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                          <CheckCircle2 size={16} style={{ color: "#10b981", flexShrink: 0, marginTop: "2px" }} />
+                      subServices.slice(0, 3).map((sub, dIdx) => (
+                        <div key={dIdx} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                          <CheckCircle2 size={14} style={{ color: "#10b981", flexShrink: 0, marginTop: "2px" }} />
                           <div>
-                            <div style={{ fontSize: "13.5px", fontWeight: 600, color: isDark ? "#ffffff" : "#0f172a" }}>
+                            <div style={{ fontSize: "12px", fontWeight: 600, color: isDark ? "#ffffff" : "#0f172a" }}>
                               {sub.name || sub.title}
                             </div>
-                            <div style={{ fontSize: "12.5px", color: isDark ? "rgba(255, 255, 255, 0.65)" : "#64748b", lineHeight: 1.4 }}>
-                              {sub.shortDescription}
-                            </div>
+                            {sub.shortDescription && (
+                              <div style={{ fontSize: "11px", color: isDark ? "rgba(255, 255, 255, 0.6)" : "#64748b", lineHeight: 1.35 }}>
+                                {sub.shortDescription}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div style={{ fontSize: "13px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
+                      <div style={{ fontSize: "12px", color: isDark ? "rgba(255, 255, 255, 0.5)" : "#64748b" }}>
                         Custom enterprise engineering specifications configured to your business roadmap.
                       </div>
                     )}
                   </div>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openLeadServicesModal({
+                {/* Tech Stack Tags */}
+                {allTech.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "18px" }}>
+                    {allTech.slice(0, 6).map((tech, tIdx) => (
+                      <span
+                        key={tIdx}
+                        style={{
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "#f1f5f9",
+                          color: isDark ? "#94a3b8" : "#475569",
+                          border: isDark ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid #e2e8f0",
+                        }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action CTA Button Pinned at Bottom */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    openLeadServicesModal({
+                      service: {
                         id: category._id || category.slug || category.name,
                         name: category.name,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "11px 18px",
-                      borderRadius: "12px",
-                      fontSize: "13.5px",
-                      fontWeight: 600,
-                      color: "#ffffff",
-                      backgroundColor: "#2563eb",
-                      border: "none",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    Request Consultation for {category.name} <ArrowRight size={14} />
-                  </button>
-                </div>
+                      },
+                      initialStep: "details",
+                    })
+                  }
+                  style={{
+                    marginTop: "auto",
+                    width: "100%",
+                    padding: "10px 16px",
+                    borderRadius: "10px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    backgroundColor: "#2563eb",
+                    border: "none",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  Request Consultation for {category.name} <ArrowRight size={14} />
+                </button>
               </div>
             );
           })}

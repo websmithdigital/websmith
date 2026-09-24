@@ -287,7 +287,15 @@ function IndustriesContent() {
 
               <button
                 type="button"
-                onClick={() => openLeadServicesModal()}
+                onClick={() =>
+                  openLeadServicesModal({
+                    service: {
+                      id: current.slug || current.name.toLowerCase().replace(/\s+/g, "-"),
+                      name: `${current.name} Industry Architecture`,
+                    },
+                    initialStep: "details",
+                  })
+                }
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

@@ -10,6 +10,13 @@ export interface SelectedLeadService {
 
 export type InitialLeadServiceInput = SelectedLeadService | SelectedLeadService[] | string | string[];
 
+export interface OpenLeadFunnelOptions {
+  service?: InitialLeadServiceInput;
+  initialStep?: LeadWizardStep;
+}
+
+export type OpenLeadModalParam = InitialLeadServiceInput | OpenLeadFunnelOptions;
+
 export type LeadWizardStep = "services" | "details" | "success";
 
 interface LeadFunnelContextValue {
@@ -20,7 +27,7 @@ interface LeadFunnelContextValue {
   leadServicesModalOpen: boolean;
   leadWizardStep: LeadWizardStep;
   setLeadWizardStep: (step: LeadWizardStep) => void;
-  openLeadServicesModal: (initialService?: InitialLeadServiceInput) => void;
+  openLeadServicesModal: (param?: OpenLeadModalParam) => void;
   closeLeadServicesModal: () => void;
 }
 
@@ -83,22 +90,43 @@ export function LeadFunnelProvider({ children }: { children: React.ReactNode }) 
       leadServicesModalOpen,
       leadWizardStep,
       setLeadWizardStep,
-      openLeadServicesModal: (initialService?: InitialLeadServiceInput) => {
-        if (initialService) {
-          if (typeof initialService === "string") {
-            persist([{ id: initialService.toLowerCase().replace(/\s+/g, "-"), name: initialService }]);
-          } else if (Array.isArray(initialService)) {
-            const formatted = initialService.map((item) =>
+      openLeadServicesModal: (param?: OpenLeadModalParam) => {
+        let targetService: InitialLeadServiceInput | undefined;
+        let targetStep: LeadWizardStep = "services";
+
+        if (param) {
+          const isOptions =
+            typeof param === "object" &&
+            param !== null &&
+            !Array.isArray(param) &&
+            ("service" in param || "initialStep" in param);
+
+          if (isOptions) {
+            const opts = param as OpenLeadFunnelOptions;
+            targetService = opts.service;
+            targetStep = opts.initialStep || (opts.service ? "details" : "services");
+          } else {
+            targetService = param as InitialLeadServiceInput;
+            targetStep = "details";
+          }
+        }
+
+        if (targetService) {
+          if (typeof targetService === "string") {
+            persist([{ id: targetService.toLowerCase().replace(/\s+/g, "-"), name: targetService }]);
+          } else if (Array.isArray(targetService)) {
+            const formatted = targetService.map((item) =>
               typeof item === "string"
                 ? { id: item.toLowerCase().replace(/\s+/g, "-"), name: item }
                 : item
             );
             persist(formatted);
           } else {
-            persist([initialService]);
+            persist([targetService]);
           }
         }
-        setLeadWizardStep("services");
+
+        setLeadWizardStep(targetStep);
         setLeadServicesModalOpen(true);
       },
       closeLeadServicesModal: () => {
