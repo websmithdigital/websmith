@@ -1590,12 +1590,12 @@ export default function LandingPage() {
               <Users size={13} />
               Technical Architects &amp; Leadership
             </div>
-            <h2 style={styles.sectionTitle} className="landing-section-title">Meet Our Expert Developers</h2>
-            <p style={styles.sectionSubtitle} className="landing-section-subtitle">The senior systems architects and product engineers driving your digital transformation.</p>
+            <h2 style={styles.sectionTitle} className="landing-section-title">Meet Our Expert Team</h2>
+            <p style={styles.sectionSubtitle} className="landing-section-subtitle">The senior architects, engineers, and specialists driving your digital transformation.</p>
           </div>
           <HorizontalCardStrip
             items={publicDevelopers}
-            ariaLabel="Expert developers"
+            ariaLabel="Expert team members"
             cardsPerView={4}
             gap={18}
             autoLoopCount={1}

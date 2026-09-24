@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   ShieldCheck, 
@@ -14,6 +15,64 @@ import {
 } from "lucide-react";
 import { useLeadFunnel } from "../../providers/LeadFunnelProvider";
 import { usePublicTheme } from "../../providers/PublicThemeProvider";
+import { getPublishedDevelopers } from "../../../core/services/userService";
+import HorizontalCardStrip from "@/components/ui/HorizontalCardStrip";
+
+interface TeamMember {
+  id?: string;
+  name: string;
+  role: string;
+  specialty: string;
+  exp: string;
+  initials: string;
+  avatar?: string;
+  status?: string;
+}
+
+const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
+  {
+    name: "Alex Mercer",
+    role: "Principal Systems Architect",
+    specialty: "High-Throughput APIs, Distributed State & Cloud Infrastructure",
+    exp: "12+ yrs exp",
+    initials: "AM",
+  },
+  {
+    name: "Elena Rostova",
+    role: "VP of Engineering & Security",
+    specialty: "HMAC-SHA256 Cryptography, Node-Locking & Compliance",
+    exp: "10+ yrs exp",
+    initials: "ER",
+  },
+  {
+    name: "Marcus Chen",
+    role: "Head of ERP & Enterprise Systems",
+    specialty: "Multi-Tenant Partitioning, Inventory Engines & Financial Billing",
+    exp: "11+ yrs exp",
+    initials: "MC",
+  },
+  {
+    name: "Sarah Al-Mansoor",
+    role: "Lead Frontend & Design Systems Architect",
+    specialty: "Next.js App Router, Micro-Interactions & Design Systems",
+    exp: "8+ yrs exp",
+    initials: "SM",
+  },
+  {
+    name: "Tariq Vance",
+    role: "Director of DevOps & SRE",
+    specialty: "Automated CI/CD, Kubernetes Orchestration & Zero-Downtime",
+    exp: "9+ yrs exp",
+    initials: "TV",
+  },
+  {
+    name: "Maya Lin",
+    role: "AI & Data Architecture Lead",
+    specialty: "Autonomous Agent Pipelines, Vector Embeddings & Neural Search",
+    exp: "7+ yrs exp",
+    initials: "ML",
+  },
+];
 
 export default function AboutPage() {
   const { publicTheme } = usePublicTheme();
@@ -73,50 +132,46 @@ export default function AboutPage() {
     },
   ];
 
-  const teamMembers = [
-    {
-      name: "Alex Mercer",
-      role: "Principal Systems Architect",
-      specialty: "High-Throughput APIs, Distributed State & Cloud Infrastructure",
-      exp: "12+ yrs exp",
-      initials: "AM",
-    },
-    {
-      name: "Elena Rostova",
-      role: "VP of Engineering & Security",
-      specialty: "HMAC-SHA256 Cryptography, Node-Locking & Compliance",
-      exp: "10+ yrs exp",
-      initials: "ER",
-    },
-    {
-      name: "Marcus Chen",
-      role: "Head of ERP & Enterprise Systems",
-      specialty: "Multi-Tenant Partitioning, Inventory Engines & Financial Billing",
-      exp: "11+ yrs exp",
-      initials: "MC",
-    },
-    {
-      name: "Sarah Al-Mansoor",
-      role: "Lead Frontend & Design Systems Architect",
-      specialty: "Next.js App Router, Micro-Interactions & Design Systems",
-      exp: "8+ yrs exp",
-      initials: "SM",
-    },
-    {
-      name: "Tariq Vance",
-      role: "Director of DevOps & SRE",
-      specialty: "Automated CI/CD, Kubernetes Orchestration & Zero-Downtime",
-      exp: "9+ yrs exp",
-      initials: "TV",
-    },
-    {
-      name: "Maya Lin",
-      role: "AI & Data Architecture Lead",
-      specialty: "Autonomous Agent Pipelines, Vector Embeddings & Neural Search",
-      exp: "7+ yrs exp",
-      initials: "ML",
-    },
-  ];
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(DEFAULT_TEAM_MEMBERS);
+
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        const data = await getPublishedDevelopers();
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped: TeamMember[] = data.map((dev: any, idx: number) => {
+            const initials = dev.name
+              ? dev.name
+                  .split(" ")
+                  .filter(Boolean)
+                  .map((n: string) => n[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)
+              : "TM";
+            return {
+              id: dev._id || dev.id || `team-${idx}`,
+              name: dev.name,
+              role: dev.headline || dev.role || "Technical Architect",
+              specialty:
+                dev.bio ||
+                (Array.isArray(dev.skills) && dev.skills.length
+                  ? dev.skills.join(" • ")
+                  : "High-Throughput APIs, Distributed State & Cloud Infrastructure"),
+              exp: dev.experienceYears ? `${dev.experienceYears}+ yrs exp` : "5+ yrs exp",
+              initials,
+              avatar: dev.avatar || "",
+              status: dev.status || "active",
+            };
+          });
+          setTeamMembers(mapped);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch published team members:", err);
+      }
+    };
+    fetchTeam();
+  }, []);
 
   return (
     <div
@@ -344,58 +399,44 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div className="wsd-about-milestones-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "14px" }}>
+        <div className="wsd-about-milestones-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px" }}>
           {milestones.map((m, idx) => (
             <div
               key={idx}
               className="wsd-about-milestone-card"
               style={{
-                display: "grid",
-                gridTemplateColumns: "80px 1fr",
-                gap: "16px",
                 padding: "16px 18px",
                 borderRadius: "16px",
                 backgroundColor: isDark ? "rgba(13, 19, 34, 0.6)" : "#ffffff",
                 border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                alignItems: "center",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
               }}
             >
-              <div
-                className="wsd-about-milestone-year"
+              <h3
+                className="wsd-about-milestone-title"
                 style={{
-                  fontSize: "12.5px",
-                  fontWeight: 800,
-                  color: "#3b82f6",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
+                  fontSize: "15px",
+                  fontWeight: 700,
+                  marginBottom: "2px",
+                  color: isDark ? "#ffffff" : "#0f172a",
+                  lineHeight: 1.35,
                 }}
               >
-                {m.year}
-              </div>
-              <div>
-                <h3
-                  className="wsd-about-milestone-title"
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: 700,
-                    marginBottom: "4px",
-                    color: isDark ? "#ffffff" : "#0f172a",
-                  }}
-                >
-                  {m.title}
-                </h3>
-                <p
-                  className="wsd-about-milestone-desc"
-                  style={{
-                    fontSize: "12.5px",
-                    lineHeight: 1.5,
-                    color: isDark ? "rgba(255, 255, 255, 0.65)" : "#64748b",
-                    margin: 0,
-                  }}
-                >
-                  {m.description}
-                </p>
-              </div>
+                {m.title}
+              </h3>
+              <p
+                className="wsd-about-milestone-desc"
+                style={{
+                  fontSize: "12.5px",
+                  lineHeight: 1.5,
+                  color: isDark ? "rgba(255, 255, 255, 0.65)" : "#64748b",
+                  margin: 0,
+                }}
+              >
+                {m.description}
+              </p>
             </div>
           ))}
         </div>
@@ -421,17 +462,17 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div
-          className="wsd-team-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "14px",
-          }}
-        >
-          {teamMembers.map((dev, idx) => (
+        <HorizontalCardStrip
+          items={teamMembers}
+          ariaLabel="Core team members"
+          cardsPerView={4}
+          mobileCardsPerView={1.2}
+          gap={16}
+          speed={0.8}
+          autoLoopCount={1}
+          direction="right-to-left"
+          renderItem={(dev) => (
             <div
-              key={idx}
               className="wsd-team-card"
               style={{
                 padding: "18px 16px",
@@ -441,29 +482,47 @@ export default function AboutPage() {
                 display: "flex",
                 flexDirection: "column",
                 gap: "10px",
+                height: "100%",
+                minHeight: "175px",
+                boxSizing: "border-box",
                 transition: "transform 0.2s ease, border-color 0.2s ease",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div
-                  className="wsd-team-avatar"
-                  style={{
-                    width: "38px",
-                    height: "38px",
-                    borderRadius: "10px",
-                    background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.02em",
-                    flexShrink: 0,
-                  }}
-                >
-                  {dev.initials}
-                </div>
+                {dev.avatar ? (
+                  <img
+                    src={dev.avatar}
+                    alt={dev.name}
+                    className="wsd-team-avatar-img"
+                    style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "10px",
+                      objectFit: "cover",
+                      flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="wsd-team-avatar"
+                    style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "10px",
+                      background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#ffffff",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      letterSpacing: "-0.02em",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {dev.initials}
+                  </div>
+                )}
                 <div style={{ minWidth: 0 }}>
                   <h3
                     className="wsd-team-name"
@@ -520,6 +579,7 @@ export default function AboutPage() {
                   fontSize: "11px",
                   color: isDark ? "rgba(255, 255, 255, 0.45)" : "#94a3b8",
                   fontWeight: 500,
+                  marginTop: "auto",
                 }}
               >
                 <span>{dev.exp}</span>
@@ -528,8 +588,8 @@ export default function AboutPage() {
                 </span>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        />
       </div>
 
       {/* Bottom CTA */}
@@ -703,6 +763,11 @@ export default function AboutPage() {
             width: 28px !important;
             height: 28px !important;
             font-size: 11px !important;
+            border-radius: 8px !important;
+          }
+          .wsd-team-avatar-img {
+            width: 28px !important;
+            height: 28px !important;
             border-radius: 8px !important;
           }
           .wsd-team-name {

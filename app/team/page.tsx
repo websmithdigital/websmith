@@ -11,15 +11,22 @@ import NavbarVisibilityToggle from '@/components/admin/NavbarVisibilityToggle';
 // Simple Badge component
 const Badge = ({ text, color }: { text: string; color: string }) => (
   <span style={{
-    padding: '4px 12px',
-    borderRadius: '20px',
+    padding: '3px 10px',
+    borderRadius: '12px',
     fontSize: '11px',
     fontWeight: '700',
-    backgroundColor: `${color}15`,
+    backgroundColor: `${color}18`,
     color: color,
     textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  }}>
+    letterSpacing: '0.4px',
+    lineHeight: '1.4',
+    whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
+    maxWidth: '180px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }} title={text}>
     {text}
   </span>
 );
@@ -44,7 +51,7 @@ const DeveloperCard = ({
 
   return (
     <div style={styles.card} className="team-card">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
         <div style={{
           width: '64px', height: '64px', borderRadius: '18px',
           background: `linear-gradient(135deg, #007AFF20, #007AFF40)`,
@@ -58,10 +65,10 @@ const DeveloperCard = ({
             dev.name.charAt(0).toUpperCase()
           )}
         </div>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px', letterSpacing: '-0.3px' }}>{dev.name}</h3>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <Badge text={dev.role} color="#007AFF" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.3px', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dev.name}</h3>
+          <div style={{ display: 'flex', gap: '6px', rowGap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Badge text={dev.headline || "Member"} color="#007AFF" />
             <Badge text={dev.status || "active"} color={dev.status === "inactive" ? "#FF9500" : "#34C759"} />
             <Badge text={dev.published ? "published" : "draft"} color={dev.published ? "#34C759" : "#8E8E93"} />
           </div>
@@ -74,7 +81,7 @@ const DeveloperCard = ({
         <div style={styles.detailItem}><Briefcase size={14} color="var(--text-secondary)" /><span style={styles.detailText}>{dev.company || 'Private Entity'}</span></div>
         {dev.headline && (
           <div style={styles.detailItem}>
-            <Code size={14} color="var(--text-secondary)" />
+            <Briefcase size={14} color="var(--text-secondary)" />
             <span style={styles.detailText}>{dev.headline}</span>
           </div>
         )}
@@ -202,7 +209,7 @@ const DeveloperModal = ({
     const phoneRegex = /^[+]?[0-9()\-\s]{7,20}$/;
 
     if (!name) {
-      setLocalError('Developer name is required.');
+      setLocalError('Full name is required.');
       return null;
     }
     if (!emailRegex.test(email)) {
@@ -247,13 +254,13 @@ const DeveloperModal = ({
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={e => e.stopPropagation()}>
         <div style={styles.modalHeader}>
-          <h2 style={styles.modalTitle}>{editingUser ? 'Edit Developer' : 'Add New Developer'}</h2>
+          <h2 style={styles.modalTitle}>{editingUser ? 'Edit Team Member' : 'Add New Team Member'}</h2>
           <button onClick={onClose} style={styles.closeBtn}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div style={styles.formRow}>
             <div style={styles.formGroup}>
-              <label style={styles.inputLabel}>Developer Name</label>
+              <label style={styles.inputLabel}>Full Name</label>
               <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required style={styles.input} placeholder="John Doe" />
             </div>
             <div style={styles.formGroup}>
@@ -268,8 +275,29 @@ const DeveloperModal = ({
               <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} style={styles.input} placeholder="+1 234 567 890" />
             </div>
             <div style={styles.formGroup}>
-              <label style={styles.inputLabel}>Role</label>
-              <input type="text" value={formData.headline} onChange={e => setFormData({ ...formData, headline: e.target.value })} style={styles.input} placeholder="Senior Full-Stack Developer" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                <label style={{ ...styles.inputLabel, margin: 0 }}>Role / Designation</label>
+                <span style={{ fontSize: '10px', color: '#007AFF', fontWeight: 600 }}>Card Badge</span>
+              </div>
+              <input
+                type="text"
+                list="company-role-options"
+                value={formData.headline}
+                onChange={e => setFormData({ ...formData, headline: e.target.value })}
+                style={styles.input}
+                placeholder="e.g. Lead UI/UX Designer, Product Manager, Senior Engineer"
+              />
+              <datalist id="company-role-options">
+                <option value="Senior Full-Stack Engineer" />
+                <option value="Lead UI/UX Designer" />
+                <option value="Product Manager" />
+                <option value="Principal Systems Architect" />
+                <option value="Director of DevOps & SRE" />
+                <option value="AI & Data Architecture Lead" />
+                <option value="VP of Engineering & Security" />
+                <option value="QA & Automation Lead" />
+                <option value="Project / Scrum Master" />
+              </datalist>
             </div>
           </div>
 
@@ -295,7 +323,7 @@ const DeveloperModal = ({
               <button type="button" onClick={addSkill} style={styles.skillAddBtn}>Add</button>
             </div>
             {formData.skills.length > 0 && (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
                 {formData.skills.map((skill) => (
                   <span key={skill} style={styles.skillChip}>
                     {skill}
@@ -306,26 +334,27 @@ const DeveloperModal = ({
             )}
           </div>
 
-          <div style={styles.formGroup}>
+          <div style={styles.formRow}>
+            <div style={styles.formGroup}>
               <label style={styles.inputLabel}>Company / Org</label>
               <input type="text" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} style={styles.input} placeholder="Freelance / Tech Co" />
             </div>
-
-                    <div style={styles.formGroup}>
-            <label style={styles.inputLabel}>Avatar Image URL</label>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <input
-                type="text"
-                value={formData.avatar}
-                onChange={e => setFormData({ ...formData, avatar: e.target.value })}
-                style={styles.input}
-                placeholder="https://images.unsplash.com/... or /images/..."
-              />
-              {formData.avatar ? (
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-color)' }}>
-                  <img src={formData.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                </div>
-              ) : null}
+            <div style={styles.formGroup}>
+              <label style={styles.inputLabel}>Avatar Image URL</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={formData.avatar}
+                  onChange={e => setFormData({ ...formData, avatar: e.target.value })}
+                  style={styles.input}
+                  placeholder="https://... or /images/..."
+                />
+                {formData.avatar ? (
+                  <div style={{ width: '34px', height: '34px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-color)' }}>
+                    <img src={formData.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -334,8 +363,8 @@ const DeveloperModal = ({
             <textarea
               value={formData.bio}
               onChange={e => setFormData({ ...formData, bio: e.target.value })}
-              style={{ ...styles.input, minHeight: '90px', resize: 'vertical' as const }}
-              placeholder="Write a short developer description..."
+              style={{ ...styles.input, minHeight: '60px', resize: 'vertical' as const }}
+              placeholder="Write a short professional description or specialty..."
             />
           </div>
 
@@ -345,7 +374,7 @@ const DeveloperModal = ({
               checked={formData.published}
               onChange={e => setFormData({ ...formData, published: e.target.checked })}
             />
-            Publish this developer profile on the public website
+            Publish this profile on the public website
           </label>
 
           {localError ? <p style={{ color: '#FF3B30', fontSize: '13px', margin: '4px 0' }}>{localError}</p> : null}
@@ -353,7 +382,7 @@ const DeveloperModal = ({
           {!editingUser && (
             <div style={styles.infoBox}>
               <p style={styles.infoText}>
-                <strong>Note:</strong> Saving this developer will email their login credentials automatically.
+                <strong>Note:</strong> Saving this team member will email their login credentials automatically.
               </p>
             </div>
           )}
@@ -364,7 +393,7 @@ const DeveloperModal = ({
               {isSaving ? 'Processing...' : 'Publish'}
             </button>
             <button type="submit" style={styles.modalSubmitBtn} disabled={isSaving}>
-              {isSaving ? 'Processing...' : editingUser ? 'Save changes' : 'Add Developer'}
+              {isSaving ? 'Processing...' : editingUser ? 'Save changes' : 'Add Member'}
             </button>
           </div>
         </form>
@@ -427,22 +456,22 @@ export default function DevelopersPage() {
       }
       await fetchDevelopers();
     } catch (error: any) {
-      console.error('Save developer error:', error);
+      console.error('Save member error:', error);
       const msg = error?.response?.data?.message || error?.message || 'Request failed';
-      alert(editingUser ? `Failed to update developer: ${msg}` : `Failed to add developer: ${msg}`);
+      alert(editingUser ? `Failed to update team member: ${msg}` : `Failed to add team member: ${msg}`);
     } finally {
       setSaving(false);
     }
   };
 
   const handleRemoveDeveloper = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this developer? This will delete their account access.')) return;
+    if (!confirm('Are you sure you want to remove this team member? This will delete their account access.')) return;
     try {
       await deleteManagedUser(id);
       await fetchDevelopers();
     } catch (error) {
       console.error('Delete error:', error);
-      alert('Failed to delete developer.');
+      alert('Failed to delete team member.');
     }
   };
 
@@ -476,7 +505,7 @@ export default function DevelopersPage() {
     return (
       <div style={styles.loadingWrapper}>
         <div style={styles.spinner}></div>
-        <p>Syncing developer database...</p>
+        <p>Syncing team database...</p>
       </div>
     );
   }
@@ -535,9 +564,9 @@ export default function DevelopersPage() {
 
       {filteredDevelopers.length === 0 ? (
         <div style={styles.emptyState}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>👨‍💻</div>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>No developers found</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Try adjusting your search or add a new developer.</p>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>👥</div>
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>No team members found</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Try adjusting your search or add a new team member.</p>
           <button
             onClick={() => {
               setEditingUser(null);
@@ -545,7 +574,7 @@ export default function DevelopersPage() {
             }}
             style={styles.primaryBtn}
           >
-            Add your first developer
+            Add your first team member
           </button>
         </div>
       ) : viewMode === 'grid' ? (
@@ -568,7 +597,10 @@ export default function DevelopersPage() {
           {filteredDevelopers.map((dev) => (
             <div key={dev._id} style={styles.devListRow}>
               <div style={styles.devListMain}>
-                <strong style={styles.devListName}>{dev.name}</strong>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <strong style={styles.devListName}>{dev.name}</strong>
+                  <Badge text={dev.headline || "Member"} color="#007AFF" />
+                </div>
                 <span style={styles.devListMeta}>{dev.email}</span>
               </div>
               <div style={styles.devListActions}>
@@ -897,12 +929,12 @@ const styles: any = {
   },
   modal: {
     background: 'var(--bg-primary)',
-    borderRadius: '32px',
+    borderRadius: '20px',
     width: '95%',
-    maxWidth: '680px',
-    maxHeight: '90vh',
+    maxWidth: '600px',
+    maxHeight: '92vh',
     overflow: 'auto',
-    padding: '32px',
+    padding: '20px 24px',
     boxShadow: '0 24px 60px rgba(0,0,0,0.2)',
     border: '1px solid var(--border-color)'
   },
@@ -910,76 +942,80 @@ const styles: any = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '28px'
+    marginBottom: '16px'
   },
   modalTitle: {
-    fontSize: '26px',
+    fontSize: '20px',
     fontWeight: '700',
     color: 'var(--text-primary)',
-    letterSpacing: '-1px'
+    letterSpacing: '-0.5px'
   },
   closeBtn: {
     background: 'var(--bg-secondary)',
     border: '1px solid var(--border-color)',
-    borderRadius: '12px',
+    borderRadius: '10px',
     cursor: 'pointer',
-    padding: '8px',
-    color: 'var(--text-secondary)'
+    padding: '6px',
+    color: 'var(--text-secondary)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-    gap: '20px',
-    marginBottom: '16px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '12px',
+    marginBottom: '10px'
   },
   formGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px'
+    gap: '4px'
   },
   inputLabel: {
-    fontSize: '13px',
+    fontSize: '11px',
     fontWeight: '700',
     color: 'var(--text-primary)',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px'
+    letterSpacing: '0.4px'
   },
   input: {
     width: '100%',
-    padding: '14px 16px',
+    padding: '9px 12px',
     backgroundColor: 'var(--bg-secondary)',
     border: '1.5px solid var(--border-color)',
-    borderRadius: '14px',
-    fontSize: '15px',
+    borderRadius: '10px',
+    fontSize: '13px',
     color: 'var(--text-primary)',
     outline: 'none'
   },
   select: {
     width: '100%',
-    padding: '14px 16px',
+    padding: '9px 12px',
     backgroundColor: 'var(--bg-secondary)',
     border: '1.5px solid var(--border-color)',
-    borderRadius: '14px',
-    fontSize: '15px',
+    borderRadius: '10px',
+    fontSize: '13px',
     color: 'var(--text-primary)',
     outline: 'none',
     appearance: 'none'
   },
   skillAddBtn: {
-    padding: '0 24px',
+    padding: '0 16px',
     background: '#007AFF',
     color: 'white',
     border: 'none',
-    borderRadius: '14px',
+    borderRadius: '10px',
     fontWeight: '700',
+    fontSize: '13px',
     cursor: 'pointer'
   },
   skillChip: {
-    padding: '6px 14px',
+    padding: '4px 10px',
     background: 'rgba(0, 122, 255, 0.1)',
     color: '#007AFF',
-    borderRadius: '20px',
-    fontSize: '13px',
+    borderRadius: '12px',
+    fontSize: '11px',
     fontWeight: '600',
     border: '1px solid rgba(0, 122, 255, 0.1)'
   },
@@ -993,38 +1029,41 @@ const styles: any = {
   },
   modalFooter: {
     display: 'flex',
-    gap: '12px',
-    marginTop: '32px'
+    gap: '10px',
+    marginTop: '16px'
   },
   modalCancelBtn: {
     flex: 1,
-    padding: '16px',
+    padding: '10px 16px',
     background: 'var(--bg-secondary)',
     border: '1px solid var(--border-color)',
-    borderRadius: '16px',
+    borderRadius: '10px',
     fontWeight: '700',
+    fontSize: '13px',
     color: 'var(--text-secondary)',
     cursor: 'pointer'
   },
   publishBtn: {
     flex: 1,
-    padding: '16px',
+    padding: '10px 16px',
     background: '#34C759',
     color: 'white',
     border: 'none',
-    borderRadius: '16px',
+    borderRadius: '10px',
     fontWeight: '700',
+    fontSize: '13px',
     cursor: 'pointer',
-    boxShadow: '0 8px 20px rgba(52,199,89,0.2)'
+    boxShadow: '0 4px 12px rgba(52,199,89,0.2)'
   },
   modalSubmitBtn: {
     flex: 1,
-    padding: '16px',
+    padding: '10px 16px',
     background: '#007AFF',
     color: 'white',
     border: 'none',
-    borderRadius: '16px',
+    borderRadius: '10px',
     fontWeight: '700',
+    fontSize: '13px',
     cursor: 'pointer',
     boxShadow: '0 8px 20px rgba(0,122,255,0.2)'
   },

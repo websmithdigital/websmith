@@ -43,7 +43,7 @@ export default function DevelopersPage() {
       const { updateDeveloper } = await import("../../../core/services/userService");
       await updateDeveloper(developer._id, { published: !developer.published });
       await fetchDevelopers();
-      setSuccessMessage(`Developer ${developer.published ? "unpublished" : "published"} successfully`);
+      setSuccessMessage(`Team member ${developer.published ? "unpublished" : "published"} successfully`);
     } catch (error) {
       console.error("Toggle publish error:", error);
     }
@@ -56,7 +56,7 @@ export default function DevelopersPage() {
       const { deleteDeveloper } = await import("../../../core/services/userService");
       await deleteDeveloper(developerToDelete);
       await fetchDevelopers();
-      setSuccessMessage("Developer deleted successfully");
+      setSuccessMessage("Team member deleted successfully");
     } catch (error) {
       console.error("Delete error:", error);
     }
@@ -98,7 +98,7 @@ export default function DevelopersPage() {
           <Code size={24} color="#007AFF" />
           <div>
             <p style={styles.statValue}>{stats.total}</p>
-            <p style={styles.statLabel}>Total Developers</p>
+            <p style={styles.statLabel}>Total Members</p>
           </div>
         </div>
         <div style={styles.statCard}>
@@ -123,7 +123,7 @@ export default function DevelopersPage() {
           <Search size={18} color="#8E8E93" />
           <input
             type="text"
-            placeholder="Search developers by name, email, ID, or skills..."
+            placeholder="Search team members by name, email, ID, or skills..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={styles.searchInput}
@@ -149,7 +149,7 @@ export default function DevelopersPage() {
       {loading && (
         <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
-          <p>Loading developers...</p>
+          <p>Loading team members...</p>
         </div>
       )}
 
@@ -157,12 +157,12 @@ export default function DevelopersPage() {
       {!loading && filteredDevelopers.length === 0 && (
         <div style={styles.emptyContainer}>
           <Code size={48} color="#C6C6C8" />
-          <h3 style={styles.emptyTitle}>No developers found</h3>
+          <h3 style={styles.emptyTitle}>No team members found</h3>
           <p style={styles.emptyText}>
-            {searchTerm ? "Try adjusting your search" : "Add your first developer to get started"}
+            {searchTerm ? "Try adjusting your search" : "Add your first team member to get started"}
           </p>
           {!searchTerm && (
-            <button onClick={handleAddDeveloper} style={styles.emptyBtn}>Add Developer</button>
+            <button onClick={handleAddDeveloper} style={styles.emptyBtn}>Add Member</button>
           )}
         </div>
       )}

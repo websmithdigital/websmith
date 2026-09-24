@@ -86,7 +86,7 @@ export default function DeveloperModal({ isOpen, onClose, onSave, developer, isS
     const phoneRegex = /^[+]?[0-9()\-\s]{7,20}$/;
 
     if (!trimmedName) {
-      setLocalError("Developer name is required.");
+      setLocalError("Full name is required.");
       return null;
     }
 
@@ -128,7 +128,7 @@ export default function DeveloperModal({ isOpen, onClose, onSave, developer, isS
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h2 style={styles.title}>{developer ? "Edit Developer" : "Add Developer"}</h2>
+          <h2 style={styles.title}>{developer ? "Edit Team Member" : "Add Team Member"}</h2>
           <button onClick={onClose} style={styles.closeBtn}>
             <X size={20} />
           </button>
@@ -137,7 +137,7 @@ export default function DeveloperModal({ isOpen, onClose, onSave, developer, isS
         <form onSubmit={handleSubmit}>
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Developer Name *</label>
+              <label style={styles.label}>Full Name *</label>
               <input
                 type="text"
                 value={formData.name}
@@ -179,16 +179,27 @@ export default function DeveloperModal({ isOpen, onClose, onSave, developer, isS
             </div>
           </div>
 
-          <div style={styles.sectionTitle}>Role</div>
+          <div style={styles.sectionTitle}>Role / Designation</div>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Role</label>
+            <label style={styles.label}>Role / Designation (Card Badge)</label>
             <input
               type="text"
+              list="admin-roles-list"
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
-              placeholder="e.g., Senior Full-Stack Developer"
+              placeholder="e.g., Lead UI/UX Designer, Product Manager, Senior Engineer"
               style={styles.input}
             />
+            <datalist id="admin-roles-list">
+              <option value="Senior Full-Stack Engineer" />
+              <option value="Lead UI/UX Designer" />
+              <option value="Product Manager" />
+              <option value="Principal Systems Architect" />
+              <option value="Director of DevOps & SRE" />
+              <option value="AI & Data Architecture Lead" />
+              <option value="VP of Engineering & Security" />
+              <option value="QA & Automation Lead" />
+            </datalist>
           </div>
 
           <div style={styles.sectionTitle}>Description</div>

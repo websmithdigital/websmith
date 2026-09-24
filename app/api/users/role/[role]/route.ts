@@ -3,12 +3,12 @@ import { apiHandler, json, badRequest, serialize } from "@/lib/server/api";
 const VALID_ROLES = ["admin", "client", "developer"];
 
 const SEED_DEVELOPERS = [
-  { name: "Alex Rivera", headline: "Principal Cloud Architect", skills: ["AWS", "Kubernetes", "Go", "PostgreSQL"], experienceYears: 10, bio: "Designs ultra-reliable, high-throughput cloud infrastructure and distributed microservices.", email: "alex.rivera@websmithdigital.com" },
-  { name: "Sophia Chen", headline: "Lead Full-Stack Engineer", skills: ["Next.js", "React 19", "TypeScript", "Node.js"], experienceYears: 8, bio: "Specializes in modern React architecture, complex interactive dashboards, and design systems.", email: "sophia.chen@websmithdigital.com" },
-  { name: "Marcus Vance", headline: "Enterprise Systems Architect", skills: ["Java", "Spring Boot", "PostgreSQL", "Docker"], experienceYears: 12, bio: "Architects mission-critical ERP systems, high-compliance APIs, and enterprise data sync pipelines.", email: "marcus.vance@websmithdigital.com" },
-  { name: "Elena Rostova", headline: "Senior Mobile & Web Engineer", skills: ["React Native", "Flutter", "iOS", "TypeScript"], experienceYears: 7, bio: "Crafts silky-smooth cross-platform mobile experiences with strict offline-first resilience.", email: "elena.rostova@websmithdigital.com" },
-  { name: "David Kim", headline: "Senior Security & Backend Engineer", skills: ["Python", "FastAPI", "Redis", "Cryptography"], experienceYears: 9, bio: "Expert in AES-256 encryption, HMAC API security gates, and ultra-low-latency backend services.", email: "david.kim@websmithdigital.com" },
-  { name: "Priya Sharma", headline: "Lead UI/UX Engineer", skills: ["Tailwind CSS", "Next.js", "Figma", "Design Systems"], experienceYears: 6, bio: "Obsessed with micro-interactions, responsive typography, and enterprise-grade design systems.", email: "priya.sharma@websmithdigital.com" },
+  { name: "Alex Mercer", headline: "Principal Systems Architect", skills: ["High-Throughput APIs", "Distributed State", "Cloud Infrastructure"], experienceYears: 12, bio: "High-Throughput APIs, Distributed State & Cloud Infrastructure", email: "alex.mercer@websmithdigital.com" },
+  { name: "Elena Rostova", headline: "VP of Engineering & Security", skills: ["HMAC-SHA256 Cryptography", "Node-Locking", "Compliance"], experienceYears: 10, bio: "HMAC-SHA256 Cryptography, Node-Locking & Compliance", email: "elena.rostova@websmithdigital.com" },
+  { name: "Marcus Chen", headline: "Head of ERP & Enterprise Systems", skills: ["Multi-Tenant Partitioning", "Inventory Engines", "Financial Billing"], experienceYears: 11, bio: "Multi-Tenant Partitioning, Inventory Engines & Financial Billing", email: "marcus.chen@websmithdigital.com" },
+  { name: "Sarah Al-Mansoor", headline: "Lead Frontend & Design Systems Architect", skills: ["Next.js App Router", "Micro-Interactions", "Design Systems"], experienceYears: 8, bio: "Next.js App Router, Micro-Interactions & Design Systems", email: "sarah.almansoor@websmithdigital.com" },
+  { name: "Tariq Vance", headline: "Director of DevOps & SRE", skills: ["Automated CI/CD", "Kubernetes Orchestration", "Zero-Downtime"], experienceYears: 9, bio: "Automated CI/CD, Kubernetes Orchestration & Zero-Downtime Releases", email: "tariq.vance@websmithdigital.com" },
+  { name: "Maya Lin", headline: "AI & Data Architecture Lead", skills: ["Autonomous Agent Pipelines", "Vector Embeddings", "Neural Search"], experienceYears: 7, bio: "Autonomous Agent Pipelines, Vector Embeddings & Neural Search", email: "maya.lin@websmithdigital.com" },
 ];
 
 export const GET = apiHandler(async ({ db, params }) => {

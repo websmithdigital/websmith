@@ -68,11 +68,14 @@ export default function DeveloperCard({ developer, viewMode, onEdit, onDelete, o
           )}
         </div>
         <div style={styles.badges}>
+          <span style={{ ...styles.statusBadge, backgroundColor: "rgba(0, 122, 255, 0.1)", color: "#007AFF" }}>
+            {developer.headline || "Member"}
+          </span>
           <span style={{ ...styles.statusBadge, backgroundColor: `${getStatusColor(developer.status)}20`, color: getStatusColor(developer.status) }}>
             {developer.status}
           </span>
           {developer.published && (
-            <span style={{ ...styles.statusBadge, backgroundColor: "rgba(0, 122, 255, 0.1)", color: "#007AFF" }}>
+            <span style={{ ...styles.statusBadge, backgroundColor: "rgba(52, 199, 89, 0.1)", color: "#34C759" }}>
               Published
             </span>
           )}
