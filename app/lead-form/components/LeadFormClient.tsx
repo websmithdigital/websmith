@@ -173,24 +173,46 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
       }
     }
 
-    if (form.whatsappPhone.trim() && !form.sameAsCalling) {
-      const waCheck = validatePhoneNumber(whatsappFull);
-      if (!waCheck.valid) {
-        nextErrors.whatsappPhone = waCheck.error || "Invalid WhatsApp phone number";
+    if (form.sameAsCalling) {
+      if (!form.callingPhone.trim()) {
+        nextErrors.whatsappPhone = "WhatsApp phone number is required";
+      }
+    } else {
+      if (!form.whatsappPhone.trim()) {
+        nextErrors.whatsappPhone = "WhatsApp phone number is required";
+      } else {
+        const waCheck = validatePhoneNumber(whatsappFull);
+        if (!waCheck.valid) {
+          nextErrors.whatsappPhone = waCheck.error || "Invalid WhatsApp phone number";
+        }
       }
     }
 
-    if (form.preferredContactDate) {
-      if (form.preferredContactDate < bookingDateLimits.minDate) {
-        nextErrors.preferredContactDate = "Please choose a date from today onwards.";
-      } else if (form.preferredContactDate > bookingDateLimits.maxDate) {
-        nextErrors.preferredContactDate = "Please select a date within the next 7 days.";
-      }
+    if (!form.preferredContactDate) {
+      nextErrors.preferredContactDate = "Preferred date is required";
+    } else if (form.preferredContactDate < bookingDateLimits.minDate) {
+      nextErrors.preferredContactDate = "Please choose a date from today onwards.";
+    } else if (form.preferredContactDate > bookingDateLimits.maxDate) {
+      nextErrors.preferredContactDate = "Please select a date within the next 7 days.";
     }
 
-    if (form.budget && Number.isNaN(Number(form.budget))) nextErrors.budget = "Budget must be numeric";
+    if (!form.preferredContactTime) {
+      nextErrors.preferredContactTime = "Preferred time slot is required";
+    }
+
+    if (!form.userTimeZone) {
+      nextErrors.userTimeZone = "Timezone is required";
+    }
+
+    if (!form.budget || !form.budget.trim()) {
+      nextErrors.budget = "Estimated budget is required";
+    } else if (Number.isNaN(Number(form.budget)) || Number(form.budget) <= 0) {
+      nextErrors.budget = "Please enter a valid budget amount";
+    }
+
     if (selectedServices.length === 0) nextErrors.services = "Choose at least one service";
     if (needsPlatform && !form.appPlatform) nextErrors.appPlatform = "Select a platform";
+    if (needsCms && !form.cmsRequirement?.trim()) nextErrors.cmsRequirement = "CMS requirement is required";
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -381,12 +403,18 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
 
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: isWizard ? "18px" : "22px", marginBottom: isWizard ? "4px" : "8px" }}>
-                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>WhatsApp Number</label>
+                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>WhatsApp Number *</label>
                 <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11.5px", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
                   <input
                     type="checkbox"
                     checked={form.sameAsCalling}
-                    onChange={(e) => setForm((prev) => ({ ...prev, sameAsCalling: e.target.checked }))}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setForm((prev) => ({ ...prev, sameAsCalling: checked }));
+                      if (checked) {
+                        setErrors((prev) => ({ ...prev, whatsappPhone: "" }));
+                      }
+                    }}
                     style={{ cursor: "pointer" }}
                   />
                   Same as calling
@@ -417,7 +445,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           <div style={{ ...(isWizard ? styles.grid3Wizard : styles.grid3), marginTop: isWizard ? "10px" : "16px" }}>
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: isWizard ? "4px" : "8px" }}>
-                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Preferred Date</label>
+                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Preferred Date *</label>
                 <span style={{ fontSize: "10.5px", color: "var(--text-secondary)", fontWeight: 500 }}>Next 7 days</span>
               </div>
               <input
@@ -435,7 +463,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
             </div>
 
             <div style={isWizard ? styles.fieldWizard : styles.field}>
-              <label style={isWizard ? styles.labelWizard : styles.label}>Preferred Time Slot</label>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Preferred Time Slot *</label>
               <div style={{ position: "relative", width: "100%" }}>
                 <select
                   value={form.preferredContactTime}
@@ -444,6 +472,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                     ...(isWizard ? styles.selectModal : styles.select),
                     paddingRight: "36px",
                     color: form.preferredContactTime ? "var(--text-primary)" : "var(--text-secondary)",
+                    borderColor: errors.preferredContactTime ? "#FF3B30" : "var(--border-color)",
                   }}
                 >
                   <option value="">Select preferred slot...</option>
@@ -469,11 +498,12 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                   }}
                 />
               </div>
+              {errors.preferredContactTime && <p style={styles.error}>{errors.preferredContactTime}</p>}
             </div>
 
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", minHeight: isWizard ? "18px" : "22px", marginBottom: isWizard ? "4px" : "8px" }}>
-                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Your Timezone</label>
+                <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Your Timezone *</label>
                 {userTimeZoneInfo.badge && (
                   <span
                     style={{
@@ -498,6 +528,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                     ...(isWizard ? styles.selectModal : styles.select),
                     paddingRight: "36px",
                     color: form.userTimeZone ? "var(--text-primary)" : "var(--text-secondary)",
+                    borderColor: errors.userTimeZone ? "#FF3B30" : "var(--border-color)",
                   }}
                 >
                   {ALL_WORLD_TIMEZONE_GROUPS.map((grp) => (
@@ -522,6 +553,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                   }}
                 />
               </div>
+              {errors.userTimeZone && <p style={styles.error}>{errors.userTimeZone}</p>}
             </div>
           </div>
 
@@ -553,12 +585,15 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           {/* Budget & Timeline */}
           <div style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
             <div style={isWizard ? styles.fieldWizard : styles.field}>
-              <label style={isWizard ? styles.labelWizard : styles.label}>Estimated Budget ($)</label>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Estimated Budget ($) *</label>
               <input
                 type="number"
                 value={form.budget}
                 onChange={(e) => setField("budget", e.target.value)}
-                style={isWizard ? styles.selectModal : styles.select}
+                style={{
+                  ...(isWizard ? styles.selectModal : styles.select),
+                  borderColor: errors.budget ? "#FF3B30" : "var(--border-color)",
+                }}
                 placeholder="e.g. 5000"
               />
               {errors.budget && <p style={styles.error}>{errors.budget}</p>}
@@ -587,21 +622,25 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           {needsCms && (
             <div style={{ marginTop: isWizard ? "10px" : "16px" }}>
               <div style={isWizard ? styles.fieldWizard : styles.field}>
-                <label style={isWizard ? styles.labelWizard : styles.label}>CMS Requirement</label>
+                <label style={isWizard ? styles.labelWizard : styles.label}>CMS Requirement *</label>
                 <input
                   type="text"
                   value={form.cmsRequirement}
                   onChange={(e) => setField("cmsRequirement", e.target.value)}
-                  style={isWizard ? styles.selectModal : styles.select}
+                  style={{
+                    ...(isWizard ? styles.selectModal : styles.select),
+                    borderColor: errors.cmsRequirement ? "#FF3B30" : "var(--border-color)",
+                  }}
                   placeholder="e.g. WordPress, Strapi, Custom Headless, None"
                 />
+                {errors.cmsRequirement && <p style={styles.error}>{errors.cmsRequirement}</p>}
               </div>
             </div>
           )}
 
           {needsPlatform && (
             <div style={{ ...(isWizard ? styles.fieldWizard : styles.field), marginTop: isWizard ? "10px" : "16px" }}>
-              <label style={isWizard ? styles.labelWizard : styles.label}>Preferred Platform</label>
+              <label style={isWizard ? styles.labelWizard : styles.label}>Preferred Platform *</label>
               <select
                 value={form.appPlatform}
                 onChange={(e) => setField("appPlatform", e.target.value)}

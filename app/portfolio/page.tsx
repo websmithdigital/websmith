@@ -426,6 +426,7 @@ export default function PortfolioPage() {
                         href={project.publicUrl}
                         target="_blank"
                         rel="noreferrer"
+                        className="wsd-visit-project-link"
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -451,6 +452,7 @@ export default function PortfolioPage() {
 
                     <button
                       type="button"
+                      className="wsd-build-similar-btn"
                       onClick={() =>
                         openLeadServicesModal({
                           service: {
@@ -463,19 +465,15 @@ export default function PortfolioPage() {
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
-                        gap: "5px",
+                        gap: "6px",
                         fontSize: "12px",
                         fontWeight: 600,
-                        padding: "6px 12px",
+                        padding: "7px 14px",
                         borderRadius: "8px",
-                        backgroundColor: isDark ? "rgba(37, 99, 235, 0.15)" : "rgba(37, 99, 235, 0.08)",
-                        color: "#3b82f6",
-                        border: "none",
                         cursor: "pointer",
-                        transition: "all 0.15s ease",
                       }}
                     >
-                      Build Similar <ArrowRight size={12} />
+                      Build Similar <ArrowRight size={13} />
                     </button>
                   </div>
                 </div>
@@ -551,6 +549,72 @@ export default function PortfolioPage() {
         .wsd-portfolio-card:hover {
           transform: translateY(-4px);
           border-color: rgba(37, 99, 235, 0.35) !important;
+        }
+
+        /* Build Similar Button: Crisp, High-Contrast & Zero Color Mixing */
+        .wsd-build-similar-btn {
+          background-color: rgba(37, 99, 235, 0.1);
+          color: #2563eb;
+          border: 1px solid rgba(37, 99, 235, 0.25);
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .dark-theme .wsd-build-similar-btn {
+          background-color: rgba(37, 99, 235, 0.18);
+          color: #60a5fa;
+          border: 1px solid rgba(37, 99, 235, 0.35);
+        }
+        .wsd-build-similar-btn:hover {
+          background-color: #2563eb !important;
+          color: #ffffff !important;
+          border-color: #2563eb !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+        .wsd-build-similar-btn:hover svg {
+          color: #ffffff !important;
+          stroke: #ffffff !important;
+        }
+
+        /* When the parent portfolio card is hovered, the button turns solid white with crisp dark text */
+        .wsd-portfolio-card:hover .wsd-build-similar-btn {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border-color: rgba(255, 255, 255, 0.95) !important;
+          font-weight: 700 !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+        }
+        .wsd-portfolio-card:hover .wsd-build-similar-btn svg {
+          color: #0f172a !important;
+          stroke: #0f172a !important;
+        }
+
+        /* When user directly hovers on the Build Similar button on a hovered card */
+        .wsd-portfolio-card:hover .wsd-build-similar-btn:hover {
+          background-color: #0f172a !important;
+          color: #ffffff !important;
+          border-color: #0f172a !important;
+          transform: translateY(-2px) scale(1.04) !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+        }
+        .wsd-portfolio-card:hover .wsd-build-similar-btn:hover svg {
+          color: #ffffff !important;
+          stroke: #ffffff !important;
+        }
+
+        /* High contrast for Visit Project link on card hover */
+        .wsd-visit-project-link {
+          transition: color 0.2s ease;
+        }
+        .wsd-portfolio-card:hover .wsd-visit-project-link {
+          color: #04274F !important;
+          font-weight: 700 !important;
+        }
+        .wsd-portfolio-card:hover .wsd-visit-project-link svg {
+          color: #04274F !important;
+          stroke: #04274F !important;
+        }
+        .wsd-portfolio-card:hover .wsd-visit-project-link:hover {
+          text-decoration: underline !important;
         }
       `}</style>
     </div>

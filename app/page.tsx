@@ -813,38 +813,67 @@ export default function LandingPage() {
     const email = contactState.email.trim().toLowerCase();
     const subject = contactState.subject.trim();
     const message = contactState.message.trim();
+
     if (!name) errors.name = "Please enter your name.";
     else if (name.length > 200) errors.name = "Name must be 200 characters or fewer.";
+
     if (!email) errors.email = "Please enter your email address.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Please enter a valid email address.";
     else if (email.length > 200) errors.email = "Email must be 200 characters or fewer.";
-    if (contactState.company.trim().length > 200) errors.company = "Company must be 200 characters or fewer.";
-    if (contactState.preferredContactDate) {
-      if (contactState.preferredContactDate < bookingDateLimits.minDate) {
-        errors.preferredContactDate = "Please choose a date from today onwards.";
-      } else if (contactState.preferredContactDate > bookingDateLimits.maxDate) {
-        errors.preferredContactDate = "Please select a date within the next 7 days.";
-      }
-    }
-    if (contactState.callingPhone.trim()) {
+
+    if (!contactState.callingPhone.trim()) {
+      errors.callingPhone = "Please enter your calling phone number.";
+    } else {
       const callCheck = validatePhoneNumber(contactState.callingPhone, contactState.callingCountry);
       if (!callCheck.valid) {
         errors.callingPhone = callCheck.error || "Please enter a valid calling phone number.";
       }
     }
-    if (contactState.whatsappPhone.trim()) {
-      const waCheck = validatePhoneNumber(contactState.whatsappPhone, contactState.whatsappCountry);
-      if (!waCheck.valid) {
-        errors.whatsappPhone = waCheck.error || "Please enter a valid WhatsApp number.";
+
+    if (contactState.sameAsCalling) {
+      if (!contactState.callingPhone.trim()) {
+        errors.whatsappPhone = "Please enter your calling number first.";
+      }
+    } else {
+      if (!contactState.whatsappPhone.trim()) {
+        errors.whatsappPhone = "Please enter your WhatsApp number.";
+      } else {
+        const waCheck = validatePhoneNumber(contactState.whatsappPhone, contactState.whatsappCountry);
+        if (!waCheck.valid) {
+          errors.whatsappPhone = waCheck.error || "Please enter a valid WhatsApp number.";
+        }
       }
     }
+
+    if (!contactState.preferredContactDate) {
+      errors.preferredContactDate = "Please choose a preferred contact date.";
+    } else if (contactState.preferredContactDate < bookingDateLimits.minDate) {
+      errors.preferredContactDate = "Please choose a date from today onwards.";
+    } else if (contactState.preferredContactDate > bookingDateLimits.maxDate) {
+      errors.preferredContactDate = "Please select a date within the next 7 days.";
+    }
+
+    if (!contactState.preferredContactTime) {
+      errors.preferredContactTime = "Please select a preferred time slot.";
+    }
+
+    const effectiveTz = contactState.userTimeZone || userTimeZoneInfo.zone;
+    if (!effectiveTz) {
+      errors.userTimeZone = "Please select your timezone.";
+    }
+
+    if (contactState.company.trim().length > 200) errors.company = "Company must be 200 characters or fewer.";
+
     if (!subject) errors.subject = "Please select a subject.";
     else if (subject.length > 300) errors.subject = "Subject must be 300 characters or fewer.";
+
     if (!message) errors.message = "Please enter your message.";
     else if (message.length > 20000) errors.message = "Message must be 20,000 characters or fewer.";
+
     if (!contactState.consent) {
       errors.consent = "Please agree to the privacy policy before submitting.";
     }
+
     setContactErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -865,7 +894,14 @@ export default function LandingPage() {
       }
       return next;
     });
-    setContactErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
+    setContactErrors((prev) => {
+      const nextErrors = { ...prev };
+      if (nextErrors[field]) delete nextErrors[field];
+      if (field === "sameAsCalling" && value === true) {
+        delete nextErrors.whatsappPhone;
+      }
+      return nextErrors;
+    });
   };
   
   const [contactInfo, setContactInfo] = useState(defaultContactInfo);
@@ -1728,7 +1764,9 @@ export default function LandingPage() {
                 >
                   <div style={styles.formRow}>
                     <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-name">Name</label>
+                      <label style={styles.formLabel} htmlFor="contact-name">
+                        Name <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
+                      </label>
                       <input 
                         id="contact-name"
                         name="name"
@@ -1747,7 +1785,9 @@ export default function LandingPage() {
                       )}
                     </div>
                     <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-email">Email</label>
+                      <label style={styles.formLabel} htmlFor="contact-email">
+                        Email <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
+                      </label>
                       <input 
                         id="contact-email"
                         name="email"
@@ -1771,7 +1811,7 @@ export default function LandingPage() {
                   <div style={styles.formRow}>
                     <div style={styles.formGroup}>
                       <label style={styles.formLabel} htmlFor="contact-calling-phone">
-                        Calling Number
+                        Calling Number <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <PhoneInputWithCountry
                         id="contact-calling-phone"
@@ -1795,7 +1835,7 @@ export default function LandingPage() {
                     <div style={styles.formGroup}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: "20px" }}>
                         <label style={styles.formLabel} htmlFor="contact-whatsapp-phone">
-                          WhatsApp Number
+                          WhatsApp Number <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                         </label>
                         <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
                           <input
@@ -1833,7 +1873,7 @@ export default function LandingPage() {
                     <div style={styles.formGroup}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                         <label style={styles.formLabel} htmlFor="contact-preferred-date">
-                          Preferred Date
+                          Preferred Date <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                         </label>
                         <span style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>
                           Next 7 days only
@@ -1847,8 +1887,9 @@ export default function LandingPage() {
                         max={bookingDateLimits.maxDate}
                         style={{
                           ...styles.formInput,
-                          ...(contactErrors.preferredContactDate ? { borderColor: "var(--color-danger, #ef4444)" } : {}),
+                          ...(contactErrors.preferredContactDate ? styles.formInputError : {}),
                         }}
+                        aria-invalid={Boolean(contactErrors.preferredContactDate)}
                         value={contactState.preferredContactDate}
                         onChange={(e) => handleContactChange("preferredContactDate", e.target.value)}
                       />
@@ -1859,7 +1900,7 @@ export default function LandingPage() {
 
                     <div style={styles.formGroup}>
                       <label style={styles.formLabel} htmlFor="contact-preferred-time">
-                        Preferred Time Slot
+                        Preferred Time Slot <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                       </label>
                       <div style={{ position: "relative", width: "100%" }}>
                         <select
@@ -1868,8 +1909,10 @@ export default function LandingPage() {
                           style={{
                             ...styles.formInput,
                             ...styles.formSelect,
+                            ...(contactErrors.preferredContactTime ? styles.formInputError : {}),
                             color: contactState.preferredContactTime ? "var(--text-primary)" : "var(--text-secondary)",
                           }}
+                          aria-invalid={Boolean(contactErrors.preferredContactTime)}
                           value={contactState.preferredContactTime}
                           onChange={(e) => handleContactChange("preferredContactTime", e.target.value)}
                         >
@@ -1898,12 +1941,15 @@ export default function LandingPage() {
                           }} 
                         />
                       </div>
+                      {contactErrors.preferredContactTime && (
+                        <p role="alert" style={styles.fieldError}>{contactErrors.preferredContactTime}</p>
+                      )}
                     </div>
 
                     <div style={styles.formGroup}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", minHeight: "20px" }}>
                         <label style={styles.formLabel} htmlFor="contact-timezone">
-                          Your Timezone
+                          Your Timezone <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
                         </label>
                         {userTimeZoneInfo.badge && (
                           <span 
@@ -1929,8 +1975,10 @@ export default function LandingPage() {
                           style={{
                             ...styles.formInput,
                             ...styles.formSelect,
+                            ...(contactErrors.userTimeZone ? styles.formInputError : {}),
                             color: "var(--text-primary)",
                           }}
+                          aria-invalid={Boolean(contactErrors.userTimeZone)}
                           value={contactState.userTimeZone || userTimeZoneInfo.zone}
                           onChange={(e) => handleContactChange("userTimeZone", e.target.value)}
                         >
@@ -1956,6 +2004,9 @@ export default function LandingPage() {
                           }} 
                         />
                       </div>
+                      {contactErrors.userTimeZone && (
+                        <p role="alert" style={styles.fieldError}>{contactErrors.userTimeZone}</p>
+                      )}
                     </div>
                   </div>
 
@@ -2055,7 +2106,9 @@ export default function LandingPage() {
                     </div>
 
                     <div style={styles.formGroup}>
-                      <label style={styles.formLabel} htmlFor="contact-subject">Subject</label>
+                      <label style={styles.formLabel} htmlFor="contact-subject">
+                        Subject <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
+                      </label>
                       <div style={{ position: "relative", width: "100%" }}>
                         <select 
                           id="contact-subject"
@@ -2100,7 +2153,9 @@ export default function LandingPage() {
                   </div>
                   
                   <div style={styles.formGroup}>
-                    <label style={styles.formLabel} htmlFor="contact-message">Message</label>
+                    <label style={styles.formLabel} htmlFor="contact-message">
+                      Message <span style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
+                    </label>
                     <textarea 
                       id="contact-message"
                       name="message"
