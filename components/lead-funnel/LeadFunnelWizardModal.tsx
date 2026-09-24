@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { useLeadFunnel } from "../../app/providers/LeadFunnelProvider";
@@ -22,11 +22,40 @@ export default function LeadFunnelWizardModal({ isOpen, onClose }: LeadFunnelWiz
         ? "Tell us about your project"
         : "You're all set";
 
+  const headerAction =
+    leadWizardStep === "details" ? (
+      <button
+        type="button"
+        onClick={() => setLeadWizardStep("services")}
+        className="wsd-modal-back-btn"
+        aria-label="Back to services"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          padding: "5px 12px",
+          borderRadius: "8px",
+          fontSize: "12.5px",
+          fontWeight: 500,
+          color: "var(--text-secondary)",
+          background: "var(--bg-secondary)",
+          border: "1px solid var(--border-color)",
+          cursor: "pointer",
+          transition: "all 0.15s ease",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <ArrowLeft size={14} />
+        <span className="wsd-modal-back-text">Back to services</span>
+      </button>
+    ) : undefined;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      headerAction={headerAction}
       maxWidth={leadWizardStep === "details" ? "920px" : "960px"}
       footer={
         leadWizardStep === "success" ? (
@@ -41,7 +70,6 @@ export default function LeadFunnelWizardModal({ isOpen, onClose }: LeadFunnelWiz
         {leadWizardStep === "details" && (
           <LeadFormClient
             variant="wizard"
-            onBack={() => setLeadWizardStep("services")}
             onSuccess={() => setLeadWizardStep("success")}
           />
         )}

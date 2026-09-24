@@ -10,6 +10,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  headerAction?: React.ReactNode;
   maxWidth?: string;
   // Optional CSS custom properties applied to the dialog box itself. Needed
   // for callers that render inside a scoped theme subtree (e.g. the Software
@@ -23,6 +24,7 @@ export default function Modal({
   title,
   children,
   footer,
+  headerAction,
   maxWidth = "500px",
   containerStyle,
 }: ModalProps) {
@@ -89,11 +91,12 @@ export default function Modal({
         {/* Header */}
         <div
           style={{
-            padding: "20px 24px",
+            padding: "16px 24px",
             borderBottom: "1px solid var(--border-color)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: "12px",
           }}
         >
           <h2
@@ -106,25 +109,28 @@ export default function Modal({
           >
             {title}
           </h2>
-          <button
-            onClick={onClose}
-            type="button"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--text-secondary)",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "color 0.2s ease",
-            }}
-            className="wsd-modal-close"
-            aria-label="Close dialog"
-          >
-            <X size={20} />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            {headerAction}
+            <button
+              onClick={onClose}
+              type="button"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-secondary)",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "color 0.2s ease",
+              }}
+              className="wsd-modal-close"
+              aria-label="Close dialog"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -162,9 +168,19 @@ export default function Modal({
         .wsd-modal-close:hover {
           color: var(--text-primary) !important;
         }
+        .wsd-modal-back-btn:hover {
+          background-color: var(--bg-hover, rgba(0, 0, 0, 0.08)) !important;
+          color: var(--text-primary) !important;
+          border-color: var(--text-secondary) !important;
+        }
         @media (max-width: 640px) {
           .wsd-responsive-modal {
             border-radius: 20px !important;
+          }
+        }
+        @media (max-width: 520px) {
+          .wsd-modal-back-text {
+            display: none !important;
           }
         }
       `}</style>
