@@ -25,6 +25,7 @@ import API from "@/core/services/apiService";
 import Modal from "@/components/ui/Modal";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { ViewModeToggle } from "@/components/ui/ViewModeToggle";
+import { getStoredUser, AuthUser } from "@/lib/auth";
 
 interface Payment {
   _id: string;
@@ -60,6 +61,13 @@ export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [isDownloadingReceipt, setIsDownloadingReceipt] = useState(false);
   const [downloadError, setDownloadError] = useState("");
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  const isAdmin = user?.role === "admin";
 
   // CRUD State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -315,31 +323,41 @@ export default function PaymentsPage() {
   }
 
   return (
-    <div style={styles.container} className="wsd-page admin-panel-scope">
+    <div style={styles.container} className="wsd-page admin-panel-scope payments-page">
       {/* Header */}
       <div style={styles.header} className="wsd-page-header payments-page-header">
-        <div style={styles.headerTitleBlock} className="payments-title-block">
-          <h1 style={styles.title} className="payments-title">Payments</h1>
-          <p style={styles.subtitle} className="payments-subtitle">Track, record, and manage all client transactions</p>
-        </div>
 
-        {/* Top & Middle Search */}
-        <div style={styles.middleSearchWrap} className="payments-middle-search">
-          <div style={styles.searchBox} className="admin-search-box wsd-search-box payments-search-box">
-            <Search size={18} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
-            <input
-              type="text"
-              placeholder="Search by invoice #, client, or transaction ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={styles.searchInput}
-              className="admin-search-input"
-            />
+        {/* Row 1: Title + Record Payment button (Admin only) */}
+        <div className="payments-title-row">
+          <div className="payments-title-block">
+            <h1 style={styles.title} className="payments-title">Payments</h1>
+            <p style={styles.subtitle} className="payments-subtitle">
+              {isAdmin ? "Track, record, and manage all client transactions" : "View your payment history and download receipts"}
+            </p>
           </div>
+          {isAdmin && (
+            <button onClick={handleOpenCreate} style={styles.primaryBtn} className="admin-primary-btn payments-record-btn">
+              <Plus size={16} />
+              <span>Record Payment</span>
+            </button>
+          )}
         </div>
 
-        {/* Right Actions */}
-        <div style={styles.headerButtons} className="wsd-page-actions payments-header-actions">
+        {/* Row 2: Search + View Toggle + Filter */}
+        <div className="payments-search-controls-row">
+          <div style={styles.middleSearchWrap} className="payments-middle-search">
+            <div style={styles.searchBox} className="admin-search-box wsd-search-box payments-search-box">
+              <Search size={18} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Search by invoice #, client, or transaction ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={styles.searchInput}
+                className="admin-search-input"
+              />
+            </div>
+          </div>
           <ViewModeToggle value={viewMode} onChange={setViewMode} className="payments-view-toggle" />
           <select
             value={filterStatus}
@@ -353,11 +371,8 @@ export default function PaymentsPage() {
             <option value="failed">Failed</option>
             <option value="refunded">Refunded</option>
           </select>
-          <button onClick={handleOpenCreate} style={styles.primaryBtn} className="admin-primary-btn">
-            <Plus size={16} />
-            <span>Record Payment</span>
-          </button>
         </div>
+
       </div>
 
       {actionMessage && (
@@ -425,7 +440,7 @@ export default function PaymentsPage() {
 
       {/* Payments List */}
       {filteredPayments.length === 0 ? (
-        <div style={styles.emptyState}>
+        <div style={styles.emptyState} className="payments-empty-state">
           <CreditCard size={64} color="var(--text-secondary)" />
           <h3 style={{color: 'var(--text-primary)'}}>No payments found</h3>
           <p style={{color: 'var(--text-secondary)'}}>Record a new payment to begin tracking transactions.</p>
@@ -475,22 +490,26 @@ export default function PaymentsPage() {
                 >
                   <Download size={14} /> Receipt
                 </button>
-                <button
-                  style={styles.editButton}
-                  className="action-btn"
-                  onClick={() => handleOpenEdit(payment)}
-                  title="Edit Payment"
-                >
-                  <Edit2 size={14} />
-                </button>
-                <button
-                  style={styles.deleteButton}
-                  className="action-btn"
-                  onClick={() => setDeleteTarget(payment)}
-                  title="Delete Payment"
-                >
-                  <Trash2 size={14} />
-                </button>
+                {isAdmin && (
+                  <>
+                    <button
+                      style={styles.editButton}
+                      className="action-btn"
+                      onClick={() => handleOpenEdit(payment)}
+                      title="Edit Payment"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      style={styles.deleteButton}
+                      className="action-btn"
+                      onClick={() => setDeleteTarget(payment)}
+                      title="Delete Payment"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}
@@ -539,12 +558,16 @@ export default function PaymentsPage() {
                       >
                         <Download size={14} />
                       </button>
-                      <button style={styles.editButton} className="action-btn" onClick={() => handleOpenEdit(payment)}>
-                        <Edit2 size={14} />
-                      </button>
-                      <button style={styles.deleteButton} className="action-btn" onClick={() => setDeleteTarget(payment)}>
-                        <Trash2 size={14} />
-                      </button>
+                      {isAdmin && (
+                        <>
+                          <button style={styles.editButton} className="action-btn" onClick={() => handleOpenEdit(payment)} title="Edit Payment">
+                            <Edit2 size={14} />
+                          </button>
+                          <button style={styles.deleteButton} className="action-btn" onClick={() => setDeleteTarget(payment)} title="Delete Payment">
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -796,41 +819,214 @@ export default function PaymentsPage() {
           transform: translateY(-1px);
           opacity: 0.8;
         }
+        /* Desktop layout (>900px): Single clean row with Title, Search, and Action Controls */
+        @media (min-width: 901px) {
+          .payments-page-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            flex-wrap: nowrap !important;
+          }
+          .payments-title-row {
+            display: contents !important;
+          }
+          .payments-title-block {
+            order: 1 !important;
+            flex-shrink: 0 !important;
+          }
+          .payments-search-controls-row {
+            display: contents !important;
+          }
+          .payments-middle-search {
+            order: 2 !important;
+            flex: 1 !important;
+            max-width: 650px !important;
+            min-width: 280px !important;
+            margin: 0 20px !important;
+          }
+          .payments-search-box {
+            height: 44px !important;
+            padding: 0 16px !important;
+            border-radius: 12px !important;
+          }
+          .payments-search-box input {
+            font-size: 14px !important;
+          }
+          .payments-view-toggle {
+            order: 3 !important;
+            flex-shrink: 0 !important;
+          }
+          .payments-filter-select {
+            order: 4 !important;
+            flex-shrink: 0 !important;
+            height: 44px !important;
+            padding: 0 14px !important;
+            border-radius: 12px !important;
+          }
+          .payments-record-btn {
+            order: 5 !important;
+            flex-shrink: 0 !important;
+            height: 44px !important;
+          }
+        }
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
         @media (max-width: 900px) {
-          .payments-page-header {
-            display: grid !important;
-            grid-template-columns: 1fr auto !important;
-            gap: 12px 8px !important;
-            align-items: center !important;
-            width: 100% !important;
+          .payments-page {
+            padding: 16px 12px 24px !important;
           }
-          .payments-title-block {
-            grid-column: 1 / -1 !important;
+          .payments-page-header {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            width: 100% !important;
+            margin-bottom: 14px !important;
+          }
+          /* Title + button: same row, space-between */
+          .payments-title-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
             width: 100% !important;
           }
           .payments-title {
-            font-size: 24px !important;
-            margin-bottom: 2px !important;
+            font-size: 18px !important;
+            margin-bottom: 1px !important;
+            line-height: 1.2 !important;
           }
           .payments-subtitle {
-            font-size: 13px !important;
+            font-size: 11px !important;
+            line-height: 1.25 !important;
+            color: var(--text-secondary) !important;
+          }
+          .payments-record-btn {
+            height: 32px !important;
+            padding: 0 10px !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            gap: 4px !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+          }
+          .payments-record-btn span {
+            display: inline !important;
+          }
+          .payments-record-btn svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+
+          /* Search + toggle + filter = one row, uniform compact 32px height */
+          .payments-search-controls-row {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 6px !important;
+            width: 100% !important;
           }
           .payments-middle-search {
-            grid-column: 1 !important;
-            grid-row: 2 !important;
-            width: 100% !important;
+            flex: 1 !important;
             min-width: 0 !important;
+            max-width: none !important;
           }
           .payments-search-box {
             width: 100% !important;
+            height: 32px !important;
+            padding: 0 8px !important;
+            border-radius: 8px !important;
+            gap: 6px !important;
           }
-          .payments-header-actions {
-            grid-column: 2 !important;
-            grid-row: 2 !important;
-            justify-self: end !important;
+          .payments-search-box svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .payments-search-box input {
+            font-size: 12px !important;
+          }
+          .payments-view-toggle {
+            height: 32px !important;
+            padding: 2px !important;
+            border-radius: 8px !important;
+            gap: 2px !important;
+            flex-shrink: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+          }
+          .payments-view-toggle button {
+            padding: 4px 6px !important;
+            height: 26px !important;
+            border-radius: 6px !important;
+          }
+          .payments-view-toggle svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .payments-filter-select {
+            height: 32px !important;
+            padding: 0 6px !important;
+            font-size: 11px !important;
+            border-radius: 8px !important;
+            max-width: 105px !important;
+            flex-shrink: 0 !important;
+          }
+
+          /* 4 stat cards in one row - compact and cleanly scaled */
+          .payments-stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 6px !important;
+            margin-bottom: 12px !important;
+          }
+          .payment-stat-card {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            padding: 8px 3px !important;
+            gap: 4px !important;
+            border-radius: 10px !important;
+          }
+          .stat-icon-wrap {
+            width: 24px !important;
+            height: 24px !important;
+            border-radius: 6px !important;
+          }
+          .stat-icon-wrap svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .payment-stat-val {
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.3px !important;
+            line-height: 1.15 !important;
+          }
+          .payment-stat-lbl {
+            font-size: 8px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0px !important;
+            line-height: 1.1 !important;
+            margin-top: 1px !important;
+            opacity: 0.8 !important;
+          }
+
+          /* Compact empty state on mobile */
+          .payments-empty-state {
+            padding: 36px 16px !important;
+            border-radius: 16px !important;
+          }
+          .payments-empty-state svg {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .payments-empty-state h3 {
+            font-size: 15px !important;
+            margin: 10px 0 4px !important;
+          }
+          .payments-empty-state p {
+            font-size: 12px !important;
           }
         }
       `}</style>
@@ -870,8 +1066,8 @@ const styles: any = {
   },
   middleSearchWrap: {
     flex: 1,
-    maxWidth: "400px",
-    minWidth: "200px",
+    maxWidth: "650px",
+    minWidth: "280px",
   },
   searchBox: {
     display: "flex",
