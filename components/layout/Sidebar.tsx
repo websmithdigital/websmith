@@ -261,7 +261,7 @@ export default function Sidebar({
       <div
         style={styles.profileSection}
         onClick={() => router.push(`${basePath}/profile`)}
-        className="profile-section-hover"
+        className="profile-section-hover sidebar-profile-section"
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
@@ -271,26 +271,26 @@ export default function Sidebar({
           }
         }}
       >
-        <div style={styles.profileAvatar}>
+        <div style={styles.profileAvatar} className="sidebar-profile-avatar">
           {user?.avatar ? (
             <img src={user.avatar} alt="" style={styles.avatarImg} />
           ) : (
             <User size={18} color="#8e8e93" />
           )}
         </div>
-        <div style={styles.profileInfo}>
-          <span style={styles.profileName}>{user?.name || "User"}</span>
-          <span style={styles.profileEmail}>{user?.email || "user@example.com"}</span>
+        <div style={styles.profileInfo} className="sidebar-profile-info">
+          <span style={styles.profileName} className="sidebar-profile-name">{user?.name || "User"}</span>
+          <span style={styles.profileEmail} className="sidebar-profile-email">{user?.email || "user@example.com"}</span>
         </div>
         <ChevronRight size={14} color="#8e8e93" />
       </div>
 
-      <div style={styles.quickActions}>
-        <button type="button" onClick={toggleTheme} style={styles.themeToggleButton} aria-label="Toggle theme">
+      <div style={styles.quickActions} className="sidebar-quick-actions">
+        <button type="button" onClick={toggleTheme} style={styles.themeToggleButton} className="sidebar-theme-btn" aria-label="Toggle theme">
           <span style={styles.themeEmoji} aria-hidden="true">{theme === "light" ? "🌙" : "☀️"}</span>
           <span>{theme === "light" ? "Dark" : "Light"}</span>
         </button>
-        <button type="button" onClick={handleLogout} style={styles.logoutButton} className="logout-button-hover">
+        <button type="button" onClick={handleLogout} style={styles.logoutButton} className="logout-button-hover sidebar-logout-btn">
           <LogOut size={14} />
           <span>Log Out</span>
         </button>
@@ -311,6 +311,7 @@ export default function Sidebar({
                 key={item.name}
                 href={item.path}
                 onClick={onNavigate}
+                className={`sidebar-nav-link ${isActive ? "sidebar-nav-link-active" : ""}`}
                 style={{
                   ...styles.link,
                   ...(isActive ? styles.activeLink : {}),
@@ -469,6 +470,56 @@ export default function Sidebar({
           /* Hide logo block on mobile — topbar already shows branding */
           .sidebar-logo-container {
             display: none !important;
+          }
+          /* Mobile compaction for sidebar */
+          .sidebar-profile-section {
+            padding: 4px 8px !important;
+            margin-bottom: 4px !important;
+            gap: 6px !important;
+            border-radius: 8px !important;
+          }
+          .sidebar-profile-avatar {
+            width: 24px !important;
+            height: 24px !important;
+          }
+          .sidebar-profile-avatar svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .sidebar-profile-name {
+            font-size: 11.5px !important;
+          }
+          .sidebar-profile-email {
+            font-size: 9.5px !important;
+          }
+          .sidebar-quick-actions {
+            gap: 4px !important;
+            margin-bottom: 4px !important;
+          }
+          .sidebar-theme-btn,
+          .sidebar-logout-btn {
+            padding: 3px 6px !important;
+            font-size: 9.5px !important;
+            border-radius: 6px !important;
+            height: 26px !important;
+          }
+          .sidebar-theme-btn svg,
+          .sidebar-logout-btn svg {
+            width: 11px !important;
+            height: 11px !important;
+          }
+          .sidebar-nav-link {
+            padding: 6px 9px !important;
+            margin-bottom: 2px !important;
+            font-size: 12px !important;
+            border-radius: 7px !important;
+          }
+          .sidebar-nav-link svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .app-sidebar {
+            padding: 6px 8px 14px !important;
           }
         }
         @media (max-width: 480px) {

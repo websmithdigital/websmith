@@ -418,6 +418,169 @@ main.app-main-shell[data-shell="panel"] .app-main-scroll {
   }
 }
 
+/* ============================================================
+   ADMIN PAGES COMPACT MOBILE VIEW (<900px)
+   Applies to all 14 admin pages scoped under .admin-panel-scope
+   ============================================================ */
+@media (max-width: 900px) {
+  /* Compact container padding — overrides inline styles */
+  .admin-panel-scope,
+  .wsd-page.admin-panel-scope,
+  div.admin-panel-scope {
+    padding: 14px 12px 24px !important;
+  }
+
+  /* Compact header typography and spacing */
+  .admin-panel-scope .wsd-page-header {
+    margin-bottom: 12px !important;
+    gap: 8px !important;
+  }
+  .admin-panel-scope .wsd-page-header h1,
+  .admin-panel-scope h1 {
+    font-size: 20px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+    letter-spacing: -0.4px !important;
+  }
+  .admin-panel-scope .wsd-page-header p,
+  .admin-panel-scope .wsd-page-header .subtitle,
+  .admin-panel-scope p.subtitle {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    color: var(--text-secondary) !important;
+  }
+
+  /* Compact primary and action buttons */
+  .admin-panel-scope .admin-primary-btn,
+  .admin-panel-scope .add-btn,
+  .admin-panel-scope .create-btn,
+  .admin-panel-scope button.admin-primary-btn {
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+  }
+  .admin-panel-scope .admin-primary-btn svg,
+  .admin-panel-scope .add-btn svg,
+  .admin-panel-scope .create-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Compact search box and input */
+  .admin-panel-scope .admin-search-box,
+  .admin-panel-scope .wsd-search-box {
+    height: 32px !important;
+    padding: 0 8px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+  }
+  .admin-panel-scope .admin-search-box svg,
+  .admin-panel-scope .wsd-search-box svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .admin-panel-scope .admin-search-input,
+  .admin-panel-scope .wsd-search-box input {
+    font-size: 12px !important;
+  }
+
+  /* Compact dropdown selects */
+  .admin-panel-scope select {
+    height: 32px !important;
+    font-size: 11px !important;
+    padding: 0 8px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Compact header action row */
+  .admin-panel-scope .wsd-page-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: auto !important;
+  }
+  .admin-panel-scope .wsd-page-actions > * {
+    flex: initial !important;
+    width: auto !important;
+  }
+
+  /* Compact 4-stat cards in 1 row */
+  .admin-panel-scope .wsd-grid-tiles {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+  .admin-panel-scope .wsd-grid-tiles .wsd-unified-card {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 8px 3px !important;
+    gap: 4px !important;
+    border-radius: 10px !important;
+  }
+  .admin-panel-scope .wsd-grid-tiles .wsd-unified-card > div:first-child {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+  }
+  .admin-panel-scope .wsd-grid-tiles .wsd-unified-card svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+  .admin-panel-scope .wsd-grid-tiles .wsd-unified-card > div:last-child > div:first-child {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.15 !important;
+  }
+  .admin-panel-scope .wsd-grid-tiles .wsd-unified-card > div:last-child > div:last-child {
+    font-size: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0px !important;
+    line-height: 1.1 !important;
+    margin-top: 1px !important;
+    opacity: 0.8 !important;
+  }
+
+  /* Compact filter tabs row */
+  .admin-panel-scope .wsd-chip-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 4px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-panel-scope .wsd-chip-row button {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    border-radius: 6px !important;
+  }
+
+  /* Dashboard-specific stats grid compaction */
+  .admin-panel-scope .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+  .admin-panel-scope .dashboard-stats-grid .admin-dashboard-card,
+  .admin-panel-scope .dashboard-stats-grid .cardContent {
+    padding: 8px 10px !important;
+  }
+  .admin-panel-scope .dashboard-header {
+    margin-bottom: 10px !important;
+  }
+}
+
 /* Animations for Login Page */
 @keyframes fadeInUp {
   from {
