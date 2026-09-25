@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Sidebar from "../components/layout/Sidebar";
 import ForcedPasswordResetModal from "@/components/auth/ForcedPasswordResetModal";
 import { default as dynamic } from "next/dynamic";
@@ -165,11 +166,24 @@ function ClientLayoutInner({ children }: { children: React.ReactNode }) {
               >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
+              <div style={styles.mobileTopbarLogoWrap}>
+                <Image
+                  src="/images/icon.png"
+                  alt="Websmith"
+                  width={34}
+                  height={34}
+                  style={styles.mobileTopbarIcon}
+                  priority
+                />
+              </div>
               <div style={styles.mobileTopbarText}>
-                <span style={styles.mobileTopbarTitle}>Websmith</span>
-                <span style={styles.mobileTopbarSubtitle}>
-                  {mounted ? (user?.role || "workspace") : "workspace"}
-                </span>
+                <span style={styles.mobileTopbarTitle}>Websmith Digital</span>
+                <div style={styles.mobileTopbarBadgeRow}>
+                  <span style={styles.mobileTopbarBadge}>
+                    {mounted ? (user?.role || "workspace") : "workspace"}
+                  </span>
+                  <span style={styles.mobileTopbarPanelLabel}>panel</span>
+                </div>
               </div>
             </div>
             <Sidebar mobileOpen={isMobileMenuOpen} onNavigate={() => setIsMobileMenuOpen(false)} />
@@ -305,16 +319,17 @@ const styles: any = {
     right: 0,
     zIndex: 1201,
     alignItems: "center",
-    gap: "12px",
-    padding: "14px 16px",
+    gap: "10px",
+    padding: "12px 14px",
     minHeight: "69px",
-    backgroundColor: "var(--bg-secondary)",
-    borderBottom: "1px solid var(--border-color)",
+    backgroundColor: "var(--bg-primary)",
+    /* No borderBottom — sidebar flows directly below as one unified panel */
+    /* No boxShadow here — we let the sidebar's right-shadow define the panel edge */
   },
   mobileMenuButton: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "12px",
+    width: "38px",
+    height: "38px",
+    borderRadius: "10px",
     border: "1px solid var(--border-color)",
     backgroundColor: "var(--bg-primary)",
     color: "var(--text-primary)",
@@ -324,21 +339,54 @@ const styles: any = {
     cursor: "pointer",
     flexShrink: 0,
   },
+  mobileTopbarLogoWrap: {
+    width: "34px",
+    height: "34px",
+    borderRadius: "9px",
+    overflow: "hidden",
+    flexShrink: 0,
+    border: "1px solid var(--border-color)",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  mobileTopbarIcon: {
+    width: "34px",
+    height: "34px",
+    objectFit: "cover",
+    display: "block",
+  },
   mobileTopbarText: {
     display: "flex",
     flexDirection: "column",
     minWidth: 0,
+    flex: 1,
   },
   mobileTopbarTitle: {
-    fontSize: "16px",
-    fontWeight: 600,
+    fontSize: "14px",
+    fontWeight: 700,
     color: "var(--text-primary)",
     lineHeight: 1.2,
+    letterSpacing: "-0.2px",
   },
-  mobileTopbarSubtitle: {
-    fontSize: "12px",
-    color: "var(--text-secondary)",
+  mobileTopbarBadgeRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    marginTop: "2px",
+  },
+  mobileTopbarBadge: {
+    fontSize: "10px",
+    fontWeight: 600,
+    color: "var(--accent-color, #007aff)",
+    backgroundColor: "rgba(0, 122, 255, 0.1)",
+    borderRadius: "4px",
+    padding: "1px 5px",
     textTransform: "capitalize",
+    lineHeight: 1.4,
+  },
+  mobileTopbarPanelLabel: {
+    fontSize: "10px",
+    color: "var(--text-secondary)",
+    lineHeight: 1.4,
   },
   mobileOverlay: {
     display: "none",

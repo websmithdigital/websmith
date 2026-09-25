@@ -235,8 +235,8 @@ export default function Sidebar({
 
   return (
     <div className={`app-sidebar ${mobileOpen ? "app-sidebar-open" : ""}`} style={styles.sidebar}>
-      <div style={styles.logoContainer}>
-        <div style={styles.maskCircle} className="logo-image-hover">
+      <div style={styles.logoContainer} className="sidebar-logo-container">
+        <div style={styles.maskCircle} className="logo-image-hover sidebar-logo-icon-wrap">
           <Image
             src={sidebarLogo.managed ? sidebarLogo.url : "/images/icon.png"}
             alt="Websmith Digital Logo"
@@ -247,7 +247,7 @@ export default function Sidebar({
             priority={true}
           />
         </div>
-        <div className="logo-text-hover" style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "4px" }}>
+        <div className="logo-text-hover sidebar-wordmark" style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "4px" }}>
           <Image
             src="/images/wordmark1.png"
             alt="Websmith Digital"
@@ -443,21 +443,37 @@ export default function Sidebar({
             overflow-x: hidden;
             overflow-y: auto !important;
             -webkit-overflow-scrolling: touch;
-            border-top: 1px solid var(--border-color);
+            /* No border-top — sidebar merges flush with topbar */
+            border-top: none !important;
+            /* Subtle right border to define the panel edge */
+            border-right: 1px solid var(--border-color) !important;
+            border-left: none !important;
             visibility: hidden;
             pointer-events: none;
+            /* --bg-primary (white) matches topbar for one unified color */
+            background: var(--bg-primary) !important;
+            background-color: var(--bg-primary) !important;
+            padding-top: 8px !important;
           }
           .app-sidebar.app-sidebar-open {
             transform: translateX(0);
             visibility: visible !important;
             pointer-events: auto !important;
-            box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+            box-shadow: 4px 0 32px rgba(0,0,0,0.18);
+            background: var(--bg-primary) !important;
+            background-color: var(--bg-primary) !important;
+          }
+          /* Hide logo block on mobile — topbar already shows branding */
+          .sidebar-logo-container {
+            display: none !important;
           }
         }
         @media (max-width: 480px) {
           .app-sidebar {
             width: min(88vw, 320px) !important;
             min-width: 0 !important;
+            background: var(--bg-primary) !important;
+            background-color: var(--bg-primary) !important;
           }
         }
         @media (min-width: 901px) and (max-height: 800px) {
