@@ -85,7 +85,7 @@ export default function ClientNotificationsPage() {
 
   if (loading) {
     return (
-      <div style={styles.container} className="wsd-page">
+      <div style={styles.container} className="wsd-page admin-panel-scope client-notifications-page">
         <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
           <p>Loading notifications...</p>
@@ -96,12 +96,12 @@ export default function ClientNotificationsPage() {
 
   return (
     <div style={styles.container} className="wsd-page">
-      <div style={styles.header}>
-        <div>
+      <div style={styles.header} className="wsd-page-header client-notifications-header">
+        <div style={styles.headerTitleBlock} className="client-notifications-title-block">
           <h1 style={styles.title}>Notifications</h1>
           <p style={styles.subtitle}>Track project assignment updates and account activity</p>
         </div>
-        <div style={styles.headerActions}>
+        <div style={styles.headerActions} className="wsd-page-actions client-notifications-actions">
           <button
             onClick={markAllAsRead}
             style={styles.markReadBtn}
@@ -231,6 +231,26 @@ export default function ClientNotificationsPage() {
       </div>
 
       <style>{`
+        @media (max-width: 768px) {
+          .client-notifications-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .client-notifications-actions {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: space-between !important;
+          }
+          .client-notifications-actions > button {
+            flex: 1 !important;
+            justify-content: center !important;
+          }
+          .notification-item {
+            padding: 12px 14px !important;
+            gap: 10px !important;
+          }
+        }
         .notification-item {
           transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }

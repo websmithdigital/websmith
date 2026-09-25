@@ -152,13 +152,13 @@ export default function SettingsPage() {
   return (
     <div style={styles.container} className="wsd-page admin-panel-scope">
       {/* Header */}
-      <div style={styles.header}>
+      <div style={styles.header} className="wsd-page-header settings-header">
         <h1 style={styles.title}>Settings</h1>
         <p style={styles.subtitle}>Manage your account and preferences</p>
       </div>
 
       {/* Tabs */}
-      <div style={styles.tabsContainer}>
+      <div style={styles.tabsContainer} className="wsd-chip-row settings-tabs-container">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -167,7 +167,7 @@ export default function SettingsPage() {
               ...styles.tab,
               ...(activeTab === tab.id ? styles.tabActive : {})
             }}
-            className="tab-hover"
+            className="tab-hover settings-tab"
           >
             <tab.icon size={18} />
             <span>{tab.label}</span>
@@ -188,12 +188,12 @@ export default function SettingsPage() {
       )}
 
       {/* Tab Content */}
-      <div style={styles.content} className="wsd-form-card">
+      <div style={styles.content} className="wsd-form-card settings-content-card">
         {/* Profile Tab */}
         {activeTab === "profile" && (
           <div style={styles.profileTab}>
-            <div style={styles.profileSummaryCard}>
-              <div style={styles.avatarLarge}>
+            <div style={styles.profileSummaryCard} className="settings-profile-summary">
+              <div style={styles.avatarLarge} className="profile-avatar-wrap">
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.name} style={styles.avatarImg} />
                 ) : (
@@ -213,7 +213,7 @@ export default function SettingsPage() {
               <button 
                 onClick={() => router.push(`/${user.role}/profile`)}
                 style={styles.updateButton}
-                className="save-btn"
+                className="save-btn settings-update-btn"
               >
                 <Edit3 size={18} />
                 <span>Update Profile Details</span>
@@ -318,6 +318,44 @@ export default function SettingsPage() {
 
       </div>
       <style>{`
+        @media (max-width: 768px) {
+          .settings-header {
+            margin-bottom: 20px !important;
+          }
+          .settings-header h1 {
+            font-size: 26px !important;
+          }
+          .settings-tabs-container {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            flex-wrap: nowrap !important;
+            padding-bottom: 6px !important;
+            margin-bottom: 20px !important;
+          }
+          .settings-tab {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            padding: 8px 12px !important;
+            font-size: 13px !important;
+          }
+          .settings-content-card {
+            padding: 16px !important;
+            border-radius: 18px !important;
+          }
+          .settings-profile-summary {
+            flex-direction: column !important;
+            text-align: center !important;
+            padding: 18px 14px !important;
+            gap: 14px !important;
+          }
+          .settings-profile-summary .profile-avatar-wrap {
+            margin: 0 auto !important;
+          }
+          .settings-update-btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
         .tab-hover { transition: all 0.25s ease; }
         .tab-hover:hover { background-color: var(--bg-secondary); transform: translateY(-1px); }
         .input-focus:focus { border-color: #007AFF !important; box-shadow: 0 0 0 4px rgba(0,122,255,0.1) !important; }

@@ -306,11 +306,11 @@ export default function ProfilePageContent() {
   const isDeveloperPanel = activePanel === "Developer";
 
   return (
-    <div style={styles.page} className="wsd-page admin-panel-scope">
-      <div style={styles.heroCard}>
+    <div style={styles.page} className="wsd-page admin-panel-scope client-profile-page">
+      <div style={styles.heroCard} className="profile-hero-card">
         <div style={styles.heroGradient} />
-        <div style={styles.heroContent}>
-          <div style={styles.heroAvatarWrap}>
+        <div style={styles.heroContent} className="profile-hero-content">
+          <div style={styles.heroAvatarWrap} className="profile-avatar-wrap">
             {avatarSrc ? (
               <img src={avatarSrc} alt={user.name} style={styles.heroAvatar} />
             ) : (
@@ -337,10 +337,10 @@ export default function ProfilePageContent() {
             />
           </div>
 
-          <div style={styles.heroText}>
+          <div style={styles.heroText} className="profile-hero-text">
             <h1 style={styles.title}>{user.name}</h1>
             <p style={styles.subtitle}>{user.email}</p>
-            <div style={styles.heroMetaRow}>
+            <div style={styles.heroMetaRow} className="profile-hero-meta">
               <span style={styles.roleBadge}>{user.role.toUpperCase()}</span>
               <span style={styles.metaPill}>Member since {joinedLabel}</span>
               <span style={styles.metaPill}>Account ID {accountId}</span>
@@ -354,7 +354,7 @@ export default function ProfilePageContent() {
 
       <div style={styles.grid}>
         <section style={styles.primaryColumn}>
-          <div style={styles.card}>
+          <div style={styles.card} className="wsd-unified-card profile-card">
             <div style={styles.cardHeader}>
               <div style={styles.cardHeaderTitle}>
                 <User size={18} />
@@ -599,6 +599,28 @@ export default function ProfilePageContent() {
           )}
         </section>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .profile-hero-content {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            padding: 0 16px 20px !important;
+            margin-top: -46px !important;
+          }
+          .profile-hero-text {
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          .profile-hero-text h1 {
+            font-size: 24px !important;
+          }
+          .profile-hero-meta {
+            justify-content: center !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

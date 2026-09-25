@@ -350,58 +350,58 @@ export default function ClientInvoicesPage() {
   }
 
   return (
-    <div style={styles.container} className="wsd-page">
+    <div style={styles.container} className="wsd-page admin-panel-scope client-invoices-page">
       {/* Header */}
-      <div style={styles.header}>
-        <div>
+      <div style={styles.header} className="wsd-page-header client-invoices-header">
+        <div style={styles.headerTitleBlock} className="client-invoices-title-block">
           <h1 style={styles.title}>My Invoices</h1>
           <p style={styles.subtitle}>Review your billing history and manage payments</p>
+        </div>
+
+        {/* Top & Middle Search - spans across middle on desktop like Tasks */}
+        <div style={styles.middleSearchWrap} className="client-invoices-middle-search">
+          <div style={styles.searchWrapper} className="admin-search-box wsd-search-box client-invoices-search">
+            <Search size={18} style={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search by invoice number (#)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+              className="input-focus"
+            />
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div style={styles.statsGrid}>
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(0, 122, 255, 0.1)" }}>
+      <div style={styles.statsGrid} className="wsd-grid-tiles client-invoices-stats">
+        <div style={styles.statCard} className="wsd-unified-card invoice-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(0, 122, 255, 0.1)" }} className="stat-icon-wrap">
             <FileText size={22} color="#007AFF" />
           </div>
           <div>
-            <div style={styles.statValue}>{stats.total}</div>
-            <div style={styles.statLabel}>Total Invoices</div>
+            <div style={styles.statValue} className="invoice-stat-val">{stats.total}</div>
+            <div style={styles.statLabel} className="invoice-stat-lbl">Total Invoices</div>
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(255, 59, 48, 0.1)" }}>
+        <div style={styles.statCard} className="wsd-unified-card invoice-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(255, 59, 48, 0.1)" }} className="stat-icon-wrap">
             <AlertCircle size={22} color="#FF3B30" />
           </div>
           <div>
-            <div style={styles.statValue}>{formatCurrency(stats.totalDue)}</div>
-            <div style={styles.statLabel}>Total Outstanding</div>
+            <div style={styles.statValue} className="invoice-stat-val">{formatCurrency(stats.totalDue)}</div>
+            <div style={styles.statLabel} className="invoice-stat-lbl">Total Outstanding</div>
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(52, 199, 89, 0.1)" }}>
+        <div style={styles.statCard} className="wsd-unified-card invoice-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(52, 199, 89, 0.1)" }} className="stat-icon-wrap">
             <CheckCircle size={22} color="#34C759" />
           </div>
           <div>
-            <div style={styles.statValue}>{formatCurrency(stats.totalPaid)}</div>
-            <div style={styles.statLabel}>Total Paid</div>
+            <div style={styles.statValue} className="invoice-stat-val">{formatCurrency(stats.totalPaid)}</div>
+            <div style={styles.statLabel} className="invoice-stat-lbl">Total Paid</div>
           </div>
-        </div>
-      </div>
-
-      {/* Search Bar */}
-      <div style={styles.searchSection}>
-        <div style={styles.searchWrapper}>
-          <Search size={18} style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search by invoice number (#)..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={styles.searchInput}
-            className="input-focus"
-          />
         </div>
       </div>
 
@@ -415,7 +415,7 @@ export default function ClientInvoicesPage() {
       ) : (
         <div style={styles.listContainer}>
           {filteredInvoices.map((invoice) => (
-            <div key={invoice._id} style={styles.invoiceCard} className="invoice-card">
+            <div key={invoice._id} style={styles.invoiceCard} className="invoice-card wsd-unified-card">
               <div style={styles.cardHeader}>
                 <div style={styles.cardInfo}>
                   <div style={styles.invNum}>{invoice.invoiceNumber}</div>
@@ -514,6 +514,50 @@ export default function ClientInvoicesPage() {
           box-shadow: 0 8px 20px rgba(0,122,255,0.25);
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 900px) {
+          .client-invoices-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .client-invoices-middle-search {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .client-invoices-stats {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px !important;
+          }
+          .invoice-stat-card {
+            padding: 8px 4px !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 3px !important;
+            border-radius: 12px !important;
+          }
+          .invoice-stat-card .stat-icon-wrap {
+            width: 26px !important;
+            height: 26px !important;
+            border-radius: 7px !important;
+          }
+          .invoice-stat-card svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .invoice-stat-val {
+            font-size: 13px !important;
+          }
+          .invoice-stat-lbl {
+            font-size: 9px !important;
+          }
+          .invoice-card {
+            padding: 14px !important;
+            border-radius: 16px !important;
+          }
+        }
         @media (max-width: 480px) {
           .hide-mobile { display: none; }
         }

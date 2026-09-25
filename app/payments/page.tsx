@@ -176,12 +176,13 @@ export default function PaymentsPage() {
         </div>
 
         {/* Right Actions */}
-        <div style={styles.headerButtons} className="wsd-page-actions">
-          <ViewModeToggle value={viewMode} onChange={setViewMode} />
+        <div style={styles.headerButtons} className="wsd-page-actions payments-header-actions">
+          <ViewModeToggle value={viewMode} onChange={setViewMode} className="payments-view-toggle" />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             style={styles.filterSelect}
+            className="payments-filter-select"
           >
             <option value="all">All Payments</option>
             <option value="completed">Completed</option>
@@ -193,41 +194,41 @@ export default function PaymentsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div style={styles.statsGrid} className="wsd-grid-tiles">
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(0, 122, 255, 0.1)" }}>
+      <div style={styles.statsGrid} className="wsd-grid-tiles payments-stats-grid">
+        <div style={styles.statCard} className="wsd-unified-card payment-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(0, 122, 255, 0.1)" }} className="stat-icon-wrap">
             <CreditCard size={20} color="#007AFF" />
           </div>
-          <div>
-            <div style={styles.statValue}>{stats.total}</div>
-            <div style={styles.statLabel}>Total Transactions</div>
+          <div className="stat-text-wrap">
+            <div style={styles.statValue} className="payment-stat-val">{stats.total}</div>
+            <div style={styles.statLabel} className="payment-stat-lbl">Total Transactions</div>
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(52, 199, 89, 0.1)" }}>
+        <div style={styles.statCard} className="wsd-unified-card payment-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(52, 199, 89, 0.1)" }} className="stat-icon-wrap">
             <DollarSign size={20} color="#34C759" />
           </div>
-          <div>
-            <div style={styles.statValue}>{formatCurrency(stats.totalAmount)}</div>
-            <div style={styles.statLabel}>Total Received</div>
+          <div className="stat-text-wrap">
+            <div style={styles.statValue} className="payment-stat-val">{formatCurrency(stats.totalAmount)}</div>
+            <div style={styles.statLabel} className="payment-stat-lbl">Total Received</div>
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(255, 149, 0, 0.1)" }}>
+        <div style={styles.statCard} className="wsd-unified-card payment-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(255, 149, 0, 0.1)" }} className="stat-icon-wrap">
             <Clock size={20} color="#FF9500" />
           </div>
-          <div>
-            <div style={styles.statValue}>{stats.pending}</div>
-            <div style={styles.statLabel}>Pending</div>
+          <div className="stat-text-wrap">
+            <div style={styles.statValue} className="payment-stat-val">{stats.pending}</div>
+            <div style={styles.statLabel} className="payment-stat-lbl">Pending</div>
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(52, 199, 89, 0.1)" }}>
+        <div style={styles.statCard} className="wsd-unified-card payment-stat-card">
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(52, 199, 89, 0.1)" }} className="stat-icon-wrap">
             <CheckCircle size={20} color="#34C759" />
           </div>
-          <div>
-            <div style={styles.statValue}>{stats.completed}</div>
-            <div style={styles.statLabel}>Completed</div>
+          <div className="stat-text-wrap">
+            <div style={styles.statValue} className="payment-stat-val">{stats.completed}</div>
+            <div style={styles.statLabel} className="payment-stat-lbl">Completed</div>
           </div>
         </div>
       </div>
@@ -421,15 +422,105 @@ export default function PaymentsPage() {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        @media (max-width: 900px) {
+          .wsd-page-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .payments-middle-search {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .payments-header-actions {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 8px !important;
+            width: 100% !important;
+          }
+          .payments-header-actions > .payments-view-toggle,
+          .payments-view-toggle {
+            flex: 0 0 auto !important;
+            width: auto !important;
+          }
+          .payments-filter-select {
+            flex: 1 1 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+            height: 40px !important;
+            padding: 8px 12px !important;
+            font-size: 13px !important;
+          }
+        }
         @media (max-width: 768px) {
           .payments-search-section {
             flex-direction: column !important;
           }
-          .payments-search-section select {
-            width: 100%;
-          }
           .payment-actions-stack {
             flex-direction: column;
+          }
+          .payments-stats-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 6px !important;
+            margin-bottom: 20px !important;
+          }
+          .payment-stat-card {
+            padding: 8px 4px !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 4px !important;
+            border-radius: 12px !important;
+          }
+          .payment-stat-card .stat-icon-wrap {
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 8px !important;
+          }
+          .payment-stat-card .stat-icon-wrap svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .payment-stat-card .stat-text-wrap {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+          }
+          .payment-stat-val {
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 100% !important;
+          }
+          .payment-stat-lbl {
+            font-size: 9px !important;
+            line-height: 1.15 !important;
+            color: var(--text-secondary) !important;
+            margin-top: 2px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            word-break: break-word !important;
+          }
+        }
+        @media (max-width: 420px) {
+          .payments-stats-grid {
+            gap: 4px !important;
+          }
+          .payment-stat-card {
+            padding: 6px 2px !important;
+          }
+          .payment-stat-val {
+            font-size: 11.5px !important;
+          }
+          .payment-stat-lbl {
+            font-size: 8px !important;
           }
         }
       `}</style>

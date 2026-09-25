@@ -4,7 +4,7 @@ import { generateUniqueRequestId } from "@/lib/tickets/email";
 // Maximum conversations rendered in the initial Query Inbox view (Phase 10).
 // The client-side list loads 15 at a time and exposes a "Load More" button;
 // older conversations are never deleted, they are simply paged.
-export const QUERY_INBOX_PAGE_SIZE = 15;
+const QUERY_INBOX_PAGE_SIZE = 15;
 
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_SIZE = 200;
@@ -65,7 +65,7 @@ function hasStoredEmailSnapshot(ticket: any): boolean {
 // initial Get in Touch submission and every inbound email reply; `adminReadAt`
 // is stamped whenever an admin opens the conversation (`/tickets/[id]/read`)
 // or sends a reply / resolution / onboarding / resend email.
-export function hasNewClientReply(ticket: any): boolean {
+function hasNewClientReply(ticket: any): boolean {
   if (!ticket.lastClientReplyAt) return false;
   const lastClient = new Date(ticket.lastClientReplyAt).getTime();
   if (Number.isNaN(lastClient)) return false;

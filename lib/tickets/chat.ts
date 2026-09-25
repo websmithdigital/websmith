@@ -131,3 +131,14 @@ export function sanitizeChatConversation(ticket: any) {
     messages: thread,
   };
 }
+
+/**
+ * Unread indicator: returns true when the client last replied AFTER the admin last read it.
+ */
+export function hasNewClientReply(ticket: any): boolean {
+  if (!ticket.lastClientReplyAt) return false;
+  const lastClient = new Date(ticket.lastClientReplyAt).getTime();
+  if (Number.isNaN(lastClient)) return false;
+  if (!ticket.adminReadAt) return true;
+  return lastClient > new Date(ticket.adminReadAt).getTime();
+}

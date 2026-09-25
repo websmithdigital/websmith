@@ -149,16 +149,17 @@ export default function ClientProjectsPage() {
   }
 
   return (
-    <div style={styles.container} className="wsd-page">
+    <div style={styles.container} className="wsd-page admin-panel-scope client-projects-page">
       {/* Header */}
-      <div style={styles.header} className="client-projects-header">
-        <div>
-          <h1 style={styles.title}>My Projects</h1>
-          <p style={styles.subtitle}>View and track all your active projects</p>
+      <div style={styles.header} className="client-projects-header wsd-page-header">
+        <div style={styles.headerTitleBlock} className="client-projects-title-block header-title-block">
+          <h1 style={styles.title} className="client-projects-title">My Projects</h1>
+          <p style={styles.subtitle} className="client-projects-subtitle">View and track all your active projects</p>
         </div>
         
-        <div style={styles.headerActions}>
-          <div style={styles.searchBox}>
+          {/* Top & Middle Search */}
+        <div style={styles.middleSearchWrap} className="projects-middle-search client-projects-middle-search">
+          <div style={styles.searchBox} className="admin-search-box client-projects-search">
             <Search size={16} color="var(--text-secondary)" />
             <input 
               type="text" 
@@ -169,22 +170,32 @@ export default function ClientProjectsPage() {
             />
           </div>
           
-          <div style={styles.viewToggle}>
+        </div>
+        
+        {/* Right Actions */}
+        <div style={styles.headerButtons} className="wsd-page-actions client-projects-actions">
+          <div style={styles.viewToggle} className="client-projects-view-toggle">
             <button 
               onClick={() => setViewMode('grid')}
               style={{ ...styles.viewToggleBtn, ...(viewMode === 'grid' ? styles.viewToggleBtnActive : {}) }}
+              title="Grid view"
+              className="view-toggle-btn"
             >
               <LayoutGrid size={18} />
             </button>
             <button 
               onClick={() => setViewMode('list')}
               style={{ ...styles.viewToggleBtn, ...(viewMode === 'list' ? styles.viewToggleBtnActive : {}) }}
+              title="List view"
+              className="view-toggle-btn"
             >
               <List size={18} />
             </button>
             <button 
               onClick={() => setViewMode('kanban')}
               style={{ ...styles.viewToggleBtn, ...(viewMode === 'kanban' ? styles.viewToggleBtnActive : {}) }}
+              title="Kanban view"
+              className="view-toggle-btn"
             >
               <Columns size={18} />
             </button>
@@ -273,9 +284,9 @@ export default function ClientProjectsPage() {
           })}
         </div>
       ) : viewMode === 'grid' ? (
-        <div style={styles.grid}>
+        <div style={styles.grid} className="client-projects-grid">
           {filteredProjects.map(project => (
-            <div key={project._id} style={styles.card} className="project-card">
+            <div key={project._id} style={styles.card} className="project-card wsd-unified-card">
               <div style={styles.cardHeader}>
                 <div style={styles.iconContainer}>
                   <Folder size={24} color="#007AFF" />
@@ -392,7 +403,7 @@ export default function ClientProjectsPage() {
       {/* Project Detail Modal */}
       {selectedProject && (
         <div style={styles.modal} onClick={() => setSelectedProject(null)}>
-          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+          <div style={styles.modalContent} className="modal-content-responsive" onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <div>
                 <h2 style={styles.modalTitle}>{selectedProject.name}</h2>
@@ -433,7 +444,7 @@ export default function ClientProjectsPage() {
             <div style={styles.modalBody}>
               {activeTab === 'details' && (
                 <div style={styles.detailsTab}>
-                  <div style={styles.detailGrid}>
+                  <div style={styles.detailGrid} className="modal-detail-grid">
                     <div style={styles.detailRowWide}>
                       <span style={styles.detailLabel}>Project Description:</span>
                       <p style={styles.detailParagraph}>{selectedProject.description}</p>
@@ -569,17 +580,90 @@ export default function ClientProjectsPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 900px) {
           .client-projects-header {
-            flex-direction: column !important;
-            gap: 16px;
+            display: grid !important;
+            grid-template-columns: 1fr auto !important;
+            gap: 12px 8px !important;
+            align-items: center !important;
+            width: 100% !important;
+          }
+          .client-projects-header .client-projects-title-block {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+          }
+          .client-projects-header .client-projects-middle-search {
+            grid-column: 1 !important;
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          .client-projects-header .client-projects-search {
+            width: 100% !important;
+            padding: 8px 12px !important;
+            border-radius: 12px !important;
+          }
+          .client-projects-header .client-projects-search input {
+            font-size: 13.5px !important;
+          }
+          .client-projects-header .client-projects-actions {
+            grid-column: 2 !important;
+            width: auto !important;
+            flex-shrink: 0 !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+          }
+          .client-projects-view-toggle {
+            padding: 3px !important;
+            border-radius: 10px !important;
+            display: flex !important;
+            gap: 2px !important;
+          }
+          .client-projects-view-toggle .view-toggle-btn {
+            padding: 7px 9px !important;
+            border-radius: 8px !important;
+          }
+          .client-projects-view-toggle .view-toggle-btn svg {
+            width: 15px !important;
+            height: 15px !important;
           }
         }
         @media (max-width: 768px) {
+          .client-projects-title {
+            font-size: 24px !important;
+            margin-bottom: 2px !important;
+          }
+          .client-projects-subtitle {
+            font-size: 13px !important;
+          }
           .client-projects-list-header {
             display: none !important;
           }
           .client-projects-list-item {
             grid-template-columns: 1fr !important;
             gap: 12px;
+            padding: 16px !important;
+          }
+          .client-projects-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+          }
+          .modal-content-responsive {
+            width: 95% !important;
+            max-height: 90vh !important;
+            margin: 10px !important;
+          }
+          .modal-detail-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+          .kanban {
+            display: flex !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            gap: 14px !important;
+            padding-bottom: 12px !important;
+          }
+          .kanban > div {
+            min-width: 260px !important;
+            flex-shrink: 0 !important;
           }
         }
       `}</style>
@@ -597,12 +681,29 @@ const styles: any = {
   header: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    gap: '20px',
+    width: '100%',
     marginBottom: '32px',
   },
   title: { fontSize: '34px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px', letterSpacing: "-1px" },
   subtitle: { fontSize: '15px', color: 'var(--text-secondary)' },
-  headerActions: { display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', width: '100%' },
+  headerTitleBlock: {
+    flexShrink: 0,
+    minWidth: '180px',
+  },
+  middleSearchWrap: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: '200px',
+      },
+  headerButtons: {
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
   searchBox: {
     display: 'flex',
     alignItems: 'center',
@@ -611,7 +712,7 @@ const styles: any = {
     border: '1.5px solid var(--border-color)',
     borderRadius: '12px',
     padding: '8px 14px',
-    width: '240px',
+    width: '100%',
     maxWidth: '100%',
   },
   searchInput: { border: 'none', outline: 'none', fontSize: '14px', flex: 1, backgroundColor: 'transparent', color: 'var(--text-primary)' },

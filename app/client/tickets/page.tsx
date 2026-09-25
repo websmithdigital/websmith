@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, ImagePlus, MessageSquare, MessageSquarePlus, Send, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ImagePlus, MessageSquare, MessageSquarePlus, Send, X, ArrowLeft } from "lucide-react";
 import Modal from "../../../components/ui/Modal";
 import {
   addTicketReply,
@@ -178,20 +178,20 @@ export default function ClientTicketsPage() {
   const statusLabel = (status: Ticket["status"]) => status.replace("_", " ");
 
   return (
-    <div style={styles.container} className="wsd-page">
-      <div style={styles.topHeader}>
-        <div>
+    <div style={styles.container} className="wsd-page admin-panel-scope client-tickets-page">
+      <div style={styles.topHeader} className="client-tickets-header wsd-page-header">
+        <div style={styles.headerTitleBlock} className="client-tickets-title-block">
           <h1 style={styles.title}>Queries</h1>
           <p style={styles.subtitle}>Create and track your support queries in a simple thread view.</p>
         </div>
-        <button type="button" onClick={() => setIsQueryModalOpen(true)} style={styles.raiseQueryBtn}>
+        <button type="button" onClick={() => setIsQueryModalOpen(true)} style={styles.raiseQueryBtn} className="admin-primary-btn client-raise-btn">
           <MessageSquarePlus size={18} />
           Create New Query
         </button>
       </div>
 
-      <div style={styles.layout} className="client-query-layout">
-        <div style={styles.listCard} className="wsd-unified-card wsd-card-blue">
+      <div style={styles.layout} className={`client-query-layout ${selectedTicket ? "ticket-selected" : "no-ticket-selected"}`}>
+        <div style={styles.listCard} className="wsd-unified-card wsd-card-blue query-list-pane">
           <h2 style={styles.historyTitle}>Query List</h2>
           {sortedTickets.length === 0 ? (
             <p style={styles.historyEmpty}>No queries yet.</p>
@@ -221,7 +221,7 @@ export default function ClientTicketsPage() {
           )}
         </div>
 
-        <div style={styles.detailsCard} className="wsd-unified-card wsd-card-cyan">
+        <div style={styles.detailsCard} className="wsd-unified-card wsd-card-cyan query-details-pane">
           {!selectedTicket ? (
             <div style={styles.emptyState}>
               <MessageSquare size={34} color="var(--text-secondary)" />
@@ -229,6 +229,17 @@ export default function ClientTicketsPage() {
             </div>
           ) : (
             <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedId(null);
+                  setThreadExpanded(false);
+                }}
+                className="query-mobile-back-btn"
+              >
+                <ArrowLeft size={16} />
+                <span>All Queries</span>
+              </button>
               <div style={styles.detailsHeader}>
                 <h2 style={styles.detailsTitle}>{selectedTicket.subject}</h2>
                 <div style={styles.detailsHeaderActions}>
@@ -473,9 +484,51 @@ export default function ClientTicketsPage() {
       </Modal>
 
       <style>{`
+        .query-mobile-back-btn {
+          display: none;
+        }
         @media (max-width: 980px) {
           .client-query-layout {
             grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .client-tickets-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 14px !important;
+          }
+          .client-raise-btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .query-mobile-back-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+          }
+          .client-query-layout.no-ticket-selected .query-details-pane {
+            display: none !important;
+          }
+          .client-query-layout.ticket-selected .query-list-pane {
+            display: none !important;
+          }
+          .client-query-layout.ticket-selected .query-details-pane {
+            display: block !important;
+            width: 100% !important;
+          }
+          .client-query-layout.no-ticket-selected .query-list-pane {
+            display: block !important;
+            width: 100% !important;
           }
         }
       `}</style>

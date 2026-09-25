@@ -1980,7 +1980,9 @@ html:not(.dark-theme) .wsd-nav-category-tab:hover:not(.wsd-nav-category-tab-acti
 
 /* 1. Base Container & Theme Scope */
 .admin-panel-scope,
-.admin-dashboard-page {
+.client-panel-scope,
+.admin-dashboard-page,
+.client-dashboard-page {
   color: var(--text-primary);
   background-color: transparent !important;
   padding: clamp(28px, 3vw, 44px) clamp(28px, 3.5vw, 48px) !important;
@@ -1988,6 +1990,33 @@ html:not(.dark-theme) .wsd-nav-category-tab:hover:not(.wsd-nav-category-tab-acti
   width: 100% !important;
   max-width: 100% !important;
   min-height: 100%;
+}
+
+@media (max-width: 768px) {
+  .admin-panel-scope,
+  .client-panel-scope,
+  .admin-dashboard-page,
+  .client-dashboard-page {
+    padding: 16px 14px 28px 14px !important;
+  }
+
+  /* Client Dashboard Top 6 Stat Cards - 3 in one row */
+  .client-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+  .client-stats-grid .client-stat-zoom-card {
+    min-width: 0 !important;
+  }
+
+  /* Client Dashboard Recent Activity & Upcoming Deadlines - 2 in one row */
+  .client-content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .client-content-grid .client-content-zoom-card {
+    min-width: 0 !important;
+  }
 }
 
 /* Custom Sleek Scrollbars across the entire Admin Shell */

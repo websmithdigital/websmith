@@ -16,7 +16,7 @@
 //          No schema change; no email/SMTP/IMAP/mailbox/chat infrastructure
 //          change; the existing ticket conversation backend is untouched.
 import { apiHandler, json, badRequest, forbidden, notFound, parseObjectId } from "@/lib/server/api";
-import { hasNewClientReply } from "../../route";
+import { hasNewClientReply } from "@/lib/tickets/chat";
 
 export const GET = apiHandler(async ({ db, request, user, params }) => {
   if (user.role !== "admin") throw forbidden();
