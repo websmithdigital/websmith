@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useState, useRef, type CSSProperties } from "react";
+import { useEffect, useState, useRef, type CSSProperties } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
   X, 
@@ -15,7 +15,18 @@ import {
   Mail, 
   ChevronDown, 
   ChevronRight,
-  ExternalLink 
+  ExternalLink,
+  Home,
+  Sparkles,
+  Building2,
+  Layers,
+  Briefcase,
+  ShoppingBag,
+  PhoneCall,
+  Sun,
+  Moon,
+  LogIn,
+  ArrowRight
 } from "lucide-react";
 import { getStoredUser, getToken } from "../../lib/auth";
 import { usePublicTheme } from "../../app/providers/PublicThemeProvider";
@@ -58,10 +69,23 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
 
   // Mobile accordion state
   const [mobileExpandedSection, setMobileExpandedSection] = useState<"services" | "industries" | "company" | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(62);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setNavMounted(true);
   }, []);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight || 62);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener("resize", updateHeaderHeight);
+    return () => window.removeEventListener("resize", updateHeaderHeight);
+  }, [mobileOpen]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -136,8 +160,8 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
               priority
             />
           </Link>
-          <div style={styles.authNavRight}>
-            <Link href="/" style={styles.authTextLink}>
+          <div style={styles.authNavRight} className="auth-nav-right">
+            <Link href="/" style={styles.authTextLink} className="auth-nav-home-link">
               Home
             </Link>
             {showGuestThemeToggle && (
@@ -145,16 +169,49 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                 type="button"
                 onClick={togglePublicTheme}
                 style={styles.themeToggleBtn}
+                className="auth-theme-toggle-btn"
                 aria-label={`Switch to ${publicTheme === "light" ? "dark" : "light"} mode`}
               >
-                <span aria-hidden="true" style={styles.themeEmoji}>{publicTheme === "light" ? "🌙" : "☀️"}</span>
+                <span aria-hidden="true" style={styles.themeEmoji} className="auth-theme-emoji">{publicTheme === "light" ? "🌙" : "☀️"}</span>
               </button>
             )}
-            <button type="button" onClick={() => openLeadServicesModal()} style={styles.ctaBtn} className="cta-hover public-nav-cta">
+            <button
+              type="button"
+              onClick={() => openLeadServicesModal()}
+              style={styles.ctaBtn}
+              className="cta-hover public-nav-cta auth-cta-btn"
+            >
               Get Started
             </button>
           </div>
         </div>
+        <style>{`
+          @media (max-width: 640px) {
+            .public-site-nav--auth .landing-nav-content {
+              padding: 10px 14px !important;
+            }
+            .public-site-nav--auth .auth-nav-right {
+              gap: 8px !important;
+            }
+            .public-site-nav--auth .auth-nav-home-link {
+              display: none !important;
+            }
+            .public-site-nav--auth .auth-theme-toggle-btn {
+              width: 32px !important;
+              height: 32px !important;
+              border-radius: 8px !important;
+            }
+            .public-site-nav--auth .auth-theme-emoji {
+              font-size: 14px !important;
+            }
+            .public-site-nav--auth .auth-cta-btn {
+              padding: 6px 12px !important;
+              font-size: 12.5px !important;
+              border-radius: 8px !important;
+              white-space: nowrap !important;
+            }
+          }
+        `}</style>
       </nav>
     );
   }
@@ -163,17 +220,18 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
     <nav
       style={{
         ...styles.nav,
-        backgroundColor: isDark
-          ? "rgba(10, 15, 29, 0.88)"
-          : "rgba(255, 255, 255, 0.9)",
+        backgroundColor: mobileOpen
+          ? (isDark ? "#070B14" : "#ffffff")
+          : (isDark ? "rgba(10, 15, 29, 0.88)" : "rgba(255, 255, 255, 0.9)"),
         borderBottom: isDark
           ? "1px solid rgba(255, 255, 255, 0.08)"
           : "1px solid #e2e8f0",
-        backdropFilter: "blur(16px)",
+        backdropFilter: mobileOpen ? "none" : "blur(16px)",
+        WebkitBackdropFilter: mobileOpen ? "none" : "blur(16px)",
       }}
-      className="landing-nav-shell public-site-nav"
+      className={`landing-nav-shell public-site-nav ${mobileOpen ? "mobile-nav-open" : ""}`}
     >
-      <div style={styles.navContent} className="landing-nav-content">
+      <div ref={headerRef} style={styles.navContent} className="landing-nav-content">
         <div style={styles.leftNavGroup}>
           {/* Brand Logo */}
           <Link href="/" style={styles.logo} className="logo-hover" onClick={() => setMobileOpen(false)}>
@@ -516,331 +574,508 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
       </div>
 
       {/* Mobile Menu Panel */}
-      {mobileOpen && (
-        <>
-          <button
-            type="button"
-            style={styles.mobileMenuOverlay}
-            className="public-mobile-menu-overlay"
-            onClick={() => setMobileOpen(false)}
-            aria-label="Close navigation menu"
-          />
-          <div
-            id="public-site-navigation"
-            style={{
-              ...styles.mobileMenu,
-              backgroundColor: isDark ? "#070B14" : "#ffffff",
-              borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#e2e8f0",
-              overflowY: "auto",
-              maxHeight: "85vh",
-            }}
-            className="public-mobile-menu-panel"
-          >
-            {isStoreRoute && (
-              <div className={`pb-3 mb-3 border-b ${isDark ? "border-white/10" : "border-slate-200"} flex flex-col gap-2`}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <input
-                    value={storeUI?.searchQuery || ""}
-                    onChange={(e) => storeUI?.setSearchQuery(e.target.value)}
-                    placeholder="Search software..."
-                    aria-label="Search software"
-                    className={`w-full pl-9 pr-3 py-2 rounded-xl text-sm transition-all focus:outline-none ${
-                      isDark
-                        ? "bg-white/[0.06] border border-white/10 text-white placeholder-slate-400"
-                        : "bg-slate-100 border border-slate-200 text-slate-900 placeholder-slate-400"
-                    }`}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    onClick={() => { setMobileOpen(false); storeUI?.openHistory(); }}
-                    className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border ${
-                      isDark ? "border-white/10 bg-white/[0.04] text-emerald-300" : "border-slate-200 bg-slate-100 text-emerald-700"
-                    }`}
-                  >
-                    <HistoryIcon className="w-3.5 h-3.5" /> History
-                  </button>
-                  <button
-                    onClick={() => { setMobileOpen(false); storeUI?.openWishlist(); }}
-                    className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border ${
-                      isDark ? "border-white/10 bg-white/[0.04] text-rose-300" : "border-slate-200 bg-slate-100 text-rose-700"
-                    }`}
-                  >
-                    <Heart className="w-3.5 h-3.5" /> Wishlist ({storeUI?.wishlistCount || 0})
-                  </button>
-                  <button
-                    onClick={() => { setMobileOpen(false); storeUI?.openCart(); }}
-                    className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-sm"
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5" /> Cart ({storeUI?.cartCount || 0})
-                  </button>
-                  <button
-                    onClick={() => { setMobileOpen(false); storeUI?.openEmailCenter(); }}
-                    className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border ${
-                      isDark ? "border-white/10 bg-white/[0.04] text-indigo-300" : "border-slate-200 bg-slate-100 text-indigo-700"
-                    }`}
-                  >
-                    <Mail className="w-3.5 h-3.5" /> Email Center
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Mobile Nav Links */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <Link
-                href="/"
-                style={{
-                  ...styles.mobileMenuItem,
-                  color: pathname === "/" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
-                  fontWeight: pathname === "/" ? 600 : 500,
-                }}
-                className={`mobile-menu-item ${pathname === "/" ? "active-mobile-link" : ""}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                Home
-              </Link>
-
-              {/* Mobile Services Accordion */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setMobileExpandedSection(mobileExpandedSection === "services" ? null : "services")}
-                  style={{
-                    ...styles.mobileMenuItem,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: isDark ? "#E2E8F0" : "#1d1d1f",
-                  }}
-                >
-                  <span>Services</span>
-                  <ChevronDown
-                    size={16}
-                    style={{
-                      transform: mobileExpandedSection === "services" ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
-                    }}
-                  />
-                </button>
-                {mobileExpandedSection === "services" && (
-                  <div style={{ paddingLeft: "16px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-                    <Link
-                      href="/services"
-                      onClick={() => setMobileOpen(false)}
-                      style={{ fontSize: "13px", color: "#3b82f6", fontWeight: 600, padding: "4px 0" }}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                ...styles.mobileMenuOverlay,
+                top: `${headerHeight}px`,
+                height: `calc(100dvh - ${headerHeight}px)`,
+              }}
+              className="public-mobile-menu-overlay"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close navigation menu"
+            />
+            <motion.div
+              id="public-site-navigation"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              style={{
+                ...styles.mobileMenu,
+                backgroundColor: isDark ? "#070B14" : "#ffffff",
+                borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#e2e8f0",
+              }}
+              className="public-mobile-menu-panel custom-scrollbar"
+            >
+              {isStoreRoute && (
+                <div className={`pb-3 mb-3 border-b ${isDark ? "border-white/10" : "border-slate-200"} flex flex-col gap-2.5`}>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input
+                      value={storeUI?.searchQuery || ""}
+                      onChange={(e) => storeUI?.setSearchQuery(e.target.value)}
+                      placeholder="Search software..."
+                      aria-label="Search software"
+                      className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+                        isDark
+                          ? "bg-white/[0.06] border border-white/10 text-white placeholder-slate-400"
+                          : "bg-slate-100 border border-slate-200 text-slate-900 placeholder-slate-400"
+                      }`}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
+                    <button
+                      onClick={() => { setMobileOpen(false); storeUI?.openHistory(); }}
+                      className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all ${
+                        isDark ? "border-white/10 bg-white/[0.04] text-emerald-300 active:bg-white/[0.08]" : "border-slate-200 bg-slate-100 text-emerald-700 active:bg-slate-200"
+                      }`}
                     >
-                      View All Services ➔
-                    </Link>
-                    {mobileServiceCategories.map((cat) => (
-                      <Link
-                        key={cat._id || cat.slug}
-                        href={`/services?tab=${cat.slug}#${cat.slug}`}
-                        onClick={() => setMobileOpen(false)}
-                        style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}
-                      >
-                        {cat.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile Industries Accordion */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setMobileExpandedSection(mobileExpandedSection === "industries" ? null : "industries")}
-                  style={{
-                    ...styles.mobileMenuItem,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: isDark ? "#E2E8F0" : "#1d1d1f",
-                  }}
-                >
-                  <span>Industries</span>
-                  <ChevronDown
-                    size={16}
-                    style={{
-                      transform: mobileExpandedSection === "industries" ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
-                    }}
-                  />
-                </button>
-                {mobileExpandedSection === "industries" && (
-                  <div style={{ paddingLeft: "16px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-                    <Link
-                      href="/industries"
-                      onClick={() => setMobileOpen(false)}
-                      style={{ fontSize: "13px", color: "#3b82f6", fontWeight: 600, padding: "4px 0" }}
+                      <HistoryIcon className="w-3.5 h-3.5" /> History
+                    </button>
+                    <button
+                      onClick={() => { setMobileOpen(false); storeUI?.openWishlist(); }}
+                      className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all ${
+                        isDark ? "border-white/10 bg-white/[0.04] text-rose-300 active:bg-white/[0.08]" : "border-slate-200 bg-slate-100 text-rose-700 active:bg-slate-200"
+                      }`}
                     >
-                      View All Industries ➔
-                    </Link>
-                    {mobileIndustries.map((ind) => (
-                      <Link
-                        key={ind._id || ind.slug}
-                        href={`/industries?sector=${ind.slug}`}
-                        onClick={() => setMobileOpen(false)}
-                        style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}
-                      >
-                        {ind.name}
-                      </Link>
-                    ))}
+                      <Heart className="w-3.5 h-3.5" /> Wishlist ({storeUI?.wishlistCount || 0})
+                    </button>
+                    <button
+                      onClick={() => { setMobileOpen(false); storeUI?.openCart(); }}
+                      className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-sm active:brightness-95"
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" /> Cart ({storeUI?.cartCount || 0})
+                    </button>
+                    <button
+                      onClick={() => { setMobileOpen(false); storeUI?.openEmailCenter(); }}
+                      className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all ${
+                        isDark ? "border-white/10 bg-white/[0.04] text-indigo-300 active:bg-white/[0.08]" : "border-slate-200 bg-slate-100 text-indigo-700 active:bg-slate-200"
+                      }`}
+                    >
+                      <Mail className="w-3.5 h-3.5" /> Email
+                    </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* Portfolio */}
-              <Link
-                href="/portfolio"
-                style={{
-                  ...styles.mobileMenuItem,
-                  color: pathname === "/portfolio" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
-                  fontWeight: pathname === "/portfolio" ? 600 : 500,
-                }}
-                className={`mobile-menu-item ${pathname === "/portfolio" ? "active-mobile-link" : ""}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                Portfolio
-              </Link>
-
-              {/* Mobile Company Accordion */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setMobileExpandedSection(mobileExpandedSection === "company" ? null : "company")}
+              {/* Mobile Nav Links */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {/* 1. Home */}
+                <Link
+                  href="/"
                   style={{
                     ...styles.mobileMenuItem,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: isDark ? "#E2E8F0" : "#1d1d1f",
+                    backgroundColor: pathname === "/" ? (isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.08)") : "transparent",
+                    color: pathname === "/" ? "#2563eb" : (isDark ? "#f1f5f9" : "#0f172a"),
+                    fontWeight: pathname === "/" ? 600 : 500,
                   }}
+                  className={`mobile-menu-item ${pathname === "/" ? "active-mobile-link" : ""}`}
+                  onClick={() => setMobileOpen(false)}
                 >
-                  <span>Company</span>
-                  <ChevronDown
-                    size={16}
-                    style={{
-                      transform: mobileExpandedSection === "company" ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
-                    }}
-                  />
-                </button>
-                {mobileExpandedSection === "company" && (
-                  <div style={{ paddingLeft: "16px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-                    <Link href="/about" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      About WebSmith
-                    </Link>
-                    <Link href="/careers" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Careers & Culture (Hiring)
-                    </Link>
-                    <Link href="/about#team" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Core Team & Architects
-                    </Link>
-                    <Link href="/blog" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Engineering Blog
-                    </Link>
-                    <Link href="/documentation" onClick={() => setMobileOpen(false)} style={{ fontSize: "13px", color: isDark ? "#94a3b8" : "#475569" }}>
-                      Documentation Center
-                    </Link>
+                  <div style={styles.mobileItemLeft}>
+                    <div style={{
+                      ...styles.mobileIconShell,
+                      backgroundColor: pathname === "/" ? "rgba(37, 99, 235, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"),
+                      color: pathname === "/" ? "#2563eb" : (isDark ? "#94a3b8" : "#64748b"),
+                    }}>
+                      <Home size={16} />
+                    </div>
+                    <span>Home</span>
                   </div>
+                  <ChevronRight size={15} style={{ opacity: pathname === "/" ? 1 : 0.4 }} />
+                </Link>
+
+                {/* 2. Services Accordion */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileExpandedSection(mobileExpandedSection === "services" ? null : "services")}
+                    style={{
+                      ...styles.mobileMenuItem,
+                      backgroundColor: mobileExpandedSection === "services" ? (isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)") : "transparent",
+                      color: pathname?.startsWith("/services") ? "#2563eb" : (isDark ? "#f1f5f9" : "#0f172a"),
+                      fontWeight: pathname?.startsWith("/services") ? 600 : 500,
+                      width: "100%",
+                    }}
+                    aria-expanded={mobileExpandedSection === "services"}
+                  >
+                    <div style={styles.mobileItemLeft}>
+                      <div style={{
+                        ...styles.mobileIconShell,
+                        backgroundColor: pathname?.startsWith("/services") ? "rgba(37, 99, 235, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"),
+                        color: pathname?.startsWith("/services") ? "#2563eb" : (isDark ? "#94a3b8" : "#64748b"),
+                      }}>
+                        <Sparkles size={16} />
+                      </div>
+                      <span>Services</span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      style={{
+                        transform: mobileExpandedSection === "services" ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.22s ease",
+                        color: isDark ? "#94a3b8" : "#64748b",
+                      }}
+                    />
+                  </button>
+                  {mobileExpandedSection === "services" && (
+                    <div style={{
+                      marginLeft: "18px",
+                      paddingLeft: "14px",
+                      borderLeft: isDark ? "2px solid rgba(59, 130, 246, 0.35)" : "2px solid rgba(37, 99, 235, 0.25)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                      margin: "6px 0 10px 18px",
+                    }}>
+                      <Link
+                        href="/services"
+                        onClick={() => setMobileOpen(false)}
+                        style={{
+                          fontSize: "13px",
+                          color: "#2563eb",
+                          fontWeight: 600,
+                          padding: "7px 10px",
+                          borderRadius: "8px",
+                          backgroundColor: isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.07)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span>View All Services</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                      {mobileServiceCategories.map((cat) => (
+                        <Link
+                          key={cat._id || cat.slug}
+                          href={`/services?tab=${cat.slug}#${cat.slug}`}
+                          onClick={() => setMobileOpen(false)}
+                          style={{
+                            fontSize: "13.5px",
+                            color: isDark ? "#cbd5e1" : "#475569",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Industries Accordion */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileExpandedSection(mobileExpandedSection === "industries" ? null : "industries")}
+                    style={{
+                      ...styles.mobileMenuItem,
+                      backgroundColor: mobileExpandedSection === "industries" ? (isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)") : "transparent",
+                      color: pathname?.startsWith("/industries") ? "#2563eb" : (isDark ? "#f1f5f9" : "#0f172a"),
+                      fontWeight: pathname?.startsWith("/industries") ? 600 : 500,
+                      width: "100%",
+                    }}
+                    aria-expanded={mobileExpandedSection === "industries"}
+                  >
+                    <div style={styles.mobileItemLeft}>
+                      <div style={{
+                        ...styles.mobileIconShell,
+                        backgroundColor: pathname?.startsWith("/industries") ? "rgba(37, 99, 235, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"),
+                        color: pathname?.startsWith("/industries") ? "#2563eb" : (isDark ? "#94a3b8" : "#64748b"),
+                      }}>
+                        <Building2 size={16} />
+                      </div>
+                      <span>Industries</span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      style={{
+                        transform: mobileExpandedSection === "industries" ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.22s ease",
+                        color: isDark ? "#94a3b8" : "#64748b",
+                      }}
+                    />
+                  </button>
+                  {mobileExpandedSection === "industries" && (
+                    <div style={{
+                      marginLeft: "18px",
+                      paddingLeft: "14px",
+                      borderLeft: isDark ? "2px solid rgba(59, 130, 246, 0.35)" : "2px solid rgba(37, 99, 235, 0.25)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                      margin: "6px 0 10px 18px",
+                    }}>
+                      <Link
+                        href="/industries"
+                        onClick={() => setMobileOpen(false)}
+                        style={{
+                          fontSize: "13px",
+                          color: "#2563eb",
+                          fontWeight: 600,
+                          padding: "7px 10px",
+                          borderRadius: "8px",
+                          backgroundColor: isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.07)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span>View All Industries</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                      {mobileIndustries.map((ind) => (
+                        <Link
+                          key={ind._id || ind.slug}
+                          href={`/industries?sector=${ind.slug}`}
+                          onClick={() => setMobileOpen(false)}
+                          style={{
+                            fontSize: "13.5px",
+                            color: isDark ? "#cbd5e1" : "#475569",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          {ind.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Portfolio */}
+                <Link
+                  href="/portfolio"
+                  style={{
+                    ...styles.mobileMenuItem,
+                    backgroundColor: pathname === "/portfolio" ? (isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.08)") : "transparent",
+                    color: pathname === "/portfolio" ? "#2563eb" : (isDark ? "#f1f5f9" : "#0f172a"),
+                    fontWeight: pathname === "/portfolio" ? 600 : 500,
+                  }}
+                  className={`mobile-menu-item ${pathname === "/portfolio" ? "active-mobile-link" : ""}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <div style={styles.mobileItemLeft}>
+                    <div style={{
+                      ...styles.mobileIconShell,
+                      backgroundColor: pathname === "/portfolio" ? "rgba(37, 99, 235, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"),
+                      color: pathname === "/portfolio" ? "#2563eb" : (isDark ? "#94a3b8" : "#64748b"),
+                    }}>
+                      <Layers size={16} />
+                    </div>
+                    <span>Portfolio</span>
+                  </div>
+                  <ChevronRight size={15} style={{ opacity: pathname === "/portfolio" ? 1 : 0.4 }} />
+                </Link>
+
+                {/* 5. Company Accordion */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileExpandedSection(mobileExpandedSection === "company" ? null : "company")}
+                    style={{
+                      ...styles.mobileMenuItem,
+                      backgroundColor: mobileExpandedSection === "company" ? (isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)") : "transparent",
+                      color: pathname?.startsWith("/about") || pathname?.startsWith("/careers") || pathname?.startsWith("/blog") || pathname?.startsWith("/documentation")
+                        ? "#2563eb"
+                        : (isDark ? "#f1f5f9" : "#0f172a"),
+                      fontWeight: 500,
+                      width: "100%",
+                    }}
+                    aria-expanded={mobileExpandedSection === "company"}
+                  >
+                    <div style={styles.mobileItemLeft}>
+                      <div style={{
+                        ...styles.mobileIconShell,
+                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+                        color: isDark ? "#94a3b8" : "#64748b",
+                      }}>
+                        <Briefcase size={16} />
+                      </div>
+                      <span>Company</span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      style={{
+                        transform: mobileExpandedSection === "company" ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.22s ease",
+                        color: isDark ? "#94a3b8" : "#64748b",
+                      }}
+                    />
+                  </button>
+                  {mobileExpandedSection === "company" && (
+                    <div style={{
+                      marginLeft: "18px",
+                      paddingLeft: "14px",
+                      borderLeft: isDark ? "2px solid rgba(59, 130, 246, 0.35)" : "2px solid rgba(37, 99, 235, 0.25)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                      margin: "6px 0 10px 18px",
+                    }}>
+                      <Link href="/about" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
+                        About WebSmith
+                      </Link>
+                      <Link href="/careers" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span>Careers & Culture</span>
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Hiring</span>
+                      </Link>
+                      <Link href="/about#team" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
+                        Core Team & Architects
+                      </Link>
+                      <Link href="/blog" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
+                        Engineering Blog
+                      </Link>
+                      <Link href="/documentation" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
+                        Documentation Center
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* 6. Software Store */}
+                <Link
+                  href="/software-store"
+                  style={{
+                    ...styles.mobileMenuItem,
+                    backgroundColor: pathname?.startsWith("/software-store") ? (isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.08)") : "transparent",
+                    color: pathname?.startsWith("/software-store") ? "#2563eb" : (isDark ? "#f1f5f9" : "#0f172a"),
+                    fontWeight: pathname?.startsWith("/software-store") ? 600 : 500,
+                  }}
+                  className={`mobile-menu-item ${pathname?.startsWith("/software-store") ? "active-mobile-link" : ""}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <div style={styles.mobileItemLeft}>
+                    <div style={{
+                      ...styles.mobileIconShell,
+                      backgroundColor: pathname?.startsWith("/software-store") ? "rgba(37, 99, 235, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"),
+                      color: pathname?.startsWith("/software-store") ? "#2563eb" : (isDark ? "#94a3b8" : "#64748b"),
+                    }}>
+                      <ShoppingBag size={16} />
+                    </div>
+                    <span>Software Store</span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[10.5px] font-semibold rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">Store</span>
+                </Link>
+
+                {/* 7. Contact Us */}
+                <Link
+                  href="/contact"
+                  style={{
+                    ...styles.mobileMenuItem,
+                    backgroundColor: pathname === "/contact" ? (isDark ? "rgba(37, 99, 235, 0.12)" : "rgba(37, 99, 235, 0.08)") : "transparent",
+                    color: pathname === "/contact" ? "#2563eb" : (isDark ? "#f1f5f9" : "#0f172a"),
+                    fontWeight: pathname === "/contact" ? 600 : 500,
+                  }}
+                  className={`mobile-menu-item ${pathname === "/contact" ? "active-mobile-link" : ""}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <div style={styles.mobileItemLeft}>
+                    <div style={{
+                      ...styles.mobileIconShell,
+                      backgroundColor: pathname === "/contact" ? "rgba(37, 99, 235, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"),
+                      color: pathname === "/contact" ? "#2563eb" : (isDark ? "#94a3b8" : "#64748b"),
+                    }}>
+                      <PhoneCall size={16} />
+                    </div>
+                    <span>Contact Us</span>
+                  </div>
+                  <ChevronRight size={15} style={{ opacity: pathname === "/contact" ? 1 : 0.4 }} />
+                </Link>
+              </div>
+
+              {/* Bottom Quick Controls & Actions */}
+              <div style={styles.mobileMenuDivider} />
+
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                {showGuestThemeToggle && (
+                  <button
+                    type="button"
+                    onClick={togglePublicTheme}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #e2e8f0",
+                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#f8fafc",
+                      color: isDark ? "#f1f5f9" : "#0f172a",
+                      fontSize: "13.5px",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                    }}
+                    className="mobile-action-pill"
+                    aria-label={`Switch to ${publicTheme === "light" ? "dark" : "light"} mode`}
+                  >
+                    {publicTheme === "light" ? (
+                      <>
+                        <Moon size={15} style={{ color: "#6366f1" }} />
+                        <span>Dark mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sun size={15} style={{ color: "#f59e0b" }} />
+                        <span>Light mode</span>
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {!isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      router.push("/login");
+                    }}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #e2e8f0",
+                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#f8fafc",
+                      color: isDark ? "#f1f5f9" : "#0f172a",
+                      fontSize: "13.5px",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                    }}
+                    className="mobile-action-pill"
+                  >
+                    <LogIn size={15} style={{ color: isDark ? "#94a3b8" : "#64748b" }} />
+                    <span>Log in</span>
+                  </button>
                 )}
               </div>
 
-              {/* Software Store */}
-              <Link
-                href="/software-store"
-                style={{
-                  ...styles.mobileMenuItem,
-                  color: pathname?.startsWith("/software-store") ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
-                  fontWeight: pathname?.startsWith("/software-store") ? 600 : 500,
-                }}
-                className={`mobile-menu-item ${pathname?.startsWith("/software-store") ? "active-mobile-link" : ""}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                Software Store
-              </Link>
-
-              {/* Contact Us */}
-              <Link
-                href="/contact"
-                style={{
-                  ...styles.mobileMenuItem,
-                  color: pathname === "/contact" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
-                  fontWeight: pathname === "/contact" ? 600 : 500,
-                }}
-                className={`mobile-menu-item ${pathname === "/contact" ? "active-mobile-link" : ""}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                Contact Us
-              </Link>
-            </div>
-
-            <div style={styles.mobileMenuDivider} />
-
-            {showGuestThemeToggle && (
-              <button type="button" onClick={togglePublicTheme} style={styles.mobileThemeBtn} className="mobile-theme-btn">
-                {publicTheme === "light" ? (
-                  <>
-                    <span aria-hidden="true" style={styles.mobileThemeEmoji}>🌙</span>
-                    Dark mode
-                  </>
-                ) : (
-                  <>
-                    <span aria-hidden="true" style={styles.mobileThemeEmoji}>☀️</span>
-                    Light mode
-                  </>
-                )}
-              </button>
-            )}
-
-            {!isLogin && (
               <button
                 type="button"
                 onClick={() => {
                   setMobileOpen(false);
-                  router.push("/login");
+                  openLeadServicesModal();
                 }}
-                style={styles.mobileLoginBtn}
-                className="mobile-login-btn"
+                style={{
+                  ...styles.mobileCtaBtn,
+                  background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
+                  color: "#ffffff",
+                  border: "none",
+                }}
+                className="cta-hover public-mobile-cta"
               >
-                Log in
+                <span>Get Started</span>
+                <ArrowRight size={16} />
               </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                openLeadServicesModal();
-              }}
-              style={{
-                ...styles.mobileCtaBtn,
-                background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
-                color: "#ffffff",
-                border: "none",
-              }}
-              className="cta-hover"
-            >
-              Get Started
-            </button>
-          </div>
-        </>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <style>{`
         @media (max-width: 980px) {
@@ -852,10 +1087,9 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
             display: flex !important;
             align-items: center;
             justify-content: center;
-            margin-right: 16px;
           }
           .public-site-nav .landing-nav-content {
-            padding-right: 8px;
+            padding-right: 12px;
           }
         }
 
@@ -871,6 +1105,26 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
           .landing-nav-content {
             padding: 10px 16px !important;
           }
+        }
+
+        .public-mobile-menu-panel::-webkit-scrollbar {
+          width: 5px;
+        }
+        .public-mobile-menu-panel::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .public-mobile-menu-panel::-webkit-scrollbar-thumb {
+          background: rgba(148, 163, 184, 0.25);
+          border-radius: 9999px;
+        }
+        .mobile-action-pill:active {
+          transform: scale(0.98);
+        }
+        .public-mobile-cta:active {
+          transform: scale(0.98);
+        }
+        .mobile-menu-item:active {
+          transform: scale(0.99);
         }
       `}</style>
     </nav>
@@ -925,6 +1179,8 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    position: "relative",
+    zIndex: 1305,
   },
   leftNavGroup: {
     display: "flex",
@@ -1035,68 +1291,98 @@ const styles: Record<string, CSSProperties> = {
   },
   mobileMenuBtn: {
     display: "none",
-    background: "none",
-    border: "none",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "transparent",
+    border: "1px solid transparent",
     cursor: "pointer",
     padding: "8px",
-    borderRadius: "8px",
+    borderRadius: "10px",
     color: "var(--text-primary)",
+    transition: "background-color 0.15s ease, border-color 0.15s ease",
   },
   mobileMenu: {
     display: "flex",
     flexDirection: "column",
-    padding: "16px",
-    border: "1px solid var(--border-color)",
-    borderRadius: "20px",
+    borderTop: "none",
+    borderLeft: "none",
+    borderRight: "none",
+    borderBottom: "1px solid var(--border-color)",
+    borderBottomLeftRadius: "24px",
+    borderBottomRightRadius: "24px",
     backgroundColor: "var(--bg-primary)",
-    position: "fixed",
-    top: "64px",
-    left: "16px",
-    right: "16px",
-    zIndex: 1302,
-    boxShadow: "var(--card-shadow)",
-    maxHeight: "calc(100dvh - 80px)",
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    right: 0,
+    width: "100%",
+    zIndex: 1304,
+    boxShadow: "0 24px 48px -12px rgba(0, 0, 0, 0.45)",
+    maxHeight: "calc(100dvh - 72px)",
     overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
+    padding: "14px 16px 24px 16px",
   },
   mobileMenuOverlay: {
     position: "fixed",
-    top: "57px",
     left: 0,
     right: 0,
     bottom: 0,
+    width: "100vw",
     border: "none",
-    backgroundColor: "rgba(0,0,0,0.22)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backdropFilter: "blur(4px)",
+    WebkitBackdropFilter: "blur(4px)",
     zIndex: 1301,
     cursor: "pointer",
   },
   mobileMenuItem: {
-    padding: "12px 16px",
-    fontSize: "16px",
+    padding: "9px 12px",
+    fontSize: "14.5px",
     fontWeight: 500,
     background: "none",
     border: "none",
     textAlign: "left",
     cursor: "pointer",
-    borderRadius: "8px",
+    borderRadius: "12px",
     fontFamily: "inherit",
     color: "var(--text-primary)",
     textDecoration: "none",
-    display: "block",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    transition: "all 0.15s ease",
+  },
+  mobileItemLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+  mobileIconShell: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "9px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    transition: "all 0.18s ease",
   },
   mobileMenuDivider: {
     height: "1px",
     backgroundColor: "var(--border-color)",
     margin: "12px 0",
+    opacity: 0.8,
   },
   mobileThemeBtn: {
-    padding: "12px 16px",
-    fontSize: "16px",
+    padding: "10px 14px",
+    fontSize: "13.5px",
     fontWeight: 500,
     backgroundColor: "var(--bg-secondary)",
     border: "1px solid var(--border-color)",
-    borderRadius: "8px",
+    borderRadius: "12px",
     cursor: "pointer",
-    marginBottom: "8px",
     fontFamily: "inherit",
     color: "var(--text-primary)",
     textAlign: "left",
@@ -1104,26 +1390,32 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
   },
   mobileLoginBtn: {
-    padding: "12px 16px",
-    fontSize: "16px",
+    padding: "10px 14px",
+    fontSize: "13.5px",
     fontWeight: 500,
     backgroundColor: "transparent",
     border: "1px solid var(--border-color)",
-    borderRadius: "8px",
+    borderRadius: "12px",
     cursor: "pointer",
-    marginBottom: "8px",
     fontFamily: "inherit",
     color: "var(--text-primary)",
   },
   mobileCtaBtn: {
-    padding: "12px 16px",
-    fontSize: "16px",
+    width: "100%",
+    padding: "12px 20px",
+    fontSize: "14.5px",
     fontWeight: 600,
     backgroundColor: "#007AFF",
     color: "#fff",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "12px",
     cursor: "pointer",
     fontFamily: "inherit",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    boxShadow: "0 4px 16px rgba(37, 99, 235, 0.35)",
+    marginTop: "8px",
   },
 };

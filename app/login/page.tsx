@@ -99,8 +99,8 @@ function LoginPageContent() {
         {/* Main content */}
         <div style={styles.card} className="wsd-auth-card">
           {/* Logo - Circle Mask with WSD */}
-          <div style={styles.logoContainer}>
-            <div style={styles.circleMask} className="circle-mask-hover">
+          <div style={styles.logoContainer} className="auth-logo-container">
+            <div style={styles.circleMask} className="circle-mask-hover auth-logo-circle">
               <Image src="/images/icon.png" alt="Websmith Digital icon" width={72} height={72} style={styles.logoImage} priority />
             </div>
             <div className="logo-text-hover" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -109,6 +109,7 @@ function LoginPageContent() {
                 alt="Websmith Digital"
                 width={240}
                 height={50}
+                className="auth-wordmark-img"
                 style={{ height: "50px", width: "auto", objectFit: "contain" }}
                 priority
               />
@@ -116,9 +117,9 @@ function LoginPageContent() {
           </div>
 
           {/* Welcome text */}
-          <div style={styles.headerText}>
-            <h2 style={styles.title}>Welcome back</h2>
-            <p style={styles.subtitle}>Sign in to continue to your workspace</p>
+          <div style={styles.headerText} className="auth-header-text">
+            <h2 style={styles.title} className="auth-title">Welcome back</h2>
+            <p style={styles.subtitle} className="auth-subtitle">Sign in to continue to your workspace</p>
           </div>
 
           {/* Error message */}
@@ -163,7 +164,7 @@ function LoginPageContent() {
                 style={{ width: "100%", display: "flex", flexDirection: "column" }}
               >
               {/* Email input */}
-              <div style={styles.inputGroup}>
+              <div style={styles.inputGroup} className="auth-input-group">
                 <label style={styles.label}>Email or Client ID</label>
                 <div style={styles.inputWrapper}>
                   <Mail size={18} style={styles.inputIcon} />
@@ -187,7 +188,7 @@ function LoginPageContent() {
               </div>
 
               {/* Password input */}
-              <div style={styles.inputGroup}>
+              <div style={styles.inputGroup} className="auth-input-group">
                 <label style={styles.label}>Password</label>
                 <div style={styles.inputWrapper}>
                   <Lock size={18} style={styles.inputIcon} />
@@ -219,7 +220,7 @@ function LoginPageContent() {
               </div>
 
               {/* Forgot password link */}
-              <div style={styles.forgotContainer}>
+              <div style={styles.forgotContainer} className="auth-forgot-container">
                 <Link href="/forgot-password" style={styles.forgotLink} className="forgot-link-hover">
                   Forgot password?
                 </Link>
@@ -240,8 +241,8 @@ function LoginPageContent() {
             </form>
 
           {/* Sign up link */}
-          <div style={styles.signupContainer}>
-            <span style={styles.signupText}>Need a new project?</span>
+          <div style={styles.signupContainer} className="auth-signup-container">
+            <span style={styles.signupText} className="auth-signup-text">Need a new project?</span>
             <button
               type="button"
               onClick={() => openLeadServicesModal()}
@@ -253,15 +254,15 @@ function LoginPageContent() {
           </div>
           </>
           )}
+          </div>
         </div>
 
         {/* Footer - Copyright */}
-        <div style={styles.footer}>
+        <div style={styles.footer} className="auth-footer">
           <p style={styles.copyright}>
             © {new Date().getFullYear()} Websmith Digital. All Rights Reserved. Developed with care by the Websmith Digital Team.
           </p>
         </div>
-      </div>
 
       {/* All Animations */}
       <style>{`
@@ -328,37 +329,105 @@ function LoginPageContent() {
         
         /* SIGN IN BUTTON */
         .signin-button {
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
           position: relative;
           overflow: hidden;
+          background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%) !important;
+          box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        .signin-button:hover:not(:disabled) {
-          background-color: #34C759 !important;
-          transform: translateX(4px) translateY(-2px) !important;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-          border-left: 3px solid #1C1C1E !important;
-          padding-left: 11px !important;
+        @media (hover: hover) and (pointer: fine) {
+          .signin-button:hover:not(:disabled) {
+            filter: brightness(1.08) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+          }
         }
         .signin-button:active:not(:disabled) {
-          transform: scale(0.98) !important;
+          transform: scale(0.985) !important;
         }
         
         /* SIGN UP BUTTON */
         .signup-button {
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          transition: all 0.2s ease !important;
           display: inline-block !important;
           position: relative !important;
+          color: #007AFF !important;
         }
-        .signup-button:hover {
-          transform: translateX(4px) translateY(-2px) !important;
-          color: #34C759 !important;
-          border-left: 3px solid #34C759 !important;
-          padding-left: 8px !important;
+        @media (hover: hover) and (pointer: fine) {
+          .signup-button:hover {
+            text-decoration: underline !important;
+            transform: translateY(-1px) !important;
+          }
         }
         .signup-button:active {
-          transform: scale(0.98) !important;
+          transform: scale(0.97) !important;
         }
         
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 640px) {
+          .login-page-shell {
+            padding: 16px 14px 24px 14px !important;
+            justify-content: flex-start !important;
+          }
+          .wsd-auth-card {
+            padding: 22px 18px 20px !important;
+            border-radius: 22px !important;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1) !important;
+          }
+          .auth-logo-container {
+            margin-bottom: 12px !important;
+          }
+          .auth-logo-circle {
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 13px !important;
+            margin-bottom: 8px !important;
+          }
+          .auth-wordmark-img {
+            height: 36px !important;
+            width: auto !important;
+          }
+          .auth-header-text {
+            margin-bottom: 14px !important;
+          }
+          .auth-title {
+            font-size: 21px !important;
+            margin-bottom: 3px !important;
+          }
+          .auth-subtitle {
+            font-size: 13px !important;
+          }
+          .auth-input-group {
+            margin-bottom: 13px !important;
+          }
+          .login-input {
+            height: 46px !important;
+            font-size: 15px !important;
+            padding: 11px 14px 11px 40px !important;
+            border-radius: 11px !important;
+          }
+          .auth-forgot-container {
+            margin-bottom: 13px !important;
+          }
+          .signin-button {
+            height: 46px !important;
+            padding: 11px !important;
+            font-size: 15px !important;
+            border-radius: 11px !important;
+            margin-bottom: 13px !important;
+          }
+          .auth-signup-text,
+          .signup-button {
+            font-size: 13px !important;
+          }
+          .auth-footer {
+            margin-top: 14px !important;
+          }
+        }
+
         /* Spinner Animation */
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -378,8 +447,7 @@ export default function LoginPage() {
 
 const styles: any = {
   container: {
-    height: "calc(100dvh - 72px)",
-    maxHeight: "calc(100dvh - 72px)",
+    minHeight: "calc(100dvh - 72px)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -387,22 +455,26 @@ const styles: any = {
     backgroundColor: "transparent",
     position: "relative",
     fontFamily: "var(--font-sans)",
-    overflow: "hidden",
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
+    padding: "24px 16px 28px 16px",
+    boxSizing: "border-box",
   },
 
   main: {
-    flex: 1,
     width: "100%",
+    maxWidth: "440px",
     position: "relative",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     boxSizing: "border-box",
+    margin: "auto 0",
   },
 
   background: {
-    position: "absolute",
+    position: "fixed",
     top: 0,
     left: 0,
     right: 0,
@@ -412,8 +484,8 @@ const styles: any = {
   },
 
   card: {
-    borderRadius: "28px",
-    padding: "34px 36px 28px",
+    borderRadius: "26px",
+    padding: "32px 34px 26px",
     width: "100%",
     maxWidth: "440px",
     position: "relative",
@@ -574,15 +646,19 @@ const styles: any = {
   signinButton: {
     width: "100%",
     padding: "13px",
-    fontSize: "16px",
+    fontSize: "15.5px",
     fontWeight: 600,
     color: "#FFFFFF",
-    backgroundColor: "#007AFF",
+    background: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
     border: "none",
     borderRadius: "12px",
     cursor: "pointer",
     marginBottom: "16px",
     fontFamily: "inherit",
+    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   signinButtonDisabled: {
@@ -623,10 +699,8 @@ const styles: any = {
   },
 
   footer: {
-    position: "absolute",
-    bottom: "12px",
-    left: 0,
-    right: 0,
+    marginTop: "20px",
+    width: "100%",
     textAlign: "center",
     zIndex: 1,
   },
