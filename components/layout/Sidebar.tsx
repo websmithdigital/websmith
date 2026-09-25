@@ -251,7 +251,7 @@ export default function Sidebar({
           <Image
             src="/images/wordmark1.png"
             alt="Websmith Digital"
-            width={190}
+            width={126}
             height={42}
             style={{ height: "42px", width: "auto", objectFit: "contain" }}
           />

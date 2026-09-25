@@ -194,11 +194,8 @@ export default function ClientNotificationsPage() {
               return (
                 <div
                   key={notification._id}
-                  style={{
-                    ...styles.notificationCard,
-                    ...(notification.isRead ? {} : styles.unreadCard),
-                  }}
-                  className="notification-item wsd-unified-card client-notif-card"
+                  style={styles.notificationCard}
+                  className={`notification-item wsd-unified-card client-notif-card ${notification.isRead ? "" : "unread-card"}`}
                 >
                   <div style={styles.cardInfo} className="client-notif-card-info">
                     <div
@@ -247,6 +244,10 @@ export default function ClientNotificationsPage() {
         }
         .mark-read-text-mobile {
           display: none;
+        }
+        .client-notif-card.unread-card {
+          border-left: 4px solid #007AFF !important;
+          background-color: color-mix(in srgb, #007AFF 8%, var(--bg-secondary)) !important;
         }
         @media (max-width: 768px) {
           .client-notifications-header {
@@ -467,10 +468,6 @@ const styles: any = {
     backgroundColor: "var(--bg-secondary)",
     borderRadius: "16px",
     border: "1px solid var(--border-color)",
-  },
-  unreadCard: {
-    borderLeft: "4px solid #007AFF",
-    backgroundColor: "color-mix(in srgb, #007AFF 8%, var(--bg-secondary))",
   },
   cardInfo: {
     display: "flex",
