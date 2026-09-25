@@ -76,6 +76,7 @@ function extractSimpleId(val: any): string | null {
   if (typeof val === "string") return val;
   if (val instanceof ObjectId) return val.toString();
   if (typeof val === "object" && typeof val.toHexString === "function") return val.toString();
+  if (typeof val === "object" && val.constructor?.name === "ObjectId") return val.toString();
   if (typeof val === "object" && !Object.keys(val).some(k => k.startsWith("$"))) return String(val);
   return null;
 }
@@ -84,6 +85,7 @@ function normalizeVal(v: any): any {
   if (v == null) return v;
   if (v instanceof ObjectId) return v.toString();
   if (typeof v === "object" && typeof v.toHexString === "function") return v.toString();
+  if (typeof v === "object" && v.constructor?.name === "ObjectId") return v.toString();
   if (v instanceof Date) return v.toISOString();
   return v;
 }
@@ -347,6 +349,7 @@ export class Cursor<T = any> {
 // ---------------------------------------------------------------------------
 export class Collection<T = any> {
   private tableName: string;
+  private static ensuredTables = new Set<string>();
   private poolPromise: Promise<Pool>;
 
   constructor(name: string, poolPromise: Promise<Pool>) {
@@ -359,6 +362,9 @@ export class Collection<T = any> {
   }
 
   private async ensureTable() {
+    if (Collection.ensuredTables.has(this.tableName)) {
+      return;
+    }
     const pool = await this.getPool();
     await pool.query(`
       CREATE TABLE IF NOT EXISTS ${this.tableName} (
@@ -369,6 +375,7 @@ export class Collection<T = any> {
       );
       CREATE INDEX IF NOT EXISTS idx_${this.tableName}_data ON ${this.tableName} USING GIN (data);
     `);
+    Collection.ensuredTables.add(this.tableName);
   }
 
   async findRaw(filter?: any): Promise<any[]> {
@@ -580,7 +587,11 @@ export class Db {
   }
 }
 
-let globalDbInstance: Db | null = null;
+declare global {
+  var __wsd_portal_db: Db | undefined;
+}
+
+let globalDbInstance: Db | null = globalThis.__wsd_portal_db || null;
 
 export function getPortalDb(customPool?: Pool): Db {
   if (customPool) {
@@ -588,6 +599,7 @@ export function getPortalDb(customPool?: Pool): Db {
   }
   if (!globalDbInstance) {
     globalDbInstance = new Db(getDb());
+    globalThis.__wsd_portal_db = globalDbInstance;
   }
   return globalDbInstance;
 }

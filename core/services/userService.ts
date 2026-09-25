@@ -41,6 +41,11 @@ export const deleteManagedUser = async (id: string) => {
   await API.delete(`/users/managed/${id}`);
 };
 
+export const updateManagedUser = async (id: string, payload: Partial<ManagedUserPayload & { adminLevel?: "super" | "sub"; status?: string }>) => {
+  const response = await API.put(`/users/managed/${id}`, payload);
+  return response.data.data as RoleUser;
+};
+
 export interface DeveloperPayload {
   name: string;
   email: string;

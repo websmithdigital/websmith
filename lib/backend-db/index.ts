@@ -10,7 +10,11 @@ import { runMigrations } from '@/lib/migrations/runner';
 import { COUNTRY_CODES } from '@/lib/data/country-codes';
 import { seedMigratedMedia } from '@/lib/media/storage';
 
-let pool: Pool | null = null;
+declare global {
+  var __wsd_pg_pool: Pool | undefined;
+}
+
+let pool: Pool | null = globalThis.__wsd_pg_pool || null;
 
 export async function getDb(): Promise<Pool> {
   // Return existing pool if already created
@@ -30,13 +34,24 @@ export async function getDb(): Promise<Pool> {
     connectionString: databaseUrl,
     ssl: { rejectUnauthorized: false }
   });
+  globalThis.__wsd_pg_pool = pool;
 
   // Test connection and ensure tables exist
   const client = await pool.connect();
 
   try {
+    // Fast path: if database schema already exists, skip running 1900 lines of DDL statements
+    if (process.env.FORCE_DB_INIT !== 'true') {
+      const tableCheck = await client.query(
+        "SELECT 1 FROM information_schema.tables WHERE table_name = 'users' LIMIT 1"
+      );
+      if (tableCheck.rowCount && tableCheck.rowCount > 0) {
+        return pool;
+      }
+    }
+
     // ============================================================
-    // CREATE ALL TABLES WITH COMPLETE SCHEMA
+    // CREATE ALL TABLES WITH COMPLETE SCHEMA (First-time bootstrap only)
     // ============================================================
 
     // 0. Create users table (API Center Admin / Auth)

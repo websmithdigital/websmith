@@ -1,10 +1,10 @@
 // PATH: C:\websmith\app\payments\page.tsx
-// Payments Page - Track all payments and transactions
-// Features: View payment history, payment status, transaction details
+// Payments Page - Track and manage all payments and transactions
+// Features: View, Record, Edit, Delete payments, download PDF receipts
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Search, 
   CreditCard, 
@@ -12,12 +12,18 @@ import {
   Calendar, 
   CheckCircle, 
   Clock, 
-  XCircle,
-  Download,
-  Eye
+  XCircle, 
+  Download, 
+  Eye,
+  Plus,
+  Edit2,
+  Trash2,
+  Check,
+  X
 } from "lucide-react";
 import API from "@/core/services/apiService";
 import Modal from "@/components/ui/Modal";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { ViewModeToggle } from "@/components/ui/ViewModeToggle";
 
 interface Payment {
@@ -27,6 +33,7 @@ interface Payment {
   clientName: string;
   clientEmail: string;
   amount: number;
+  currency?: string;
   method: "card" | "bank" | "cash" | "crypto";
   status: "completed" | "pending" | "failed" | "refunded";
   transactionId: string;
@@ -34,8 +41,18 @@ interface Payment {
   notes?: string;
 }
 
+interface InvoiceOption {
+  _id: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  amount: number;
+  dueAmount?: number;
+}
+
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -44,12 +61,31 @@ export default function PaymentsPage() {
   const [isDownloadingReceipt, setIsDownloadingReceipt] = useState(false);
   const [downloadError, setDownloadError] = useState("");
 
-  useEffect(() => {
-    fetchPayments();
-  }, []);
+  // CRUD State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
+  const [actionMessage, setActionMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const fetchPayments = async () => {
+  const [formData, setFormData] = useState({
+    invoiceId: "",
+    invoiceNumber: "",
+    clientName: "",
+    clientEmail: "",
+    amount: "",
+    currency: "USD",
+    method: "bank" as "card" | "bank" | "cash" | "crypto",
+    status: "completed" as "completed" | "pending" | "failed" | "refunded",
+    transactionId: "",
+    date: new Date().toISOString().split("T")[0],
+    notes: "",
+  });
+
+  const fetchPayments = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await API.get("/payments");
       if (response.data.success || response.data.data) {
         setPayments(response.data.data || []);
@@ -58,6 +94,133 @@ export default function PaymentsPage() {
       console.error("Fetch payments error:", error);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const fetchInvoices = useCallback(async () => {
+    try {
+      const res = await API.get("/invoices");
+      if (res.data?.data) {
+        setInvoices(res.data.data);
+      }
+    } catch (e) {
+      console.error("Fetch invoices for payments error:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPayments();
+    fetchInvoices();
+  }, [fetchPayments, fetchInvoices]);
+
+  const handleOpenCreate = () => {
+    setEditingPayment(null);
+    setFormError(null);
+    setFormData({
+      invoiceId: invoices[0]?._id || "",
+      invoiceNumber: invoices[0]?.invoiceNumber || "",
+      clientName: invoices[0]?.clientName || "",
+      clientEmail: invoices[0]?.clientEmail || "",
+      amount: invoices[0] ? String(invoices[0].dueAmount ?? invoices[0].amount ?? "") : "",
+      currency: "USD",
+      method: "bank",
+      status: "completed",
+      transactionId: `TXN-${Date.now()}`,
+      date: new Date().toISOString().split("T")[0],
+      notes: "",
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (payment: Payment) => {
+    setEditingPayment(payment);
+    setFormError(null);
+    setFormData({
+      invoiceId: payment.invoiceId || "",
+      invoiceNumber: payment.invoiceNumber || "",
+      clientName: payment.clientName || "",
+      clientEmail: payment.clientEmail || "",
+      amount: String(payment.amount),
+      currency: payment.currency || "USD",
+      method: payment.method,
+      status: payment.status,
+      transactionId: payment.transactionId || "",
+      date: payment.date ? payment.date.split("T")[0] : new Date().toISOString().split("T")[0],
+      notes: payment.notes || "",
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleInvoiceSelect = (invId: string) => {
+    const selected = invoices.find((inv) => inv._id === invId);
+    if (selected) {
+      setFormData((prev) => ({
+        ...prev,
+        invoiceId: selected._id,
+        invoiceNumber: selected.invoiceNumber,
+        clientName: selected.clientName,
+        clientEmail: selected.clientEmail,
+        amount: String(selected.dueAmount ?? selected.amount),
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, invoiceId: invId }));
+    }
+  };
+
+  const handleSavePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.amount || isNaN(Number(formData.amount))) {
+      setFormError("Valid payment amount is required");
+      return;
+    }
+
+    setIsSaving(true);
+    setFormError(null);
+
+    const payload = {
+      invoiceId: formData.invoiceId || undefined,
+      invoiceNumber: formData.invoiceNumber.trim(),
+      clientName: formData.clientName.trim(),
+      clientEmail: formData.clientEmail.trim(),
+      amount: Number(formData.amount),
+      currency: formData.currency,
+      method: formData.method,
+      status: formData.status,
+      transactionId: formData.transactionId.trim() || `TXN-${Date.now()}`,
+      date: formData.date ? new Date(formData.date).toISOString() : new Date().toISOString(),
+      notes: formData.notes.trim(),
+    };
+
+    try {
+      if (editingPayment) {
+        await API.put(`/payments/${editingPayment._id}`, payload);
+        setActionMessage({ type: "success", text: `Payment #${payload.transactionId} updated successfully.` });
+      } else {
+        await API.post("/payments", payload);
+        setActionMessage({ type: "success", text: `Payment #${payload.transactionId} recorded successfully.` });
+      }
+      setIsModalOpen(false);
+      setEditingPayment(null);
+      await fetchPayments();
+      setTimeout(() => setActionMessage(null), 3500);
+    } catch (err: any) {
+      console.error("Save payment error:", err);
+      setFormError(err.response?.data?.message || err.message || "Failed to save payment");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeletePayment = async () => {
+    if (!deleteTarget) return;
+    try {
+      await API.delete(`/payments/${deleteTarget._id}`);
+      setActionMessage({ type: "success", text: `Payment #${deleteTarget.transactionId} deleted.` });
+      setDeleteTarget(null);
+      await fetchPayments();
+      setTimeout(() => setActionMessage(null), 3500);
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to delete payment");
     }
   };
 
@@ -97,9 +260,9 @@ export default function PaymentsPage() {
   };
 
   const filteredPayments = payments.filter(payment => {
-    const matchesSearch = payment.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.transactionId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (payment.invoiceNumber || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (payment.clientName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (payment.transactionId || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === "all" || payment.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -157,7 +320,7 @@ export default function PaymentsPage() {
       <div style={styles.header} className="wsd-page-header payments-page-header">
         <div style={styles.headerTitleBlock} className="payments-title-block">
           <h1 style={styles.title} className="payments-title">Payments</h1>
-          <p style={styles.subtitle} className="payments-subtitle">Track all your transactions and payments</p>
+          <p style={styles.subtitle} className="payments-subtitle">Track, record, and manage all client transactions</p>
         </div>
 
         {/* Top & Middle Search */}
@@ -184,14 +347,35 @@ export default function PaymentsPage() {
             style={styles.filterSelect}
             className="payments-filter-select"
           >
-            <option value="all">All Payments</option>
+            <option value="all">All Statuses</option>
             <option value="completed">Completed</option>
             <option value="pending">Pending</option>
             <option value="failed">Failed</option>
             <option value="refunded">Refunded</option>
           </select>
+          <button onClick={handleOpenCreate} style={styles.primaryBtn} className="admin-primary-btn">
+            <Plus size={16} />
+            <span>Record Payment</span>
+          </button>
         </div>
       </div>
+
+      {actionMessage && (
+        <div style={{
+          padding: '12px 18px',
+          borderRadius: '12px',
+          marginBottom: '20px',
+          backgroundColor: actionMessage.type === 'success' ? 'rgba(52, 199, 89, 0.12)' : 'rgba(255, 59, 48, 0.12)',
+          color: actionMessage.type === 'success' ? '#34C759' : '#FF3B30',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Check size={18} />
+          <span>{actionMessage.text}</span>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div style={styles.statsGrid} className="wsd-grid-tiles payments-stats-grid">
@@ -233,8 +417,6 @@ export default function PaymentsPage() {
         </div>
       </div>
 
-      
-
       {downloadError && (
         <div style={styles.errorBanner} role="alert">
           {downloadError}
@@ -246,7 +428,7 @@ export default function PaymentsPage() {
         <div style={styles.emptyState}>
           <CreditCard size={64} color="var(--text-secondary)" />
           <h3 style={{color: 'var(--text-primary)'}}>No payments found</h3>
-          <p style={{color: 'var(--text-secondary)'}}>When you receive payments, they will appear here</p>
+          <p style={{color: 'var(--text-secondary)'}}>Record a new payment to begin tracking transactions.</p>
         </div>
       ) : viewMode === 'grid' ? (
         <div style={styles.paymentsGrid}>
@@ -283,7 +465,7 @@ export default function PaymentsPage() {
               </div>
               <div style={styles.paymentActions} className="payment-actions-stack">
                 <button style={styles.viewButton} className="action-btn" onClick={() => handleViewDetails(payment)}>
-                  <Eye size={14} /> View Details
+                  <Eye size={14} /> View
                 </button>
                 <button
                   style={styles.downloadButton}
@@ -291,7 +473,23 @@ export default function PaymentsPage() {
                   onClick={() => handleDownloadReceipt(payment)}
                   disabled={isDownloadingReceipt}
                 >
-                  <Download size={14} /> {isDownloadingReceipt ? 'Downloading...' : 'Receipt'}
+                  <Download size={14} /> Receipt
+                </button>
+                <button
+                  style={styles.editButton}
+                  className="action-btn"
+                  onClick={() => handleOpenEdit(payment)}
+                  title="Edit Payment"
+                >
+                  <Edit2 size={14} />
+                </button>
+                <button
+                  style={styles.deleteButton}
+                  className="action-btn"
+                  onClick={() => setDeleteTarget(payment)}
+                  title="Delete Payment"
+                >
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>
@@ -329,9 +527,9 @@ export default function PaymentsPage() {
                   <td style={styles.td}>{formatDate(payment.date)}</td>
                   <td style={styles.td}>{payment.transactionId}</td>
                   <td style={styles.td}>
-                    <div style={styles.paymentActions} className="payment-actions-stack">
+                    <div style={styles.tableActions}>
                       <button style={styles.viewButton} className="action-btn" onClick={() => handleViewDetails(payment)}>
-                        <Eye size={14} /> View
+                        <Eye size={14} />
                       </button>
                       <button
                         style={styles.downloadButton}
@@ -339,7 +537,13 @@ export default function PaymentsPage() {
                         onClick={() => handleDownloadReceipt(payment)}
                         disabled={isDownloadingReceipt}
                       >
-                        <Download size={14} /> Receipt
+                        <Download size={14} />
+                      </button>
+                      <button style={styles.editButton} className="action-btn" onClick={() => handleOpenEdit(payment)}>
+                        <Edit2 size={14} />
+                      </button>
+                      <button style={styles.deleteButton} className="action-btn" onClick={() => setDeleteTarget(payment)}>
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -350,6 +554,168 @@ export default function PaymentsPage() {
         </div>
       )}
 
+      {/* Record / Edit Payment Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingPayment(null);
+        }}
+        title={editingPayment ? "Edit Payment" : "Record New Payment"}
+        maxWidth="600px"
+      >
+        <form onSubmit={handleSavePayment} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {!editingPayment && invoices.length > 0 && (
+            <div>
+              <label style={styles.formLabel}>Select Invoice (Optional)</label>
+              <select
+                style={styles.formInput}
+                value={formData.invoiceId}
+                onChange={(e) => handleInvoiceSelect(e.target.value)}
+              >
+                <option value="">-- Manual Payment (No Invoice) --</option>
+                {invoices.map((inv) => (
+                  <option key={inv._id} value={inv._id}>
+                    #{inv.invoiceNumber} - {inv.clientName} (Due: ${inv.dueAmount ?? inv.amount})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={styles.formLabel}>Invoice Number *</label>
+              <input
+                style={styles.formInput}
+                value={formData.invoiceNumber}
+                onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })}
+                placeholder="INV-001"
+                required
+              />
+            </div>
+            <div>
+              <label style={styles.formLabel}>Amount (USD) *</label>
+              <input
+                style={styles.formInput}
+                type="number"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                placeholder="0.00"
+                required
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={styles.formLabel}>Client Name *</label>
+              <input
+                style={styles.formInput}
+                value={formData.clientName}
+                onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                placeholder="Client Name"
+                required
+              />
+            </div>
+            <div>
+              <label style={styles.formLabel}>Client Email *</label>
+              <input
+                style={styles.formInput}
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+                placeholder="client@example.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={styles.formLabel}>Payment Method</label>
+              <select
+                style={styles.formInput}
+                value={formData.method}
+                onChange={(e) => setFormData({ ...formData, method: e.target.value as any })}
+              >
+                <option value="bank">Bank Transfer</option>
+                <option value="card">Credit Card</option>
+                <option value="cash">Cash</option>
+                <option value="crypto">Cryptocurrency</option>
+              </select>
+            </div>
+            <div>
+              <label style={styles.formLabel}>Status</label>
+              <select
+                style={styles.formInput}
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              >
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+                <option value="refunded">Refunded</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={styles.formLabel}>Transaction ID</label>
+              <input
+                style={styles.formInput}
+                value={formData.transactionId}
+                onChange={(e) => setFormData({ ...formData, transactionId: e.target.value })}
+                placeholder="TXN-123456"
+              />
+            </div>
+            <div>
+              <label style={styles.formLabel}>Payment Date</label>
+              <input
+                style={styles.formInput}
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={styles.formLabel}>Notes (Optional)</label>
+            <textarea
+              style={{ ...styles.formInput, minHeight: "80px" }}
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Additional payment details or receipt references..."
+            />
+          </div>
+
+          {formError && (
+            <div style={{ color: "#FF3B30", fontSize: "14px", fontWeight: 600 }}>{formError}</div>
+          )}
+
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "12px" }}>
+            <button
+              type="button"
+              style={styles.cancelBtn}
+              onClick={() => {
+                setIsModalOpen(false);
+                setEditingPayment(null);
+              }}
+              disabled={isSaving}
+            >
+              Cancel
+            </button>
+            <button type="submit" style={styles.saveBtn} disabled={isSaving}>
+              {isSaving ? "Saving..." : editingPayment ? "Update Payment" : "Record Payment"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Details Modal */}
       <Modal
         isOpen={Boolean(selectedPayment)}
         onClose={handleCloseDetails}
@@ -398,6 +764,17 @@ export default function PaymentsPage() {
           </div>
         ) : null}
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmationModal
+        isOpen={Boolean(deleteTarget)}
+        title="Delete Payment"
+        message={`Are you sure you want to delete payment #${deleteTarget?.transactionId} of ${formatCurrency(deleteTarget?.amount || 0)}? This will adjust related invoice balances.`}
+        confirmLabel="Delete"
+        isDanger
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDeletePayment}
+      />
 
       <style>{`
         .input-focus:focus {
@@ -449,113 +826,11 @@ export default function PaymentsPage() {
           }
           .payments-search-box {
             width: 100% !important;
-            padding: 8px 12px !important;
-            border-radius: 12px !important;
-            height: 42px !important;
-          }
-          .payments-search-box input {
-            font-size: 13.5px !important;
           }
           .payments-header-actions {
-            display: contents !important;
-          }
-          .payments-view-toggle {
             grid-column: 2 !important;
             grid-row: 2 !important;
-            width: auto !important;
-            flex-shrink: 0 !important;
-            display: flex !important;
-            height: 42px !important;
-            box-sizing: border-box !important;
-            align-items: center !important;
-          }
-          .payments-view-toggle button {
-            padding: 6px 10px !important;
-            border-radius: 8px !important;
-            height: 34px !important;
-          }
-          .payments-view-toggle button svg {
-            width: 15px !important;
-            height: 15px !important;
-          }
-          .payments-filter-select {
-            grid-column: 1 / -1 !important;
-            grid-row: 3 !important;
-            width: 100% !important;
-            height: 42px !important;
-            padding: 8px 14px !important;
-            border-radius: 12px !important;
-            font-size: 13.5px !important;
-          }
-        }
-        @media (max-width: 768px) {
-          .payments-search-section {
-            flex-direction: column !important;
-          }
-          .payment-actions-stack {
-            flex-direction: column;
-          }
-          .payments-stats-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-            gap: 6px !important;
-            margin-bottom: 20px !important;
-          }
-          .payment-stat-card {
-            padding: 8px 4px !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            text-align: center !important;
-            gap: 4px !important;
-            border-radius: 12px !important;
-          }
-          .payment-stat-card .stat-icon-wrap {
-            width: 28px !important;
-            height: 28px !important;
-            border-radius: 8px !important;
-          }
-          .payment-stat-card .stat-icon-wrap svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          .payment-stat-card .stat-text-wrap {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            width: 100% !important;
-          }
-          .payment-stat-val {
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            line-height: 1.2 !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            max-width: 100% !important;
-          }
-          .payment-stat-lbl {
-            font-size: 9px !important;
-            line-height: 1.15 !important;
-            color: var(--text-secondary) !important;
-            margin-top: 2px !important;
-            display: -webkit-box !important;
-            -webkit-line-clamp: 2 !important;
-            -webkit-box-orient: vertical !important;
-            overflow: hidden !important;
-            word-break: break-word !important;
-          }
-        }
-        @media (max-width: 420px) {
-          .payments-stats-grid {
-            gap: 4px !important;
-          }
-          .payment-stat-card {
-            padding: 6px 2px !important;
-          }
-          .payment-stat-val {
-            font-size: 11.5px !important;
-          }
-          .payment-stat-lbl {
-            font-size: 8px !important;
+            justify-self: end !important;
           }
         }
       `}</style>
@@ -565,68 +840,90 @@ export default function PaymentsPage() {
 
 const styles: any = {
   container: {
-    width: "100%",
-    maxWidth: "100%",
-    margin: 0,
-    backgroundColor: "transparent",
-    color: "var(--text-primary)",
-    minHeight: '100%',
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "400px",
-    gap: "16px",
-  },
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid var(--border-color)",
-    borderTopColor: "#007AFF",
-    borderRadius: "50%",
-    animation: "spin 0.8s linear infinite",
+    padding: "32px",
+    maxWidth: "1400px",
+    margin: "0 auto",
   },
   header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '20px',
-    marginBottom: '28px',
-    width: '100%',
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "32px",
+    gap: "16px",
+    flexWrap: "wrap",
   },
   headerTitleBlock: {
     flexShrink: 0,
-    minWidth: '180px',
-  },
-  middleSearchWrap: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    minWidth: '220px',
-  },
-  headerButtons: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-    flexShrink: 0,
   },
   title: {
-    fontSize: "34px",
-    fontWeight: 700,
+    fontSize: "32px",
+    fontWeight: 800,
     color: "var(--text-primary)",
+    margin: 0,
     marginBottom: "8px",
     letterSpacing: "-1px",
   },
   subtitle: {
-    fontSize: "16px",
+    fontSize: "15px",
     color: "var(--text-secondary)",
+    margin: 0,
+  },
+  middleSearchWrap: {
+    flex: 1,
+    maxWidth: "400px",
+    minWidth: "200px",
+  },
+  searchBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px 16px",
+    backgroundColor: "var(--bg-secondary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "12px",
+  },
+  searchInput: {
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    color: "var(--text-primary)",
+    fontSize: "14px",
+    width: "100%",
+  },
+  headerButtons: {
+    display: "flex",
+    gap: "10px",
+    alignItems: "center",
+  },
+  filterSelect: {
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "1px solid var(--border-color)",
+    backgroundColor: "var(--bg-secondary)",
+    color: "var(--text-primary)",
+    fontSize: "13px",
+    fontWeight: 600,
+    outline: "none",
+    cursor: "pointer",
+  },
+  primaryBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "10px 18px",
+    backgroundColor: "#007AFF",
+    color: "#fff",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "13px",
+    fontWeight: 700,
+    cursor: "pointer",
+    boxShadow: "0 4px 12px rgba(0,122,255,0.25)",
   },
   statsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "16px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "20px",
     marginBottom: "32px",
   },
   statCard: {
@@ -634,9 +931,9 @@ const styles: any = {
     alignItems: "center",
     gap: "16px",
     padding: "20px",
-    backgroundColor: 'transparent',
-    borderRadius: "16px",
+    backgroundColor: "var(--bg-secondary)",
     border: "1px solid var(--border-color)",
+    borderRadius: "16px",
   },
   statIcon: {
     width: "48px",
@@ -645,114 +942,56 @@ const styles: any = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   statValue: {
     fontSize: "24px",
-    fontWeight: 700,
+    fontWeight: 800,
     color: "var(--text-primary)",
+    letterSpacing: "-0.5px",
   },
   statLabel: {
-    fontSize: "13px",
+    fontSize: "12px",
     color: "var(--text-secondary)",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginTop: "2px",
   },
-  searchSection: {
-    display: "flex",
-    gap: "16px",
-    marginBottom: "24px",
-    flexWrap: "wrap",
-  },
-  searchBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '10px 18px',
-    backgroundColor: 'var(--bg-secondary)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '14px',
-    width: '100%',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-    transition: 'all 0.2s ease',
-  },
-  searchInput: {
-    flex: 1,
-    border: 'none',
-    outline: 'none',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    backgroundColor: 'transparent',
-    color: 'var(--text-primary)',
-    width: '100%',
-  },
-  filterSelect: {
+  errorBanner: {
     padding: "12px 16px",
-    fontSize: "14px",
-    border: "1.5px solid var(--border-color)",
+    backgroundColor: "rgba(255, 59, 48, 0.1)",
+    border: "1px solid rgba(255, 59, 48, 0.2)",
+    color: "#FF3B30",
     borderRadius: "12px",
-    backgroundColor: 'transparent',
-    color: "var(--text-primary)",
-    cursor: "pointer",
+    marginBottom: "20px",
+    fontSize: "14px",
   },
   emptyState: {
     textAlign: "center",
     padding: "80px 20px",
     backgroundColor: "var(--bg-secondary)",
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-  },
-  paymentsList: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "16px",
+    borderRadius: "24px",
+    border: "1.5px dashed var(--border-color)",
   },
   paymentsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "16px",
-  },
-  tableContainer: {
-    overflowX: "auto" as const,
-    borderRadius: "20px",
-    border: "1px solid var(--border-color)",
-    backgroundColor: 'transparent',
-    boxShadow: "0 10px 30px rgba(0,0,0,0.04)",
-  },
-  paymentsTable: {
-    width: "100%",
-    borderCollapse: "collapse" as const,
-    minWidth: "780px",
-  },
-  th: {
-    padding: "18px 16px",
-    textAlign: "left" as const,
-    fontSize: "12px",
-    fontWeight: 700,
-    color: "var(--text-secondary)",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
-    borderBottom: "1px solid var(--border-color)",
-  },
-  td: {
-    padding: "16px",
-    borderBottom: "1px solid var(--border-color)",
-    color: "var(--text-primary)",
-    verticalAlign: "middle" as const,
-    fontSize: "14px",
-  },
-  tableRow: {
-    transition: "background-color 0.2s ease",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+    gap: "20px",
   },
   paymentCard: {
-    backgroundColor: 'transparent',
-    borderRadius: "16px",
+    backgroundColor: "var(--bg-secondary)",
     border: "1px solid var(--border-color)",
+    borderRadius: "18px",
     padding: "20px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
   },
   paymentHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: "16px",
-    flexWrap: "wrap",
     gap: "12px",
   },
   paymentLeft: {
@@ -761,88 +1000,193 @@ const styles: any = {
     gap: "12px",
   },
   methodIcon: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
   invoiceNumber: {
-    fontSize: "16px",
+    fontSize: "15px",
     fontWeight: 700,
-    color: "#007AFF",
+    color: "var(--text-primary)",
   },
   clientName: {
-    fontSize: "14px",
+    fontSize: "13px",
     color: "var(--text-secondary)",
   },
   paymentRight: {
-    textAlign: "right" as const,
+    textAlign: "right",
   },
   amount: {
-    fontSize: "20px",
-    fontWeight: 700,
+    fontSize: "18px",
+    fontWeight: 800,
     color: "var(--text-primary)",
+    letterSpacing: "-0.5px",
     marginBottom: "4px",
   },
   statusBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-    padding: "4px 10px",
-    borderRadius: "20px",
-    fontSize: "12px",
-    fontWeight: 600,
-    textTransform: "capitalize" as const,
+    padding: "3px 8px",
+    borderRadius: "8px",
+    fontSize: "11px",
+    fontWeight: 700,
+    textTransform: "uppercase",
   },
   paymentDetails: {
     display: "flex",
-    gap: "24px",
+    flexDirection: "column",
+    gap: "6px",
+    fontSize: "12px",
+    color: "var(--text-secondary)",
     paddingTop: "12px",
     borderTop: "1px solid var(--border-color)",
-    marginBottom: "12px",
-    flexWrap: "wrap",
   },
   detailItem: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    fontSize: "13px",
-    color: "var(--text-secondary)",
+    gap: "6px",
   },
   paymentActions: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    marginTop: "auto",
   },
   viewButton: {
+    flex: 1,
+    padding: "8px 12px",
+    borderRadius: "10px",
+    border: "1px solid var(--border-color)",
+    backgroundColor: "var(--bg-primary)",
+    color: "var(--text-primary)",
+    fontSize: "12px",
+    fontWeight: 600,
+    cursor: "pointer",
     display: "flex",
     alignItems: "center",
-    gap: "6px",
-    padding: "8px 16px",
-    backgroundColor: "var(--bg-secondary)",
-    border: "1px solid var(--border-color)",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "13px",
-    color: "var(--text-primary)",
-    fontWeight: 600,
+    justifyContent: "center",
+    gap: "4px",
   },
   downloadButton: {
+    flex: 1,
+    padding: "8px 12px",
+    borderRadius: "10px",
+    border: "1px solid var(--border-color)",
+    backgroundColor: "var(--bg-primary)",
+    color: "var(--text-primary)",
+    fontSize: "12px",
+    fontWeight: 600,
+    cursor: "pointer",
     display: "flex",
     alignItems: "center",
-    gap: "6px",
-    padding: "8px 16px",
-    backgroundColor: "#007AFF",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "13px",
-    color: "#FFFFFF",
-    fontWeight: 600,
+    justifyContent: "center",
+    gap: "4px",
   },
-  errorBanner: {
-    backgroundColor: "#FFE9E9",
-    color: "#BF1E2E",
-    border: "1px solid #F5C6CB",
+  editButton: {
+    padding: "8px 10px",
+    borderRadius: "10px",
+    border: "1px solid rgba(0, 122, 255, 0.25)",
+    backgroundColor: "rgba(0, 122, 255, 0.08)",
+    color: "#007AFF",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButton: {
+    padding: "8px 10px",
+    borderRadius: "10px",
+    border: "1px solid rgba(255, 59, 48, 0.25)",
+    backgroundColor: "rgba(255, 59, 48, 0.08)",
+    color: "#FF3B30",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tableContainer: {
+    backgroundColor: "var(--bg-secondary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "18px",
+    overflow: "hidden",
+  },
+  paymentsTable: {
+    width: "100%",
+    borderCollapse: "collapse",
+    textAlign: "left",
+  },
+  th: {
+    padding: "16px 20px",
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    color: "var(--text-secondary)",
+    borderBottom: "1px solid var(--border-color)",
+  },
+  tableRow: {
+    borderBottom: "1px solid var(--border-color)",
+    transition: "background 0.2s",
+  },
+  td: {
+    padding: "16px 20px",
+    fontSize: "14px",
+    color: "var(--text-primary)",
+  },
+  tableActions: {
+    display: "flex",
+    gap: "6px",
+    alignItems: "center",
+  },
+  formLabel: {
+    display: "block",
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    color: "var(--text-primary)",
+    marginBottom: "6px",
+  },
+  formInput: {
+    width: "100%",
+    padding: "12px 14px",
+    backgroundColor: "var(--bg-secondary)",
+    border: "1px solid var(--border-color)",
     borderRadius: "12px",
-    padding: "14px 16px",
-    marginBottom: "20px",
+    color: "var(--text-primary)",
+    fontSize: "14px",
+    outline: "none",
+  },
+  cancelBtn: {
+    padding: "10px 20px",
+    backgroundColor: "transparent",
+    border: "1px solid var(--border-color)",
+    borderRadius: "12px",
+    color: "var(--text-secondary)",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  saveBtn: {
+    padding: "10px 24px",
+    backgroundColor: "#007AFF",
+    color: "#fff",
+    border: "none",
+    borderRadius: "12px",
+    fontWeight: 700,
+    cursor: "pointer",
+    boxShadow: "0 4px 12px rgba(0,122,255,0.25)",
+  },
+  loadingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "100px",
+    gap: "16px",
+    color: "var(--text-secondary)",
+  },
+  spinner: {
+    width: "36px",
+    height: "36px",
+    border: "3px solid var(--border-color)",
+    borderTopColor: "#007AFF",
+    borderRadius: "50%",
+    animation: "spin 0.8s linear infinite",
   },
   modalContent: {
     display: "flex",

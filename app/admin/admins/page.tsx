@@ -1,11 +1,18 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Search, Shield, Trash2, X } from 'lucide-react';
+import { Plus, Search, Shield, Trash2, Edit2, X, Check } from 'lucide-react';
 import { ViewModeToggle, GridListView } from '@/components/ui/ViewModeToggle';
 import { getStoredUser } from '@/lib/auth';
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
-import { createManagedUser, deleteManagedUser, getUsersByRole, ManagedUserPayload, RoleUser } from '@/core/services/userService';
+import {
+  createManagedUser,
+  updateManagedUser,
+  deleteManagedUser,
+  getUsersByRole,
+  ManagedUserPayload,
+  RoleUser
+} from '@/core/services/userService';
 
 function ManagedUserModal({
   isOpen,
@@ -13,6 +20,7 @@ function ManagedUserModal({
   title,
   isSaving,
   submitError,
+  initialUser,
   onClose,
   onSave,
 }: {
@@ -21,27 +29,56 @@ function ManagedUserModal({
   title: string;
   isSaving: boolean;
   submitError?: string | null;
+  initialUser?: RoleUser | null;
   onClose: () => void;
-  onSave: (payload: ManagedUserPayload) => Promise<void>;
+  onSave: (payload: ManagedUserPayload & { adminLevel?: 'super' | 'sub' }) => Promise<void>;
 }) {
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', company: '' });
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    company: string;
+    adminLevel: 'super' | 'sub';
+  }>({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    adminLevel: 'sub',
+  });
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ name: '', email: '', phone: '', company: '' });
+      if (initialUser) {
+        setFormData({
+          name: initialUser.name || '',
+          email: initialUser.email || '',
+          phone: initialUser.phone || '',
+          company: initialUser.company || '',
+          adminLevel: (initialUser.adminLevel as 'super' | 'sub') || 'sub',
+        });
+      } else {
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          company: '',
+          adminLevel: 'sub',
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialUser]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSave({
-      ...formData,
       name: formData.name.trim(),
       email: formData.email.trim().toLowerCase(),
       phone: formData.phone.trim(),
       company: formData.company.trim(),
+      adminLevel: formData.adminLevel,
       role,
     });
   };
@@ -64,6 +101,7 @@ function ManagedUserModal({
                 style={styles.input}
                 required
                 disabled={isSaving}
+                placeholder="Full Name"
               />
             </div>
             <div style={styles.formGroup}>
@@ -75,6 +113,7 @@ function ManagedUserModal({
                 style={styles.input}
                 required
                 disabled={isSaving}
+                placeholder="admin@example.com"
               />
             </div>
           </div>
@@ -87,6 +126,7 @@ function ManagedUserModal({
                 onChange={(e) => setFormData((current) => ({ ...current, phone: e.target.value }))}
                 style={styles.input}
                 disabled={isSaving}
+                placeholder="+1 (555) 000-0000"
               />
             </div>
             <div style={styles.formGroup}>
@@ -96,13 +136,29 @@ function ManagedUserModal({
                 onChange={(e) => setFormData((current) => ({ ...current, company: e.target.value }))}
                 style={styles.input}
                 disabled={isSaving}
+                placeholder="Organization or Title"
               />
+            </div>
+          </div>
+
+          <div style={styles.row}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Admin Level</label>
+              <select
+                value={formData.adminLevel}
+                onChange={(e) => setFormData((current) => ({ ...current, adminLevel: e.target.value as 'super' | 'sub' }))}
+                style={{ ...styles.input, cursor: 'pointer' }}
+                disabled={isSaving}
+              >
+                <option value="sub">Sub Admin (Staff / Manager)</option>
+                <option value="super">Super Admin (Full Access)</option>
+              </select>
             </div>
           </div>
 
           <div style={styles.infoBox}>
             <p style={styles.infoText}>
-              <strong>Note:</strong> Saving this {role} will email their login credentials automatically.
+              <strong>Note:</strong> {initialUser ? 'Updating this profile will save changes immediately.' : 'Saving this admin will register their account credentials.'}
             </p>
           </div>
 
@@ -111,7 +167,7 @@ function ManagedUserModal({
           <div style={styles.modalFooter}>
             <button type="button" onClick={onClose} style={styles.cancelBtn} disabled={isSaving}>Cancel</button>
             <button type="submit" style={styles.saveBtn} disabled={isSaving}>
-              {isSaving ? 'Saving...' : `Save Admin`}
+              {isSaving ? 'Saving...' : initialUser ? 'Update Admin' : 'Create Admin'}
             </button>
           </div>
         </form>
@@ -122,20 +178,39 @@ function ManagedUserModal({
 
 function ManagedUserCard({
   user,
+  onEdit,
   onDelete,
 }: {
   user: RoleUser;
+  onEdit: (user: RoleUser) => void;
   onDelete: (user: RoleUser) => void;
 }) {
+  const isSuper = (user.adminLevel || 'super') === 'super';
+
   return (
     <div style={styles.userCard} className="managed-user-card">
       <div style={styles.userCardHeader}>
         <div style={styles.userIcon}>
-          <Shield size={20} color="#007AFF" />
+          <Shield size={20} color={isSuper ? "#007AFF" : "#5856D6"} />
         </div>
-        <button onClick={() => onDelete(user)} style={styles.iconDeleteBtn} title={`Delete ${user.name}`} className="delete-btn-hover">
-          <Trash2 size={16} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            onClick={() => onEdit(user)}
+            style={styles.iconEditBtn}
+            title={`Edit ${user.name}`}
+            className="edit-btn-hover"
+          >
+            <Edit2 size={15} />
+          </button>
+          <button
+            onClick={() => onDelete(user)}
+            style={styles.iconDeleteBtn}
+            title={`Delete ${user.name}`}
+            className="delete-btn-hover"
+          >
+            <Trash2 size={15} />
+          </button>
+        </div>
       </div>
       <h3 style={styles.userName}>{user.name}</h3>
       <p style={styles.userMeta}>{user.email}</p>
@@ -143,10 +218,10 @@ function ManagedUserCard({
       <div style={{ marginTop: '16px' }}>
         <span style={{ 
           ...styles.roleBadge,
-          backgroundColor: 'rgba(0, 122, 255, 0.1)',
-          color: '#007AFF'
+          backgroundColor: isSuper ? 'rgba(0, 122, 255, 0.1)' : 'rgba(88, 86, 214, 0.1)',
+          color: isSuper ? '#007AFF' : '#5856D6'
         }}>
-          {((user.adminLevel || 'super') === 'super' ? 'Super Admin' : 'Sub Admin')}
+          {isSuper ? 'Super Admin' : 'Sub Admin'}
         </span>
       </div>
     </div>
@@ -159,24 +234,21 @@ export default function AdminsPage() {
   const [roleSaving, setRoleSaving] = useState(false);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<RoleUser | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<RoleUser | null>(null);
   const [viewMode, setViewMode] = useState<GridListView>('grid');
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchUsers = useCallback(async () => {
-    const user = getStoredUser();
-    const isSuperAdmin = user?.role === 'admin' && (user?.adminLevel || 'super') === 'super';
-    
     setLoading(true);
     setRoleError(null);
     try {
-      if (isSuperAdmin) {
-        const adminUsers = await getUsersByRole('admin');
-        // Show ALL sub-admins (adminLevel === 'sub')
-        setAdmins(adminUsers.filter((u) => (u.adminLevel || 'super') === 'sub'));
-      }
-    } catch (err) {
+      const adminUsers = await getUsersByRole('admin');
+      setAdmins(adminUsers || []);
+    } catch (err: any) {
       console.error('Failed to fetch admins:', err);
+      setRoleError('Failed to load admin accounts.');
     } finally {
       setLoading(false);
     }
@@ -186,15 +258,35 @@ export default function AdminsPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleSaveManagedUser = async (payload: ManagedUserPayload) => {
+  const handleOpenCreate = () => {
+    setEditingAdmin(null);
+    setRoleError(null);
+    setIsAdminModalOpen(true);
+  };
+
+  const handleOpenEdit = (user: RoleUser) => {
+    setEditingAdmin(user);
+    setRoleError(null);
+    setIsAdminModalOpen(true);
+  };
+
+  const handleSaveManagedUser = async (payload: ManagedUserPayload & { adminLevel?: 'super' | 'sub' }) => {
     setRoleSaving(true);
     setRoleError(null);
     try {
-      await createManagedUser(payload);
+      if (editingAdmin) {
+        await updateManagedUser(editingAdmin._id, payload);
+        setStatusMessage({ type: 'success', text: `Admin "${payload.name}" updated successfully.` });
+      } else {
+        await createManagedUser(payload);
+        setStatusMessage({ type: 'success', text: `Admin "${payload.name}" created successfully.` });
+      }
       setIsAdminModalOpen(false);
+      setEditingAdmin(null);
       await fetchUsers();
+      setTimeout(() => setStatusMessage(null), 3500);
     } catch (err: any) {
-      setRoleError(err.response?.data?.message || 'Failed to create admin account');
+      setRoleError(err.response?.data?.message || err.message || 'Operation failed');
     } finally {
       setRoleSaving(false);
     }
@@ -204,8 +296,10 @@ export default function AdminsPage() {
     if (!deleteTarget) return;
     try {
       await deleteManagedUser(deleteTarget._id);
+      setStatusMessage({ type: 'success', text: `Admin "${deleteTarget.name}" deleted.` });
       setDeleteTarget(null);
       await fetchUsers();
+      setTimeout(() => setStatusMessage(null), 3500);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to delete admin');
     }
@@ -223,7 +317,7 @@ export default function AdminsPage() {
       <header style={styles.header} className="wsd-page-header">
         <div style={styles.headerTitleBlock}>
           <h1 style={styles.title}>Admins</h1>
-          <p style={styles.subtitle}>Manage sub-admins and internal system access</p>
+          <p style={styles.subtitle}>Manage administrators and system access privileges</p>
         </div>
 
         {/* Top & Middle Search */}
@@ -242,12 +336,29 @@ export default function AdminsPage() {
         {/* Right Actions */}
         <div style={styles.headerButtons} className="wsd-page-actions">
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
-          <button onClick={() => setIsAdminModalOpen(true)} style={styles.primaryBtn} className="admin-primary-btn">
+          <button onClick={handleOpenCreate} style={styles.primaryBtn} className="admin-primary-btn">
             <Plus size={16} />
             <span>Add Admin</span>
           </button>
         </div>
       </header>
+
+      {statusMessage && (
+        <div style={{
+          padding: '12px 18px',
+          borderRadius: '12px',
+          marginBottom: '20px',
+          backgroundColor: statusMessage.type === 'success' ? 'rgba(52, 199, 89, 0.12)' : 'rgba(255, 59, 48, 0.12)',
+          color: statusMessage.type === 'success' ? '#34C759' : '#FF3B30',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Check size={18} />
+          <span>{statusMessage.text}</span>
+        </div>
+      )}
 
       <div style={styles.sectionBlock}>
         {loading ? (
@@ -258,7 +369,7 @@ export default function AdminsPage() {
         ) : filteredAdmins.length === 0 ? (
           <div style={styles.emptyContainer}>
             <Shield size={48} color="var(--border-color)" />
-            <h3 style={styles.emptyTitle}>No sub-admins found</h3>
+            <h3 style={styles.emptyTitle}>No administrators found</h3>
             <p style={styles.emptyText}>Add an admin account to help manage the platform.</p>
           </div>
         ) : viewMode === 'grid' ? (
@@ -267,6 +378,7 @@ export default function AdminsPage() {
               <ManagedUserCard
                 key={user._id}
                 user={user}
+                onEdit={handleOpenEdit}
                 onDelete={(target) => setDeleteTarget(target)}
               />
             ))}
@@ -276,13 +388,29 @@ export default function AdminsPage() {
             {filteredAdmins.map((user) => (
               <div key={user._id} style={styles.adminListRow}>
                 <div>
-                  <strong style={styles.adminListName}>{user.name}</strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <strong style={styles.adminListName}>{user.name}</strong>
+                    <span style={{
+                      ...styles.roleBadge,
+                      backgroundColor: (user.adminLevel || 'super') === 'super' ? 'rgba(0, 122, 255, 0.1)' : 'rgba(88, 86, 214, 0.1)',
+                      color: (user.adminLevel || 'super') === 'super' ? '#007AFF' : '#5856D6',
+                      padding: '2px 8px',
+                      fontSize: '10px'
+                    }}>
+                      {(user.adminLevel || 'super') === 'super' ? 'Super Admin' : 'Sub Admin'}
+                    </span>
+                  </div>
                   <p style={styles.adminListMeta}>{user.email}</p>
                   <p style={styles.adminListMeta}>{user.company || '—'}</p>
                 </div>
-                <button type="button" onClick={() => setDeleteTarget(user)} style={styles.adminListDelete}>
-                  <Trash2 size={16} />
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="button" onClick={() => handleOpenEdit(user)} style={styles.adminListEdit} title="Edit Admin">
+                    <Edit2 size={16} />
+                  </button>
+                  <button type="button" onClick={() => setDeleteTarget(user)} style={styles.adminListDelete} title="Delete Admin">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -292,10 +420,14 @@ export default function AdminsPage() {
       <ManagedUserModal
         isOpen={isAdminModalOpen}
         role="admin"
-        title="New Admin"
+        title={editingAdmin ? `Edit Admin: ${editingAdmin.name}` : "New Admin"}
+        initialUser={editingAdmin}
         isSaving={roleSaving}
         submitError={roleError}
-        onClose={() => setIsAdminModalOpen(false)}
+        onClose={() => {
+          setIsAdminModalOpen(false);
+          setEditingAdmin(null);
+        }}
         onSave={handleSaveManagedUser}
       />
 
@@ -323,10 +455,19 @@ export default function AdminsPage() {
           box-shadow: 0 12px 30px rgba(0,0,0,0.08);
           border-color: #007AFF20;
         }
+        .icon-btn-hover:hover {
+          background: #007AFF !important;
+          color: white !important;
+        }
         .delete-btn-hover:hover {
           background: #FF3B30 !important;
           color: white !important;
-          transform: scale(1.1);
+          transform: scale(1.05);
+        }
+        .edit-btn-hover:hover {
+          background: #007AFF !important;
+          color: white !important;
+          transform: scale(1.05);
         }
       `}</style>
     </div>
@@ -437,8 +578,18 @@ const styles: any = {
   },
   adminListName: { fontSize: '15px', color: 'var(--text-primary)' },
   adminListMeta: { fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0' },
+  adminListEdit: {
+    padding: '8px 10px',
+    borderRadius: '10px',
+    border: '1px solid rgba(0,122,255,0.25)',
+    background: 'rgba(0,122,255,0.06)',
+    color: '#007AFF',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+  },
   adminListDelete: {
-    padding: '10px 12px',
+    padding: '8px 10px',
     borderRadius: '10px',
     border: '1px solid rgba(255,59,48,0.25)',
     background: 'transparent',
@@ -473,14 +624,27 @@ const styles: any = {
     justifyContent: 'center',
     border: '1px solid var(--border-color)',
   },
+  iconEditBtn: {
+    background: 'rgba(0, 122, 255, 0.05)',
+    border: '1px solid rgba(0, 122, 255, 0.15)',
+    cursor: 'pointer',
+    color: '#007AFF',
+    padding: '8px',
+    borderRadius: '10px',
+    transition: 'all 0.25s ease',
+    display: 'flex',
+    alignItems: 'center',
+  },
   iconDeleteBtn: {
     background: 'rgba(255, 59, 48, 0.05)',
     border: '1px solid rgba(255, 59, 48, 0.1)',
     cursor: 'pointer',
     color: '#FF3B30',
-    padding: '10px',
-    borderRadius: '12px',
+    padding: '8px',
+    borderRadius: '10px',
     transition: 'all 0.25s ease',
+    display: 'flex',
+    alignItems: 'center',
   },
   userName: {
     fontSize: '20px',

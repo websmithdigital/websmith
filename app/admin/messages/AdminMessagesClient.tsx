@@ -138,7 +138,7 @@ const PRIORITY_SELECT_ARROW =
 //      drops into the inbox live whether or not a conversation is open.
 // There are no secondary timers, no state-dependent gating and no manual
 // buttons. Polling stops only on unmount.
-const POLL_INTERVAL_MS = 1_000;
+const POLL_INTERVAL_MS = 3_000;
 
 // Clock-skew safety window for the incremental `?after=` cursor: deltas are
 // re-fetched from slightly BEFORE the last known message time (browser clock
