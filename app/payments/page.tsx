@@ -154,15 +154,15 @@ export default function PaymentsPage() {
   return (
     <div style={styles.container} className="wsd-page admin-panel-scope">
       {/* Header */}
-      <div style={styles.header} className="wsd-page-header">
-        <div style={styles.headerTitleBlock}>
-          <h1 style={styles.title}>Payments</h1>
-          <p style={styles.subtitle}>Track all your transactions and payments</p>
+      <div style={styles.header} className="wsd-page-header payments-page-header">
+        <div style={styles.headerTitleBlock} className="payments-title-block">
+          <h1 style={styles.title} className="payments-title">Payments</h1>
+          <p style={styles.subtitle} className="payments-subtitle">Track all your transactions and payments</p>
         </div>
 
         {/* Top & Middle Search */}
         <div style={styles.middleSearchWrap} className="payments-middle-search">
-          <div style={styles.searchBox} className="admin-search-box wsd-search-box">
+          <div style={styles.searchBox} className="admin-search-box wsd-search-box payments-search-box">
             <Search size={18} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
             <input
               type="text"
@@ -423,34 +423,69 @@ export default function PaymentsPage() {
           to { transform: rotate(360deg); }
         }
         @media (max-width: 900px) {
-          .wsd-page-header {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            gap: 12px !important;
+          .payments-page-header {
+            display: grid !important;
+            grid-template-columns: 1fr auto !important;
+            gap: 12px 8px !important;
+            align-items: center !important;
+            width: 100% !important;
+          }
+          .payments-title-block {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+          }
+          .payments-title {
+            font-size: 24px !important;
+            margin-bottom: 2px !important;
+          }
+          .payments-subtitle {
+            font-size: 13px !important;
           }
           .payments-middle-search {
+            grid-column: 1 !important;
+            grid-row: 2 !important;
             width: 100% !important;
-            max-width: 100% !important;
+            min-width: 0 !important;
+          }
+          .payments-search-box {
+            width: 100% !important;
+            padding: 8px 12px !important;
+            border-radius: 12px !important;
+            height: 42px !important;
+          }
+          .payments-search-box input {
+            font-size: 13.5px !important;
           }
           .payments-header-actions {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            gap: 8px !important;
-            width: 100% !important;
+            display: contents !important;
           }
-          .payments-header-actions > .payments-view-toggle,
           .payments-view-toggle {
-            flex: 0 0 auto !important;
+            grid-column: 2 !important;
+            grid-row: 2 !important;
             width: auto !important;
+            flex-shrink: 0 !important;
+            display: flex !important;
+            height: 42px !important;
+            box-sizing: border-box !important;
+            align-items: center !important;
+          }
+          .payments-view-toggle button {
+            padding: 6px 10px !important;
+            border-radius: 8px !important;
+            height: 34px !important;
+          }
+          .payments-view-toggle button svg {
+            width: 15px !important;
+            height: 15px !important;
           }
           .payments-filter-select {
-            flex: 1 1 auto !important;
-            width: auto !important;
-            min-width: 0 !important;
-            height: 40px !important;
-            padding: 8px 12px !important;
-            font-size: 13px !important;
+            grid-column: 1 / -1 !important;
+            grid-row: 3 !important;
+            width: 100% !important;
+            height: 42px !important;
+            padding: 8px 14px !important;
+            border-radius: 12px !important;
+            font-size: 13.5px !important;
           }
         }
         @media (max-width: 768px) {

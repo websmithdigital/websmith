@@ -95,26 +95,30 @@ export default function ClientNotificationsPage() {
   }
 
   return (
-    <div style={styles.container} className="wsd-page">
-      <div style={styles.header} className="wsd-page-header client-notifications-header">
+    <div style={styles.container} className="wsd-page admin-panel-scope client-notifications-page">
+      <div style={{ ...styles.header, flexWrap: "nowrap" }} className="client-notifications-header">
         <div style={styles.headerTitleBlock} className="client-notifications-title-block">
-          <h1 style={styles.title}>Notifications</h1>
-          <p style={styles.subtitle}>Track project assignment updates and account activity</p>
+          <div className="client-notifications-title-row">
+            <h1 style={{ ...styles.title, marginBottom: 0 }} className="client-notifications-title">Notifications</h1>
+            {unreadCount > 0 && (
+              <span style={styles.unreadBadge} className="client-notif-unread-badge">
+                {unreadCount} unread
+              </span>
+            )}
+          </div>
+          <p style={styles.subtitle} className="client-notifications-subtitle">Track project assignment updates and account activity</p>
         </div>
-        <div style={styles.headerActions} className="wsd-page-actions client-notifications-actions">
+        <div style={styles.headerActions} className="client-notifications-actions">
           <button
             onClick={markAllAsRead}
             style={styles.markReadBtn}
+            className="client-notif-mark-read-btn"
             disabled={!notifications.some((item) => !item.isRead)}
           >
-            <MailOpen size={18} />
-            <span>Mark all as read</span>
+            <MailOpen size={14} />
+            <span className="mark-read-text-desktop">Mark all as read</span>
+            <span className="mark-read-text-mobile">Mark all read</span>
           </button>
-          {unreadCount > 0 && (
-            <div style={styles.unreadBadge}>
-              {unreadCount} unread
-            </div>
-          )}
         </div>
       </div>
 
@@ -125,14 +129,15 @@ export default function ClientNotificationsPage() {
       )}
 
       {/* Filter Tabs */}
-      <div style={styles.filterContainer}>
-        <div style={styles.filterTabs}>
+      <div style={styles.filterContainer} className="client-notif-filter-container">
+        <div style={styles.filterTabs} className="client-notif-filter-tabs">
           <button 
             onClick={() => setFilter('all')} 
             style={{
               ...styles.filterTab,
               ...(filter === 'all' ? styles.filterTabActive : {})
             }}
+            className="client-notif-filter-tab"
           >
             <Bell size={14} />
             All
@@ -143,6 +148,7 @@ export default function ClientNotificationsPage() {
               ...styles.filterTab,
               ...(filter === 'project' ? styles.filterTabActive : {})
             }}
+            className="client-notif-filter-tab"
           >
             <Folder size={14} />
             Projects
@@ -153,6 +159,7 @@ export default function ClientNotificationsPage() {
               ...styles.filterTab,
               ...(filter === 'task' ? styles.filterTabActive : {})
             }}
+            className="client-notif-filter-tab"
           >
             <TrendingUp size={14} />
             Tasks
@@ -163,6 +170,7 @@ export default function ClientNotificationsPage() {
               ...styles.filterTab,
               ...(filter === 'query' ? styles.filterTabActive : {})
             }}
+            className="client-notif-filter-tab"
           >
             <LifeBuoy size={14} />
             Queries
@@ -178,7 +186,7 @@ export default function ClientNotificationsPage() {
             <p>{filter === 'all' ? 'Project assignment updates will appear here.' : `No ${filter} notifications.`}</p>
           </div>
         ) : (
-          <div style={styles.grid}>
+          <div style={styles.grid} className="client-notif-grid">
             {filteredNotifications.map((notification) => {
               const notifType = getNotificationType(notification);
               const iconConfig = getNotificationIcon(notifType);
@@ -190,37 +198,38 @@ export default function ClientNotificationsPage() {
                     ...styles.notificationCard,
                     ...(notification.isRead ? {} : styles.unreadCard),
                   }}
-                  className="notification-item wsd-unified-card"
+                  className="notification-item wsd-unified-card client-notif-card"
                 >
-                  <div style={styles.cardInfo}>
+                  <div style={styles.cardInfo} className="client-notif-card-info">
                     <div
                       style={{
                         ...styles.iconWrapper,
                         backgroundColor: notification.isRead ? "var(--bg-primary)" : iconConfig.bg,
                       }}
+                      className="client-notif-icon-wrap"
                     >
-                      <IconComponent size={20} color={notification.isRead ? "var(--text-secondary)" : iconConfig.color} />
+                      <IconComponent size={18} color={notification.isRead ? "var(--text-secondary)" : iconConfig.color} />
                     </div>
-                    <div style={styles.textContent}>
+                    <div style={styles.textContent} className="client-notif-text-content">
                       <div style={styles.messageHeader}>
-                        <p style={styles.messageText}>{notification.message}</p>
+                        <p style={styles.messageText} className="client-notif-msg">{notification.message}</p>
                         <span style={{
                           ...styles.typeBadge,
                           backgroundColor: iconConfig.bg,
                           color: iconConfig.color
-                        }}>
+                        }} className="client-notif-badge">
                           {notifType}
                         </span>
                       </div>
-                      <div style={styles.metaInfo}>
+                      <div style={styles.metaInfo} className="client-notif-meta">
                         <Clock size={12} />
                         <span>{new Date(notification.createdAt).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
                   {!notification.isRead && (
-                    <button onClick={() => markAsRead(notification._id)} style={styles.actionBtn} title="Mark as read">
-                      <CheckCircle size={20} color="#34C759" />
+                    <button onClick={() => markAsRead(notification._id)} style={styles.actionBtn} className="client-notif-check-btn" title="Mark as read">
+                      <CheckCircle size={18} color="#34C759" />
                     </button>
                   )}
                 </div>
@@ -231,24 +240,149 @@ export default function ClientNotificationsPage() {
       </div>
 
       <style>{`
+        .client-notifications-title-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .mark-read-text-mobile {
+          display: none;
+        }
         @media (max-width: 768px) {
           .client-notifications-header {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            gap: 12px !important;
-          }
-          .client-notifications-actions {
-            width: 100% !important;
             display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
             justify-content: space-between !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            margin-bottom: 12px !important;
+            width: 100% !important;
           }
-          .client-notifications-actions > button {
-            flex: 1 !important;
-            justify-content: center !important;
+          .client-notifications-header > .client-notifications-title-block,
+          .client-notifications-title-block {
+            flex: 1 1 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+          }
+          .client-notifications-title-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            flex-wrap: wrap !important;
+          }
+          .client-notifications-title {
+            font-size: 20px !important;
+            margin-bottom: 2px !important;
+          }
+          .client-notifications-subtitle {
+            font-size: 11.5px !important;
+            line-height: 1.3 !important;
+            margin-top: 2px !important;
+            margin-bottom: 0 !important;
+          }
+          .client-notif-unread-badge {
+            padding: 2px 7px !important;
+            font-size: 10px !important;
+            border-radius: 6px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            font-weight: 700 !important;
+          }
+          .client-notifications-header > .client-notifications-actions,
+          .client-notifications-actions {
+            width: auto !important;
+            flex: 0 0 auto !important;
+            display: flex !important;
+            align-items: center !important;
+            align-self: flex-start !important;
+          }
+          .client-notifications-actions > button,
+          .client-notif-mark-read-btn {
+            width: auto !important;
+            flex: none !important;
+            padding: 6px 10px !important;
+            font-size: 11.5px !important;
+            border-radius: 8px !important;
+            gap: 4px !important;
+            white-space: nowrap !important;
+          }
+          .mark-read-text-desktop {
+            display: none !important;
+          }
+          .mark-read-text-mobile {
+            display: inline !important;
+          }
+          .client-notif-filter-container {
+            margin-bottom: 10px !important;
+          }
+          .client-notif-filter-tabs {
+            padding: 3px !important;
+            gap: 4px !important;
+            border-radius: 10px !important;
+          }
+          .client-notif-filter-tab {
+            padding: 5px 9px !important;
+            font-size: 11.5px !important;
+            border-radius: 7px !important;
+            gap: 4px !important;
+          }
+          .client-notif-filter-tab svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .client-notif-grid {
+            gap: 8px !important;
           }
           .notification-item {
-            padding: 12px 14px !important;
-            gap: 10px !important;
+            padding: 9px 11px !important;
+            border-radius: 12px !important;
+            gap: 8px !important;
+          }
+          .client-notif-card-info {
+            gap: 9px !important;
+            align-items: flex-start !important;
+          }
+          .client-notif-icon-wrap {
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 7px !important;
+            flex-shrink: 0 !important;
+          }
+          .client-notif-icon-wrap svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .client-notif-text-content {
+            gap: 3px !important;
+            min-width: 0 !important;
+          }
+          .client-notif-msg {
+            font-size: 12px !important;
+            line-height: 1.35 !important;
+            word-break: break-word !important;
+          }
+          .client-notif-badge {
+            font-size: 9px !important;
+            padding: 1px 5px !important;
+            border-radius: 4px !important;
+          }
+          .client-notif-meta {
+            font-size: 10px !important;
+            gap: 4px !important;
+            margin-top: 2px !important;
+          }
+          .client-notif-meta svg {
+            width: 11px !important;
+            height: 11px !important;
+          }
+          .client-notif-check-btn {
+            padding: 4px !important;
+            flex-shrink: 0 !important;
+          }
+          .client-notif-check-btn svg {
+            width: 16px !important;
+            height: 16px !important;
           }
         }
         .notification-item {

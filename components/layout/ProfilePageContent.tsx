@@ -308,13 +308,13 @@ export default function ProfilePageContent() {
   return (
     <div style={styles.page} className="wsd-page admin-panel-scope client-profile-page">
       <div style={styles.heroCard} className="profile-hero-card">
-        <div style={styles.heroGradient} />
+        <div style={styles.heroGradient} className="profile-hero-gradient" />
         <div style={styles.heroContent} className="profile-hero-content">
           <div style={styles.heroAvatarWrap} className="profile-avatar-wrap">
             {avatarSrc ? (
-              <img src={avatarSrc} alt={user.name} style={styles.heroAvatar} />
+              <img src={avatarSrc} alt={user.name} style={styles.heroAvatar} className="profile-hero-avatar" />
             ) : (
-              <div style={styles.heroAvatarFallback}>{initials}</div>
+              <div style={styles.heroAvatarFallback} className="profile-avatar-fallback">{initials}</div>
             )}
             <button
               type="button"
@@ -325,6 +325,7 @@ export default function ProfilePageContent() {
               }}
               onClick={() => fileInputRef.current?.click()}
               disabled={!isEditMode}
+              className="profile-avatar-action"
             >
               <Camera size={16} />
             </button>
@@ -338,53 +339,54 @@ export default function ProfilePageContent() {
           </div>
 
           <div style={styles.heroText} className="profile-hero-text">
-            <h1 style={styles.title}>{user.name}</h1>
-            <p style={styles.subtitle}>{user.email}</p>
+            <h1 style={styles.title} className="profile-hero-title">{user.name}</h1>
+            <p style={styles.subtitle} className="profile-hero-subtitle">{user.email}</p>
             <div style={styles.heroMetaRow} className="profile-hero-meta">
-              <span style={styles.roleBadge}>{user.role.toUpperCase()}</span>
-              <span style={styles.metaPill}>Member since {joinedLabel}</span>
-              <span style={styles.metaPill}>Account ID {accountId}</span>
+              <span style={styles.roleBadge} className="profile-role-badge">{user.role.toUpperCase()}</span>
+              <span style={styles.metaPill} className="profile-meta-pill">Member since {joinedLabel}</span>
+              <span style={styles.metaPill} className="profile-meta-pill">Account ID {accountId}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {message ? <div style={styles.successBanner}>{message}</div> : null}
-      {error ? <div style={styles.errorBanner}>{error}</div> : null}
+      {message ? <div style={styles.successBanner} className="profile-banner profile-success-banner">{message}</div> : null}
+      {error ? <div style={styles.errorBanner} className="profile-banner profile-error-banner">{error}</div> : null}
 
       <div style={styles.grid}>
-        <section style={styles.primaryColumn}>
+        <section style={styles.primaryColumn} className="profile-primary-column">
           <div style={styles.card} className="wsd-unified-card profile-card">
-            <div style={styles.cardHeader}>
-              <div style={styles.cardHeaderTitle}>
+            <div style={styles.cardHeader} className="profile-card-header">
+              <div style={styles.cardHeaderTitle} className="profile-card-header-title">
                 <User size={18} />
-                <h2 style={styles.cardTitle}>Profile Information</h2>
+                <h2 style={styles.cardTitle} className="profile-card-title">Profile Information</h2>
               </div>
-              <p style={styles.cardDescription}>
+              <p style={styles.cardDescription} className="profile-card-description">
                 Manage your {activePanel.toLowerCase()} profile details. Fields stay read-only until you choose Edit.
               </p>
             </div>
 
-            <form onSubmit={handleProfileUpdate} style={styles.form}>
-              <div style={styles.summaryList}>
+            <form onSubmit={handleProfileUpdate} style={styles.form} className="profile-form">
+              <div style={styles.summaryList} className="profile-summary-list">
                 {panelDetails.map((detail) => (
-                  <div key={detail.label} style={styles.summaryRow}>
-                    <span style={styles.summaryLabel}>{detail.label}</span>
-                    <span style={styles.summaryValue}>{detail.value}</span>
+                  <div key={detail.label} style={styles.summaryRow} className="profile-summary-row">
+                    <span style={styles.summaryLabel} className="profile-summary-label">{detail.label}</span>
+                    <span style={styles.summaryValue} className="profile-summary-value">{detail.value}</span>
                   </div>
                 ))}
               </div>
 
-              <div style={styles.formGrid}>
-                <label style={styles.field}>
-                  <span style={styles.label}>Full Name</span>
-                  <div style={styles.inputWrap}>
+              <div style={styles.formGrid} className="profile-form-grid">
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">Full Name</span>
+                  <div style={styles.inputWrap} className="profile-input-wrap">
                     <User size={16} color="var(--text-secondary)" />
                     <input
                       type="text"
                       value={profileForm.name}
                       onChange={(event) => setProfileForm((prev) => ({ ...prev, name: event.target.value }))}
                       style={styles.input}
+                      className="profile-input"
                       readOnly={!isEditMode}
                       required
                       aria-readonly={!isEditMode}
@@ -392,24 +394,25 @@ export default function ProfilePageContent() {
                   </div>
                 </label>
 
-                <label style={styles.field}>
-                  <span style={styles.label}>Email Address</span>
-                  <div style={{ ...styles.inputWrap, ...styles.readOnlyWrap }}>
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">Email Address</span>
+                  <div style={{ ...styles.inputWrap, ...styles.readOnlyWrap }} className="profile-input-wrap">
                     <Mail size={16} color="var(--text-secondary)" />
-                    <input type="email" value={profileForm.email} style={styles.input} readOnly />
+                    <input type="email" value={profileForm.email} style={styles.input} className="profile-input" readOnly />
                   </div>
-                  <span style={styles.helperText}>Email is read-only for account security.</span>
+                  <span style={styles.helperText} className="profile-helper-text">Email is read-only for account security.</span>
                 </label>
 
-                <label style={styles.field}>
-                  <span style={styles.label}>Phone Number</span>
-                  <div style={styles.inputWrap}>
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">Phone Number</span>
+                  <div style={styles.inputWrap} className="profile-input-wrap">
                     <Phone size={16} color="var(--text-secondary)" />
                     <input
                       type="tel"
                       value={profileForm.phone}
                       onChange={(event) => setProfileForm((prev) => ({ ...prev, phone: event.target.value }))}
                       style={styles.input}
+                      className="profile-input"
                       placeholder="+1 (555) 000-0000"
                       readOnly={!isEditMode}
                       aria-readonly={!isEditMode}
@@ -417,15 +420,16 @@ export default function ProfilePageContent() {
                   </div>
                 </label>
 
-                <label style={styles.field}>
-                  <span style={styles.label}>Company</span>
-                  <div style={styles.inputWrap}>
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">Company</span>
+                  <div style={styles.inputWrap} className="profile-input-wrap">
                     <Building size={16} color="var(--text-secondary)" />
                     <input
                       type="text"
                       value={profileForm.company}
                       onChange={(event) => setProfileForm((prev) => ({ ...prev, company: event.target.value }))}
                       style={styles.input}
+                      className="profile-input"
                       placeholder="Your company"
                       readOnly={!isEditMode}
                       aria-readonly={!isEditMode}
@@ -435,15 +439,15 @@ export default function ProfilePageContent() {
               </div>
 
               {isDeveloperPanel && (
-                <div style={styles.developerPanelNote}>
+                <div style={styles.developerPanelNote} className="profile-dev-note">
                   <strong>Developer profile:</strong> Public portfolio fields such as skills, headline, and availability are managed by the admin team section. Personal contact details can be edited here.
                 </div>
               )}
 
-              <div style={styles.actionRow}>
+              <div style={styles.actionRow} className="profile-action-row">
                 {!isEditMode ? (
                   <>
-                    <button type="button" style={styles.primaryButton} onClick={handleEnterEditMode}>
+                    <button type="button" style={styles.primaryButton} onClick={handleEnterEditMode} className="profile-btn profile-primary-btn">
                       <User size={16} />
                       Edit
                     </button>
@@ -451,6 +455,7 @@ export default function ProfilePageContent() {
                       type="button"
                       style={styles.secondaryButton}
                       onClick={handleShowPasswordForm}
+                      className="profile-btn profile-secondary-btn"
                     >
                       <Lock size={16} />
                       Change Password
@@ -458,7 +463,7 @@ export default function ProfilePageContent() {
                   </>
                 ) : (
                   <>
-                    <button type="submit" style={styles.primaryButton} disabled={profileSaving}>
+                    <button type="submit" style={styles.primaryButton} disabled={profileSaving} className="profile-btn profile-primary-btn">
                       <Save size={16} />
                       {profileSaving ? "Saving..." : "Save Changes"}
                     </button>
@@ -467,6 +472,7 @@ export default function ProfilePageContent() {
                       style={styles.secondaryButton}
                       onClick={handleCancelEdit}
                       disabled={profileSaving}
+                      className="profile-btn profile-secondary-btn"
                     >
                       Cancel
                     </button>
@@ -474,6 +480,7 @@ export default function ProfilePageContent() {
                       type="button"
                       style={styles.secondaryButton}
                       onClick={handleShowPasswordForm}
+                      className="profile-btn profile-secondary-btn"
                     >
                       <Lock size={16} />
                       Change Password
@@ -485,19 +492,19 @@ export default function ProfilePageContent() {
           </div>
 
           {showPasswordForm && (
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <div style={styles.cardHeaderTitle}>
+            <div style={styles.card} className="wsd-unified-card profile-card profile-password-card">
+              <div style={styles.cardHeader} className="profile-card-header">
+                <div style={styles.cardHeaderTitle} className="profile-card-header-title">
                   <Lock size={18} />
-                  <h2 style={styles.cardTitle}>Change Password</h2>
+                  <h2 style={styles.cardTitle} className="profile-card-title">Change Password</h2>
                 </div>
-                <p style={styles.cardDescription}>Use a strong password and confirm it before saving.</p>
+                <p style={styles.cardDescription} className="profile-card-description">Use a strong password and confirm it before saving.</p>
               </div>
 
-              <form onSubmit={handlePasswordChange} style={styles.form}>
-                <label style={styles.field}>
-                  <span style={styles.label}>Current Password</span>
-                  <div style={styles.passwordWrap}>
+              <form onSubmit={handlePasswordChange} style={styles.form} className="profile-form">
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">Current Password</span>
+                  <div style={styles.passwordWrap} className="profile-password-wrap">
                     <input
                       type={showCurrentPassword ? "text" : "password"}
                       value={passwordForm.currentPassword}
@@ -505,6 +512,7 @@ export default function ProfilePageContent() {
                         setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))
                       }
                       style={styles.passwordInput}
+                      className="profile-password-input"
                       autoComplete="current-password"
                       required
                     />
@@ -519,14 +527,15 @@ export default function ProfilePageContent() {
                   </div>
                 </label>
 
-                <label style={styles.field}>
-                  <span style={styles.label}>New Password</span>
-                  <div style={styles.passwordWrap}>
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">New Password</span>
+                  <div style={styles.passwordWrap} className="profile-password-wrap">
                     <input
                       type={showNewPassword ? "text" : "password"}
                       value={passwordForm.newPassword}
                       onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
                       style={styles.passwordInput}
+                      className="profile-password-input"
                       autoComplete="new-password"
                       required
                     />
@@ -541,9 +550,9 @@ export default function ProfilePageContent() {
                   </div>
                 </label>
 
-                <label style={styles.field}>
-                  <span style={styles.label}>Confirm New Password</span>
-                  <div style={styles.passwordWrap}>
+                <label style={styles.field} className="profile-field">
+                  <span style={styles.label} className="profile-label">Confirm New Password</span>
+                  <div style={styles.passwordWrap} className="profile-password-wrap">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       value={passwordForm.confirmPassword}
@@ -551,6 +560,7 @@ export default function ProfilePageContent() {
                         setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
                       }
                       style={styles.passwordInput}
+                      className="profile-password-input"
                       autoComplete="new-password"
                       required
                     />
@@ -563,25 +573,26 @@ export default function ProfilePageContent() {
                       {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p style={styles.helperText}>{getPasswordValidationMessage()}</p>
+                  <p style={styles.helperText} className="profile-helper-text">{getPasswordValidationMessage()}</p>
                 </label>
 
-                <div style={styles.checklist}>
+                <div style={styles.checklist} className="profile-checklist">
                   {passwordChecklist.map((item) => (
-                    <div key={item.key} style={styles.checklistRow}>
+                    <div key={item.key} style={styles.checklistRow} className="profile-checklist-row">
                       <span
                         style={{
                           ...styles.checklistDot,
                           backgroundColor: item.met ? "#22C55E" : "rgba(148, 163, 184, 0.5)",
                         }}
+                        className="profile-checklist-dot"
                       />
                       <span>{item.label}</span>
                     </div>
                   ))}
                 </div>
 
-                <div style={styles.actionRow}>
-                  <button type="submit" style={styles.secondaryButton} disabled={passwordSaving}>
+                <div style={styles.actionRow} className="profile-action-row">
+                  <button type="submit" style={styles.secondaryButton} disabled={passwordSaving} className="profile-btn profile-primary-btn">
                     <ShieldCheck size={16} />
                     {passwordSaving ? "Updating..." : "Update Password"}
                   </button>
@@ -590,6 +601,7 @@ export default function ProfilePageContent() {
                     style={styles.secondaryButton}
                     onClick={handleClosePasswordForm}
                     disabled={passwordSaving}
+                    className="profile-btn profile-secondary-btn"
                   >
                     Close
                   </button>
@@ -602,22 +614,195 @@ export default function ProfilePageContent() {
 
       <style>{`
         @media (max-width: 768px) {
+          .profile-hero-card {
+            border-radius: 16px !important;
+            margin-bottom: 12px !important;
+          }
+          .profile-hero-gradient {
+            height: 56px !important;
+          }
           .profile-hero-content {
-            flex-direction: column !important;
-            align-items: center !important;
-            text-align: center !important;
-            padding: 0 16px 20px !important;
-            margin-top: -46px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-end !important;
+            text-align: left !important;
+            padding: 0 12px 12px !important;
+            margin-top: -30px !important;
+            gap: 12px !important;
+            flex-wrap: nowrap !important;
+          }
+          .profile-avatar-wrap {
+            width: 62px !important;
+            height: 62px !important;
+            flex-shrink: 0 !important;
+          }
+          .profile-hero-avatar,
+          .profile-avatar-fallback {
+            border-radius: 16px !important;
+            border-width: 3px !important;
+            font-size: 22px !important;
+          }
+          .profile-avatar-action {
+            width: 22px !important;
+            height: 22px !important;
+            right: -2px !important;
+            bottom: -2px !important;
+          }
+          .profile-avatar-action svg {
+            width: 11px !important;
+            height: 11px !important;
           }
           .profile-hero-text {
-            width: 100% !important;
+            flex: 1 1 auto !important;
             min-width: 0 !important;
           }
-          .profile-hero-text h1 {
-            font-size: 24px !important;
+          .profile-hero-title {
+            font-size: 16px !important;
+            margin: 0 !important;
+            line-height: 1.25 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .profile-hero-subtitle {
+            font-size: 11.5px !important;
+            margin: 2px 0 6px !important;
+            line-height: 1.2 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
           }
           .profile-hero-meta {
-            justify-content: center !important;
+            justify-content: flex-start !important;
+            gap: 5px !important;
+          }
+          .profile-role-badge {
+            padding: 2.5px 7px !important;
+            font-size: 9.5px !important;
+            border-radius: 6px !important;
+          }
+          .profile-meta-pill {
+            padding: 2.5px 7px !important;
+            font-size: 9.5px !important;
+            border-radius: 6px !important;
+          }
+          .profile-banner {
+            padding: 8px 12px !important;
+            font-size: 11.5px !important;
+            border-radius: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          .profile-card {
+            padding: 12px 14px !important;
+            border-radius: 14px !important;
+          }
+          .profile-card-header {
+            margin-bottom: 10px !important;
+          }
+          .profile-card-header-title {
+            gap: 6px !important;
+            margin-bottom: 2px !important;
+          }
+          .profile-card-header-title svg {
+            width: 15px !important;
+            height: 15px !important;
+          }
+          .profile-card-title {
+            font-size: 14.5px !important;
+          }
+          .profile-card-description {
+            font-size: 11px !important;
+            line-height: 1.35 !important;
+          }
+          .profile-form {
+            gap: 10px !important;
+          }
+          .profile-summary-list {
+            gap: 6px !important;
+            margin-bottom: 4px !important;
+          }
+          .profile-summary-row {
+            padding-bottom: 6px !important;
+          }
+          .profile-summary-label,
+          .profile-summary-value {
+            font-size: 11.5px !important;
+          }
+          .profile-form-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .profile-field {
+            gap: 3px !important;
+          }
+          .profile-label {
+            font-size: 11.5px !important;
+          }
+          .profile-input-wrap {
+            min-height: 38px !important;
+            height: 38px !important;
+            padding: 0 10px !important;
+            border-radius: 9px !important;
+            gap: 8px !important;
+          }
+          .profile-input-wrap svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .profile-input-wrap input {
+            font-size: 12.5px !important;
+          }
+          .profile-helper-text {
+            font-size: 10.5px !important;
+            margin: 1px 0 0 !important;
+          }
+          .profile-action-row {
+            gap: 8px !important;
+            margin-top: 4px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+          }
+          .profile-btn {
+            min-width: 0 !important;
+            flex: 1 1 auto !important;
+            min-height: 35px !important;
+            height: 35px !important;
+            padding: 0 10px !important;
+            font-size: 12px !important;
+            border-radius: 8px !important;
+            white-space: nowrap !important;
+            gap: 5px !important;
+          }
+          .profile-btn svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .profile-password-card {
+            padding: 12px 14px !important;
+            border-radius: 14px !important;
+          }
+          .profile-password-wrap {
+            min-height: 38px !important;
+            height: 38px !important;
+            border-radius: 9px !important;
+            padding-left: 10px !important;
+          }
+          .profile-password-input {
+            font-size: 12.5px !important;
+          }
+          .profile-checklist {
+            padding: 8px 10px !important;
+            gap: 5px !important;
+            border-radius: 9px !important;
+          }
+          .profile-checklist-row {
+            font-size: 11px !important;
+            gap: 6px !important;
+          }
+          .profile-checklist-dot {
+            width: 6px !important;
+            height: 6px !important;
           }
         }
       `}</style>

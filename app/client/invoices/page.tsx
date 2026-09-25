@@ -354,21 +354,21 @@ export default function ClientInvoicesPage() {
       {/* Header */}
       <div style={styles.header} className="wsd-page-header client-invoices-header">
         <div style={styles.headerTitleBlock} className="client-invoices-title-block">
-          <h1 style={styles.title}>My Invoices</h1>
-          <p style={styles.subtitle}>Review your billing history and manage payments</p>
+          <h1 style={styles.title} className="client-invoices-title">My Invoices</h1>
+          <p style={styles.subtitle} className="client-invoices-subtitle">Review your billing history and manage payments</p>
         </div>
 
         {/* Top & Middle Search - spans across middle on desktop like Tasks */}
         <div style={styles.middleSearchWrap} className="client-invoices-middle-search">
-          <div style={styles.searchWrapper} className="admin-search-box wsd-search-box client-invoices-search">
-            <Search size={18} style={styles.searchIcon} />
+          <div style={styles.searchWrapper} className="client-invoices-search-wrap">
+            <Search size={16} style={styles.searchIcon} className="client-invoices-search-icon" />
             <input
               type="text"
               placeholder="Search by invoice number (#)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={styles.searchInput}
-              className="input-focus"
+              className="client-invoices-search-input"
             />
           </div>
         </div>
@@ -413,56 +413,56 @@ export default function ClientInvoicesPage() {
           <p style={{ color: 'var(--text-secondary)' }}>When you receive new invoices, they will appear here for payment.</p>
         </div>
       ) : (
-        <div style={styles.listContainer}>
+        <div style={styles.listContainer} className="client-invoices-list">
           {filteredInvoices.map((invoice) => (
-            <div key={invoice._id} style={styles.invoiceCard} className="invoice-card wsd-unified-card">
-              <div style={styles.cardHeader}>
-                <div style={styles.cardInfo}>
-                  <div style={styles.invNum}>{invoice.invoiceNumber}</div>
-                  <div style={styles.invDate}>Generated on {formatDate(invoice.issueDate)}</div>
+            <div key={invoice._id} style={styles.invoiceCard} className="invoice-card wsd-unified-card client-invoice-card">
+              <div style={styles.cardHeader} className="invoice-card-header">
+                <div style={styles.cardInfo} className="invoice-card-info">
+                  <div style={styles.invNum} className="invoice-num">{invoice.invoiceNumber}</div>
+                  <div style={styles.invDate} className="invoice-date">Generated on {formatDate(invoice.issueDate)}</div>
                 </div>
                 <div style={{
                   ...styles.statusBadge,
                   backgroundColor: `${getStatusColor(invoice.status)}15`,
                   color: getStatusColor(invoice.status),
                   border: `1px solid ${getStatusColor(invoice.status)}25`
-                }}>
+                }} className="invoice-status-badge">
                   {invoice.status.toUpperCase()}
                 </div>
               </div>
               
-              <div style={styles.cardContent}>
-                <div style={styles.amountSection}>
-                  <div style={styles.amountLabel}>Invoice Total</div>
-                  <div style={styles.amountValue}>{formatCurrency(invoice.amount)}</div>
-                  <div style={styles.dueValue}>
+              <div style={styles.cardContent} className="invoice-card-content">
+                <div style={styles.amountSection} className="invoice-amount-section">
+                  <div style={styles.amountLabel} className="invoice-amount-label">Invoice Total</div>
+                  <div style={styles.amountValue} className="invoice-amount-val">{formatCurrency(invoice.amount)}</div>
+                  <div style={styles.dueValue} className="invoice-due-val">
                     Remaining Due: {formatCurrency(invoice.dueAmount ?? invoice.amount)}
                   </div>
                 </div>
-                <div style={styles.dateSection}>
-                  <div style={styles.amountLabel}>Due Date</div>
+                <div style={styles.dateSection} className="invoice-date-section">
+                  <div style={styles.amountLabel} className="invoice-amount-label">Due Date</div>
                   <div style={{
                     ...styles.dateValue, 
                     color: invoice.status === 'overdue' ? '#FF3B30' : 'var(--text-primary)'
-                  }}>
+                  }} className="invoice-date-val">
                     {formatDate(invoice.dueDate)}
                   </div>
                 </div>
               </div>
 
-              <div style={styles.cardFooter}>
-                <div style={styles.footerActions}>
-                  <button style={styles.actionBtn} className="action-btn-hover" onClick={() => setViewInvoice(invoice)}>
-                    <Eye size={16} /> <span className="hide-mobile">Details</span>
+              <div style={styles.cardFooter} className="invoice-card-footer">
+                <div style={styles.footerActions} className="invoice-footer-actions">
+                  <button style={styles.actionBtn} className="action-btn-hover invoice-action-btn" onClick={() => setViewInvoice(invoice)}>
+                    <Eye size={15} /> <span className="hide-mobile">Details</span>
                   </button>
-                  <button style={styles.actionBtn} className="action-btn-hover" onClick={() => handleDownloadInvoice(invoice)}>
-                    <Download size={16} /> <span className="hide-mobile">Receipt</span>
+                  <button style={styles.actionBtn} className="action-btn-hover invoice-action-btn" onClick={() => handleDownloadInvoice(invoice)}>
+                    <Download size={15} /> <span className="hide-mobile">Receipt</span>
                   </button>
                 </div>
                 {invoice.status !== "paid" && (
                   <button 
                     style={styles.payButton} 
-                    className="pay-btn-hover"
+                    className="pay-btn-hover invoice-pay-btn"
                     onClick={() => {
                       setPaymentError("");
                       setGatewayMessage("");
@@ -470,11 +470,11 @@ export default function ClientInvoicesPage() {
                       setSelectedInvoice(invoice);
                     }}
                   >
-                    <CreditCard size={18} /> {hasPendingPayment(invoice._id) ? "Retry Payment" : "Pay Now"}
+                    <CreditCard size={15} /> {hasPendingPayment(invoice._id) ? "Retry Payment" : "Pay Now"}
                   </button>
                 )}
                 {invoice.status !== "paid" && hasPendingPayment(invoice._id) && (
-                  <div style={styles.pendingVerification}>
+                  <div style={styles.pendingVerification} className="invoice-pending-msg">
                     Verification pending. You can retry if this takes too long.
                   </div>
                 )}
@@ -518,20 +518,63 @@ export default function ClientInvoicesPage() {
           .client-invoices-header {
             flex-direction: column !important;
             align-items: stretch !important;
-            gap: 12px !important;
+            gap: 10px !important;
+            margin-bottom: 12px !important;
+          }
+          .client-invoices-title {
+            font-size: 22px !important;
+            letter-spacing: -0.5px !important;
+            margin-bottom: 2px !important;
+          }
+          .client-invoices-subtitle {
+            font-size: 12.5px !important;
           }
           .client-invoices-middle-search {
             width: 100% !important;
             max-width: 100% !important;
           }
         }
+        .client-invoices-search-wrap {
+          position: relative !important;
+          width: 100% !important;
+        }
+        .client-invoices-search-icon {
+          position: absolute !important;
+          left: 14px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          color: var(--text-secondary) !important;
+          pointer-events: none !important;
+          z-index: 1 !important;
+        }
+        .client-invoices-search-input {
+          width: 100% !important;
+          padding: 8px 14px 8px 38px !important;
+          font-size: 13.5px !important;
+          border-radius: 12px !important;
+          border: 1.5px solid var(--border-color) !important;
+          background-color: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          outline: none !important;
+          height: 40px !important;
+          box-sizing: border-box !important;
+          transition: all 0.2s ease !important;
+        }
+        .client-invoices-search-input:focus {
+          border-color: #007AFF !important;
+          box-shadow: 0 0 0 3px rgba(0,122,255,0.12) !important;
+        }
         @media (max-width: 768px) {
+          .client-invoices-header {
+            margin-bottom: 10px !important;
+          }
           .client-invoices-stats {
             grid-template-columns: repeat(3, 1fr) !important;
             gap: 6px !important;
+            margin-bottom: 12px !important;
           }
           .invoice-stat-card {
-            padding: 8px 4px !important;
+            padding: 7px 4px !important;
             flex-direction: column !important;
             align-items: center !important;
             text-align: center !important;
@@ -551,11 +594,65 @@ export default function ClientInvoicesPage() {
             font-size: 13px !important;
           }
           .invoice-stat-lbl {
-            font-size: 9px !important;
+            font-size: 8.5px !important;
           }
-          .invoice-card {
-            padding: 14px !important;
-            border-radius: 16px !important;
+          .client-invoices-list {
+            gap: 10px !important;
+          }
+          .client-invoice-card {
+            padding: 12px 14px !important;
+            border-radius: 14px !important;
+          }
+          .invoice-card-header {
+            margin-bottom: 8px !important;
+            gap: 8px !important;
+          }
+          .invoice-num {
+            font-size: 14.5px !important;
+          }
+          .invoice-date {
+            font-size: 11.5px !important;
+          }
+          .invoice-status-badge {
+            padding: 3px 8px !important;
+            font-size: 10px !important;
+            border-radius: 8px !important;
+            letter-spacing: 0.5px !important;
+          }
+          .invoice-card-content {
+            padding: 8px 0 !important;
+            margin-bottom: 8px !important;
+          }
+          .invoice-amount-label {
+            font-size: 10px !important;
+          }
+          .invoice-amount-val {
+            font-size: 18px !important;
+          }
+          .invoice-due-val {
+            font-size: 11.5px !important;
+            margin-top: 2px !important;
+          }
+          .invoice-date-val {
+            font-size: 13.5px !important;
+          }
+          .invoice-card-footer {
+            gap: 8px !important;
+          }
+          .invoice-footer-actions {
+            gap: 6px !important;
+          }
+          .invoice-action-btn {
+            padding: 6px 10px !important;
+            border-radius: 8px !important;
+            font-size: 12px !important;
+            gap: 5px !important;
+          }
+          .invoice-pay-btn {
+            padding: 7px 14px !important;
+            font-size: 12.5px !important;
+            border-radius: 9px !important;
+            gap: 6px !important;
           }
         }
         @media (max-width: 480px) {

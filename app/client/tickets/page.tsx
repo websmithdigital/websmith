@@ -179,14 +179,15 @@ export default function ClientTicketsPage() {
 
   return (
     <div style={styles.container} className="wsd-page admin-panel-scope client-tickets-page">
-      <div style={styles.topHeader} className="client-tickets-header wsd-page-header">
+      <div style={{ ...styles.topHeader, flexWrap: "nowrap" }} className="client-tickets-header">
         <div style={styles.headerTitleBlock} className="client-tickets-title-block">
-          <h1 style={styles.title}>Queries</h1>
-          <p style={styles.subtitle}>Create and track your support queries in a simple thread view.</p>
+          <h1 style={styles.title} className="client-tickets-title">Queries</h1>
+          <p style={styles.subtitle} className="client-tickets-subtitle">Create and track your support queries in a simple thread view.</p>
         </div>
         <button type="button" onClick={() => setIsQueryModalOpen(true)} style={styles.raiseQueryBtn} className="admin-primary-btn client-raise-btn">
-          <MessageSquarePlus size={18} />
-          Create New Query
+          <MessageSquarePlus size={15} />
+          <span className="client-raise-text-desktop">Create New Query</span>
+          <span className="client-raise-text-mobile">New Query</span>
         </button>
       </div>
 
@@ -240,10 +241,10 @@ export default function ClientTicketsPage() {
                 <ArrowLeft size={16} />
                 <span>All Queries</span>
               </button>
-              <div style={styles.detailsHeader}>
-                <h2 style={styles.detailsTitle}>{selectedTicket.subject}</h2>
-                <div style={styles.detailsHeaderActions}>
-                  <span style={styles.readOnlyStatus}>{statusLabel(selectedTicket.status)}</span>
+              <div style={styles.detailsHeader} className="query-details-header">
+                <h2 style={styles.detailsTitle} className="query-details-title">{selectedTicket.subject}</h2>
+                <div style={styles.detailsHeaderActions} className="query-details-actions">
+                  <span style={styles.readOnlyStatus} className="query-status-badge">{statusLabel(selectedTicket.status)}</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -251,14 +252,15 @@ export default function ClientTicketsPage() {
                       setThreadExpanded(false);
                     }}
                     style={styles.closeChatBtn}
+                    className="query-close-btn"
                   >
                     Close
                   </button>
                 </div>
               </div>
 
-              <div style={styles.threadToggleRow}>
-                <p style={styles.threadToggleHint}>
+              <div style={styles.threadToggleRow} className="query-thread-toggle-row">
+                <p style={styles.threadToggleHint} className="query-thread-hint">
                   {selectedTicket.history?.length
                     ? `${selectedTicket.history.length} message${selectedTicket.history.length === 1 ? "" : "s"} in this thread.`
                     : "No messages yet."}
@@ -267,6 +269,7 @@ export default function ClientTicketsPage() {
                   type="button"
                   onClick={() => setThreadExpanded((prev) => !prev)}
                   style={styles.toggleThreadBtn}
+                  className="query-toggle-btn"
                   aria-expanded={threadExpanded}
                 >
                   {threadExpanded ? (
@@ -487,6 +490,9 @@ export default function ClientTicketsPage() {
         .query-mobile-back-btn {
           display: none;
         }
+        .client-raise-text-mobile {
+          display: none;
+        }
         @media (max-width: 980px) {
           .client-query-layout {
             grid-template-columns: 1fr !important;
@@ -494,27 +500,104 @@ export default function ClientTicketsPage() {
         }
         @media (max-width: 768px) {
           .client-tickets-header {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            gap: 14px !important;
-          }
-          .client-raise-btn {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            margin-bottom: 14px !important;
             width: 100% !important;
-            justify-content: center !important;
+          }
+          .client-tickets-header > .client-tickets-title-block,
+          .client-tickets-title-block {
+            flex: 1 1 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+          }
+          .client-tickets-title {
+            font-size: 20px !important;
+            margin-bottom: 2px !important;
+          }
+          .client-tickets-subtitle {
+            font-size: 11.5px !important;
+            line-height: 1.3 !important;
+          }
+          .client-tickets-header > .client-raise-btn,
+          .client-raise-btn {
+            flex: 0 0 auto !important;
+            width: auto !important;
+            padding: 7px 11px !important;
+            font-size: 12px !important;
+            border-radius: 9px !important;
+            gap: 5px !important;
+            white-space: nowrap !important;
+            align-self: flex-start !important;
+          }
+          .client-raise-text-desktop {
+            display: none !important;
+          }
+          .client-raise-text-mobile {
+            display: inline !important;
+          }
+          .query-details-pane {
+            min-height: auto !important;
+            padding: 12px 14px !important;
+            gap: 10px !important;
+            border-radius: 14px !important;
           }
           .query-mobile-back-btn {
             display: inline-flex !important;
             align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 10px;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 8px;
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
+            align-self: flex-start;
+          }
+          .query-details-header {
+            padding-bottom: 8px !important;
+            gap: 8px !important;
+            align-items: flex-start !important;
+          }
+          .query-details-title {
+            font-size: 14.5px !important;
+            line-height: 1.35 !important;
+            font-weight: 700 !important;
+          }
+          .query-details-actions {
+            gap: 6px !important;
+            flex-shrink: 0 !important;
+          }
+          .query-status-badge {
+            padding: 3px 8px !important;
+            font-size: 11px !important;
+          }
+          .query-close-btn {
+            padding: 4px 8px !important;
+            font-size: 11px !important;
+            border-radius: 7px !important;
+          }
+          .query-thread-toggle-row {
+            gap: 6px !important;
+          }
+          .query-thread-hint {
+            font-size: 12px !important;
+          }
+          .query-toggle-btn {
+            padding: 6px 10px !important;
+            font-size: 12px !important;
+            border-radius: 8px !important;
+          }
+          .query-list-pane {
+            padding: 12px 10px !important;
+            border-radius: 14px !important;
           }
           .client-query-layout.no-ticket-selected .query-details-pane {
             display: none !important;
@@ -523,7 +606,8 @@ export default function ClientTicketsPage() {
             display: none !important;
           }
           .client-query-layout.ticket-selected .query-details-pane {
-            display: block !important;
+            display: flex !important;
+            flex-direction: column !important;
             width: 100% !important;
           }
           .client-query-layout.no-ticket-selected .query-list-pane {
@@ -548,7 +632,7 @@ const styles: any = {
     justifyContent: "space-between",
     alignItems: "flex-start",
     gap: "16px",
-    flexWrap: "wrap" as const,
+    flexWrap: "nowrap" as const,
     marginBottom: "20px",
   },
   title: { fontSize: "32px", fontWeight: 700, color: "var(--text-primary)", margin: 0, marginBottom: "6px", letterSpacing: "-1px" },
