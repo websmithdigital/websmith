@@ -42,7 +42,7 @@ export interface CmsServiceCategory {
 
 export interface CmsServiceItem {
   _id?: string;
-  categoryId: string;
+  categoryId?: string;
   categoryName?: string;
   name: string;
   title?: string;
