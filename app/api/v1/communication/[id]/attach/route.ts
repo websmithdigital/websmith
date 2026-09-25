@@ -149,7 +149,7 @@ export async function POST(
       }, { status: 400 });
     }
 
-    const storagePath = process.env.ATTACHMENT_STORAGE_PATH || path.join(process.cwd(), 'public', 'attachments');
+    const storagePath = process.env.ATTACHMENT_STORAGE_PATH || path.join(/*turbopackIgnore: true*/ process.cwd(), 'public', 'attachments');
     const convDir = path.join(storagePath, id);
     fs.mkdirSync(convDir, { recursive: true });
 

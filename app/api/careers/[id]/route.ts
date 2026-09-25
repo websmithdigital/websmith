@@ -1,5 +1,4 @@
-import { apiHandler, json, jsonBody, unauthorized, notFound, badRequest } from "@/lib/server/api";
-import { ObjectId } from "mongodb";
+import { apiHandler, json, jsonBody, unauthorized, notFound, badRequest, ObjectId } from "@/lib/server/api";
 
 export const PUT = apiHandler(
   async ({ db, request, user, params }) => {
