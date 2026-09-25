@@ -615,150 +615,185 @@ export default function ProfilePageContent() {
       <style>{`
         @media (max-width: 768px) {
           .profile-hero-card {
-            border-radius: 16px !important;
-            margin-bottom: 12px !important;
+            border-radius: 14px !important;
+            margin-bottom: 10px !important;
           }
           .profile-hero-gradient {
-            height: 56px !important;
+            height: 48px !important;
           }
           .profile-hero-content {
             display: flex !important;
             flex-direction: row !important;
-            align-items: flex-end !important;
+            align-items: flex-start !important;
             text-align: left !important;
-            padding: 0 12px 12px !important;
-            margin-top: -30px !important;
-            gap: 12px !important;
+            padding: 0 12px 10px !important;
+            margin-top: -24px !important;
+            gap: 10px !important;
             flex-wrap: nowrap !important;
           }
           .profile-avatar-wrap {
-            width: 62px !important;
-            height: 62px !important;
+            width: 52px !important;
+            height: 52px !important;
             flex-shrink: 0 !important;
           }
           .profile-hero-avatar,
           .profile-avatar-fallback {
-            border-radius: 16px !important;
+            border-radius: 14px !important;
             border-width: 3px !important;
-            font-size: 22px !important;
+            font-size: 20px !important;
           }
           .profile-avatar-action {
-            width: 22px !important;
-            height: 22px !important;
+            width: 20px !important;
+            height: 20px !important;
             right: -2px !important;
             bottom: -2px !important;
           }
           .profile-avatar-action svg {
-            width: 11px !important;
-            height: 11px !important;
+            width: 10px !important;
+            height: 10px !important;
           }
           .profile-hero-text {
             flex: 1 1 auto !important;
             min-width: 0 !important;
+            margin-top: 26px !important;
           }
           .profile-hero-title {
-            font-size: 16px !important;
+            font-size: 15px !important;
             margin: 0 !important;
-            line-height: 1.25 !important;
+            line-height: 1.2 !important;
+            color: var(--text-primary) !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
           }
           .profile-hero-subtitle {
-            font-size: 11.5px !important;
-            margin: 2px 0 6px !important;
+            font-size: 11px !important;
+            margin: 1px 0 5px !important;
             line-height: 1.2 !important;
+            color: var(--text-secondary) !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
           }
           .profile-hero-meta {
             justify-content: flex-start !important;
-            gap: 5px !important;
+            gap: 4px !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
           }
           .profile-role-badge {
-            padding: 2.5px 7px !important;
-            font-size: 9.5px !important;
-            border-radius: 6px !important;
+            padding: 2px 6px !important;
+            font-size: 9px !important;
+            border-radius: 5px !important;
           }
           .profile-meta-pill {
-            padding: 2.5px 7px !important;
-            font-size: 9.5px !important;
-            border-radius: 6px !important;
+            padding: 2px 6px !important;
+            font-size: 9px !important;
+            border-radius: 5px !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
           }
           .profile-banner {
-            padding: 8px 12px !important;
-            font-size: 11.5px !important;
-            border-radius: 10px !important;
-            margin-bottom: 10px !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+            border-radius: 8px !important;
+            margin-bottom: 8px !important;
           }
           .profile-card {
-            padding: 12px 14px !important;
-            border-radius: 14px !important;
+            padding: 10px 12px !important;
+            border-radius: 12px !important;
           }
           .profile-card-header {
-            margin-bottom: 10px !important;
+            margin-bottom: 8px !important;
           }
           .profile-card-header-title {
-            gap: 6px !important;
+            gap: 5px !important;
             margin-bottom: 2px !important;
           }
           .profile-card-header-title svg {
-            width: 15px !important;
-            height: 15px !important;
+            width: 14px !important;
+            height: 14px !important;
           }
           .profile-card-title {
-            font-size: 14.5px !important;
+            font-size: 14px !important;
           }
           .profile-card-description {
-            font-size: 11px !important;
-            line-height: 1.35 !important;
+            font-size: 10.5px !important;
+            line-height: 1.3 !important;
           }
           .profile-form {
-            gap: 10px !important;
+            gap: 8px !important;
           }
           .profile-summary-list {
-            gap: 6px !important;
-            margin-bottom: 4px !important;
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 4px !important;
+            padding: 6px !important;
+            background: var(--bg-secondary) !important;
+            border-radius: 8px !important;
+            margin-bottom: 6px !important;
+            border: 1px solid var(--border-color) !important;
           }
           .profile-summary-row {
-            padding-bottom: 6px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            border: none !important;
+            padding: 0 !important;
           }
-          .profile-summary-label,
+          .profile-summary-label {
+            font-size: 9px !important;
+            color: var(--text-secondary) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+          }
           .profile-summary-value {
             font-size: 11.5px !important;
+            font-weight: 700 !important;
+            color: var(--text-primary) !important;
           }
           .profile-form-grid {
             grid-template-columns: 1fr !important;
-            gap: 8px !important;
+            gap: 6px !important;
           }
           .profile-field {
-            gap: 3px !important;
+            gap: 2px !important;
           }
           .profile-label {
-            font-size: 11.5px !important;
+            font-size: 10.5px !important;
+            font-weight: 600 !important;
           }
           .profile-input-wrap {
-            min-height: 38px !important;
-            height: 38px !important;
-            padding: 0 10px !important;
-            border-radius: 9px !important;
-            gap: 8px !important;
+            min-height: 33px !important;
+            height: 33px !important;
+            padding: 0 8px !important;
+            border-radius: 7px !important;
+            gap: 6px !important;
           }
           .profile-input-wrap svg {
-            width: 13px !important;
-            height: 13px !important;
+            width: 12px !important;
+            height: 12px !important;
           }
           .profile-input-wrap input {
-            font-size: 12.5px !important;
+            font-size: 12px !important;
           }
           .profile-helper-text {
-            font-size: 10.5px !important;
+            font-size: 9.5px !important;
             margin: 1px 0 0 !important;
           }
+          .profile-dev-note {
+            padding: 6px 8px !important;
+            font-size: 10.5px !important;
+            line-height: 1.35 !important;
+            border-radius: 7px !important;
+            margin-top: 2px !important;
+          }
           .profile-action-row {
-            gap: 8px !important;
-            margin-top: 4px !important;
+            gap: 6px !important;
+            margin-top: 6px !important;
             display: flex !important;
             flex-direction: row !important;
             flex-wrap: wrap !important;
@@ -766,43 +801,43 @@ export default function ProfilePageContent() {
           .profile-btn {
             min-width: 0 !important;
             flex: 1 1 auto !important;
-            min-height: 35px !important;
-            height: 35px !important;
+            min-height: 33px !important;
+            height: 33px !important;
             padding: 0 10px !important;
-            font-size: 12px !important;
-            border-radius: 8px !important;
+            font-size: 11.5px !important;
+            border-radius: 7px !important;
             white-space: nowrap !important;
-            gap: 5px !important;
+            gap: 4px !important;
           }
           .profile-btn svg {
-            width: 13px !important;
-            height: 13px !important;
+            width: 12px !important;
+            height: 12px !important;
           }
           .profile-password-card {
-            padding: 12px 14px !important;
-            border-radius: 14px !important;
+            padding: 10px 12px !important;
+            border-radius: 12px !important;
           }
           .profile-password-wrap {
-            min-height: 38px !important;
-            height: 38px !important;
-            border-radius: 9px !important;
-            padding-left: 10px !important;
+            min-height: 33px !important;
+            height: 33px !important;
+            border-radius: 7px !important;
+            padding-left: 8px !important;
           }
           .profile-password-input {
-            font-size: 12.5px !important;
+            font-size: 12px !important;
           }
           .profile-checklist {
-            padding: 8px 10px !important;
-            gap: 5px !important;
-            border-radius: 9px !important;
+            padding: 6px 8px !important;
+            gap: 4px !important;
+            border-radius: 7px !important;
           }
           .profile-checklist-row {
-            font-size: 11px !important;
-            gap: 6px !important;
+            font-size: 10.5px !important;
+            gap: 5px !important;
           }
           .profile-checklist-dot {
-            width: 6px !important;
-            height: 6px !important;
+            width: 5px !important;
+            height: 5px !important;
           }
         }
       `}</style>
