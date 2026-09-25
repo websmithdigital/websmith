@@ -367,6 +367,9 @@ export default function Sidebar({
           scrollbar-width: thin !important;
           scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
           -webkit-overflow-scrolling: touch;
+          /* Desktop background — overridden on mobile below */
+          background: var(--bg-secondary);
+          background-color: var(--bg-secondary);
         }
         .app-sidebar::-webkit-scrollbar,
         aside.app-sidebar::-webkit-scrollbar,
@@ -491,7 +494,8 @@ const styles: any = {
     width: "260px",
     height: "100%",
     maxHeight: "100%",
-    background: "var(--bg-secondary)",
+    /* background removed from inline styles — controlled by CSS class only
+       so that mobile @media !important rules can properly override it */
     color: "var(--text-primary)",
     padding: "8px 10px 10px",
     display: "flex",
