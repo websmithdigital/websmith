@@ -369,8 +369,8 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                 onClick={() => setActiveDropdown(activeDropdown === "company" ? null : "company")}
                 style={{
                   ...styles.menuItem,
-                  color: pathname === "/about" || pathname === "/careers" || activeDropdown === "company" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
-                  fontWeight: pathname === "/about" || pathname === "/careers" || activeDropdown === "company" ? 600 : 500,
+                  color: pathname === "/about" || pathname === "/careers" || pathname === "/privacy" || pathname === "/terms" || pathname?.startsWith("/blog") || pathname?.startsWith("/documentation") || activeDropdown === "company" ? "#007AFF" : (isDark ? "#E2E8F0" : "#1d1d1f"),
+                  fontWeight: pathname === "/about" || pathname === "/careers" || pathname === "/privacy" || pathname === "/terms" || pathname?.startsWith("/blog") || pathname?.startsWith("/documentation") || activeDropdown === "company" ? 600 : 500,
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -875,7 +875,7 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                     style={{
                       ...styles.mobileMenuItem,
                       backgroundColor: mobileExpandedSection === "company" ? (isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)") : "transparent",
-                      color: pathname?.startsWith("/about") || pathname?.startsWith("/careers") || pathname?.startsWith("/blog") || pathname?.startsWith("/documentation")
+                      color: pathname?.startsWith("/about") || pathname?.startsWith("/careers") || pathname?.startsWith("/blog") || pathname?.startsWith("/documentation") || pathname === "/privacy" || pathname === "/terms"
                         ? "#2563eb"
                         : (isDark ? "#f1f5f9" : "#0f172a"),
                       fontWeight: 500,
@@ -927,6 +927,12 @@ export default function PublicSiteNav({ variant = "full" }: PublicSiteNavProps) 
                       </Link>
                       <Link href="/documentation" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
                         Documentation Center
+                      </Link>
+                      <Link href="/privacy" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
+                        Privacy Policy
+                      </Link>
+                      <Link href="/terms" onClick={() => setMobileOpen(false)} style={{ fontSize: "13.5px", color: isDark ? "#cbd5e1" : "#475569", padding: "6px 10px", borderRadius: "6px" }}>
+                        Terms of Service
                       </Link>
                     </div>
                   )}

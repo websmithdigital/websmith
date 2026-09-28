@@ -22,6 +22,20 @@ import { SEED_SERVICE_CATEGORIES, type CmsServiceCategory, type CmsServiceItem }
 import LucideIcon from "@/components/shared/LucideIcon";
 import { usePersistedTab } from "@/hooks/usePersistedTab";
 
+const TAB_ALIASES: Record<string, string> = {
+  engineering: "web-engineering",
+  software: "web-engineering",
+  web: "web-engineering",
+  erp: "business-software",
+  crm: "business-software",
+  business: "business-software",
+  mobile: "mobile-development",
+  apps: "mobile-development",
+  branding: "creative-branding",
+  design: "creative-branding",
+  cloud: "cloud-growth",
+};
+
 function ServicesContent() {
   const { publicTheme } = usePublicTheme();
   const isDark = publicTheme === "dark";
@@ -34,6 +48,13 @@ function ServicesContent() {
     paramName: "tab",
   });
   const [highlightedSlug, setHighlightedSlug] = useState<string>("");
+
+  // Normalize tab aliases (e.g. ?tab=engineering -> web-engineering, ?tab=erp -> business-software)
+  useEffect(() => {
+    if (activeTab && TAB_ALIASES[activeTab.toLowerCase()]) {
+      setActiveTab(TAB_ALIASES[activeTab.toLowerCase()]);
+    }
+  }, [activeTab, setActiveTab]);
 
   useEffect(() => {
     let isCancelled = false;

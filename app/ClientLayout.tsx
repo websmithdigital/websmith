@@ -211,9 +211,6 @@ function ClientLayoutInner({ children }: { children: React.ReactNode }) {
         onLogout={handleForcedPasswordResetLogout}
       />
 
-      {/* ✅ Cookie Consent Banner for public pages */}
-      <CookieConsentBanner />
-
       <style>{`
         .app-layout-shell {
           height: 100dvh;

@@ -65,35 +65,39 @@ export const publicPrimaryNav = [
 export const publicFooterConfig = {
   brand: {
     name: "WebSmith Digital",
-    tagline: "Building powerful digital ecosystems and smart solutions that work for your business.",
+    tagline: "Building high-performance web ecosystems, enterprise ERP platforms, and universal software licensing infrastructure.",
   },
   sections: [
     {
-      title: "Solutions",
+      title: "Services",
       links: [
-        { label: "Software Engineering", href: "/services?tab=engineering" },
-        { label: "Enterprise ERP & CRM", href: "/services?tab=erp" },
-        { label: "Universal Licensing (ULP)", href: "/services?tab=licensing" },
-        { label: "Industry Solutions", href: "/industries" },
-        { label: "Software Store", href: "/software-store" },
+        { label: "Web Engineering & Redesign", href: "/services?tab=web-engineering" },
+        { label: "Mobile & App Development", href: "/services?tab=mobile-development" },
+        { label: "Business Software & CRM/ERP", href: "/services?tab=business-software" },
+        { label: "Creative, Design & Branding", href: "/services?tab=creative-branding" },
+        { label: "Cloud, Performance & SLA", href: "/services?tab=cloud-growth" },
+        { label: "All Capabilities", href: "/services" },
       ],
     },
     {
       title: "Company",
       links: [
         { label: "About WebSmith", href: "/about" },
-        { label: "Core Architects", href: "/about#team" },
-        { label: "Client Portfolio", href: "/portfolio" },
+        { label: "Industry Verticals", href: "/industries" },
+        { label: "Portfolio", href: "/portfolio" },
         { label: "Careers & Culture", href: "/careers" },
         { label: "Engineering Blog", href: "/blog" },
+        { label: "Book Consultation", href: "/lead-form" },
       ],
     },
     {
-      title: "Resources & Legal",
+      title: "Products & Support",
       links: [
-        { label: "Documentation", href: "/documentation" },
-        { label: "Support & Help", href: "/support" },
-        { label: "Contact Us", href: "/contact" },
+        { label: "Software Storefront", href: "/software-store" },
+        { label: "Universal Licensing (ULP)", href: "/license" },
+        { label: "Documentation & APIs", href: "/documentation" },
+        { label: "Help & Support Center", href: "/support" },
+        { label: "Contact Engineering", href: "/contact" },
         { label: "Privacy Policy", href: "/privacy" },
         { label: "Terms of Service", href: "/terms" },
       ],

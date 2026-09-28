@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Info, Briefcase, Users2, BookOpen, FileText, ArrowRight, type LucideIcon } from "lucide-react";
+import { Info, Briefcase, Users2, BookOpen, FileText, ArrowRight, ShieldCheck, Scale, type LucideIcon } from "lucide-react";
 
 type CompanyItem = {
   title: string;
@@ -42,6 +42,18 @@ const COMPANY_ITEMS: CompanyItem[] = [
     description: "Platform APIs, SDK guides, and reference specs",
     icon: FileText,
     href: "/documentation",
+  },
+  {
+    title: "Privacy Policy",
+    description: "Data protection standards, consent & GDPR compliance",
+    icon: ShieldCheck,
+    href: "/privacy",
+  },
+  {
+    title: "Terms of Service",
+    description: "Platform usage terms, licensing agreements & conditions",
+    icon: Scale,
+    href: "/terms",
   },
 ];
 
