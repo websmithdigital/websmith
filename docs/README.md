@@ -23,7 +23,8 @@ It is a navigable companion to the two governance documents already in this fold
 7. `07-API-Reference.md` — public `/api/v1` and internal `/internal/backend` endpoints.
 8. `08-Database.md` — the PostgreSQL schema and migrations.
 9. `09-AWS-01-Rules.md` — the mandatory execution rules and invariants.
-10. `app/internal/publisher/template/python/Integrations.md` — the SDK Integration Guide
+10. `Website UI.md` — public brand asset standards, header mega-menus, and modernized footer architecture.
+11. `app/internal/publisher/template/python/Integrations.md` — the SDK Integration Guide
     shipped inside generated Python SDKs (rewritten copy lives in the template; this index
     links to the source-of-truth version).
 

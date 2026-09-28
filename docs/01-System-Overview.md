@@ -17,6 +17,7 @@ communications center — all from a single internal **API Center**.
 | **SDK Publisher** | `app/internal/publisher/*` | Generates, validates, and packages per-product SDKs for 13 runtimes. |
 | **Public API (v1)** | `app/api/v1/*` | Customer-facing endpoints used by the generated SDKs and the public storefront. |
 | **Public storefront** | `www.websmithdigital.com/software-store` (untouchable) | Working public product store (products + `/api/v1/store/*` + `/api/v1/checkout/*`). |
+| **Public Website & CMS** | `app/(public)/*`, `components/layout/*`, `core/config/publicSite.ts` | High-performance agency marketing site, dynamic capabilities, industry verticals, portfolio, and engineering blog. |
 | **Communications Center** | `app/internal/backend/communications/*`, `app/internal/backend/mailboxes/*` | Unified inbox, mailboxes (IMAP/SMTP), queue, delivery logs. |
 | **Notifications** | `lib/notification/notification-service.ts` | Event-driven email (Brevo) + SMS (Fast2SMS) notifications. |
 | **Database** | `lib/backend-db/index.ts`, `lib/migrations/runner.ts` | Single Neon PostgreSQL database (serverless). |

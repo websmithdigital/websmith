@@ -1,76 +1,108 @@
-| Website       | Official link                                                                 |
-| ------------- | ----------------------------------------------------------------------------- |
-| Uiverse       | [https://uiverse.io](https://uiverse.io?utm_source=chatgpt.com)               |
-| Lerpa UI      | [https://lerpa.dev](https://lerpa.dev?utm_source=chatgpt.com)                 |
-| Aceternity UI | [https://ui.aceternity.com](https://ui.aceternity.com?utm_source=chatgpt.com) |
-| Magic UI      | [https://magicui.design](https://magicui.design?utm_source=chatgpt.com)       |
-| Spectrum UI   | [https://ui.spectrumhq.in](https://ui.spectrumhq.in?utm_source=chatgpt.com)   |
-| SyntaxUI      | [https://syntaxui.com](https://syntaxui.com?utm_source=chatgpt.com)           |
-| Float UI      | [https://floatui.com](https://floatui.com?utm_source=chatgpt.com)             |
-| Emerald UI    | [https://emerald-ui.com](https://emerald-ui.com?utm_source=chatgpt.com)       |
-| HyperUI       | [https://hyperui.dev](https://hyperui.dev?utm_source=chatgpt.com)             |
-| DaisyUI       | [https://daisyui.com](https://daisyui.com?utm_source=chatgpt.com)             |
-| React Bits    | [https://reactbits.dev](https://reactbits.dev?utm_source=chatgpt.com)         |
-| Animata       | [https://animata.design](https://animata.design?utm_source=chatgpt.com)       |
-| HotwireBits   | [https://hotwirebits.com](https://hotwirebits.com?utm_source=chatgpt.com)     |
-| fvn-ui        | [https://fvn-ui.com](https://fvn-ui.com?utm_source=chatgpt.com)               |
-| Versa UI      | [https://versa-ui.com](https://versa-ui.com?utm_source=chatgpt.com)           |
-| shadcn/ui     | [https://ui.shadcn.com](https://ui.shadcn.com?utm_source=chatgpt.com)         |
-| Radix UI      | [https://www.radix-ui.com](https://www.radix-ui.com?utm_source=chatgpt.com)   |
-| PrimeReact    | [https://primereact.org](https://primereact.org?utm_source=chatgpt.com)       |
-| HeroUI        | [https://www.heroui.com](https://www.heroui.com?utm_source=chatgpt.com)       |
-| Cult UI       | [https://cult-ui.com](https://cult-ui.com?utm_source=chatgpt.com)             |
-| Fly On UI     | [https://www.flying-ui.com](https://www.flying-ui.com?utm_source=chatgpt.com) |
+# Website UI & Design System Specification
 
+This document details the public visual architecture, brand assets, navigation hierarchy, and layout engineering of the **WebSmith Digital** platform.
 
+---
 
+## Brand Asset Standards (`public/images/`)
 
+All brand imagery strictly maintains physical aspect ratio constraints to eliminate layout shifts (CLS) and Next.js Image optimization warnings:
 
-Yes. For your Websmith / Next.js / React project, I would narrow the list like this:
+| Asset | Source File | Dimensions | Aspect Ratio | Primary Role |
+| :--- | :--- | :--- | :--- | :--- |
+| **Brand Crest** | `public/images/icon.png` | 1254 × 1254 px | **1:1** | High-contrast circular header icon, admin sidebars, auth badges, and mobile app avatars. |
+| **Typographic Wordmark** | `public/images/wordmark.png` | 2172 × 724 px | **3:1** | Horizontal logotype with geometric emblem and typography. (Also duplicated as `wordmark1.png`). |
+| **Browser Tab Favicon** | `public/favicon.ico` | 16/32/48 px | **1:1** | Multi-resolution ICO generated directly from `icon.png` (replaces legacy black banners). |
+| **High-DPI Tab Favicon** | `public/images/favicon-32x32.png` | 32 × 32 px | **1:1** | Desktop tab favicon. |
+| **Apple Touch Icon** | `public/images/apple-touch-icon.png` | 180 × 180 px | **1:1** | iOS home-screen icon and safari pinned tab. |
+| **Android Chrome Icons** | `public/images/android-chrome-*.png` | 192 / 512 px | **1:1** | PWA shortcut and splash screen icons. |
+| **OpenGraph Preview** | `public/images/websmith_original.jpg` | 1200 × 630 px | **1.91:1** | Social media card (Twitter/X, LinkedIn, Discord). |
 
-Website	What you get	Best for	My rating
-React Bits	140+ animated components, backgrounds, text effects, particles, waves, orbits, visual effects; copy-paste source	Advanced animations & backgrounds	⭐⭐⭐⭐⭐
-Aceternity UI	Large collection of animated React/Tailwind components, 3D effects, spotlights, cards, backgrounds	Premium/cinematic UI	⭐⭐⭐⭐⭐
-Magic UI	Animated cards, marquees, beams, gradients, bento sections, marketing effects	Landing pages & marketing	⭐⭐⭐⭐⭐
-shadcn/ui	Buttons, dialogs, forms, dropdowns, tables and core UI primitives; source code is owned by you	Application foundation	⭐⭐⭐⭐⭐
-Lerpa UI	1,300+ copy-paste React components, shadcn-compatible, Motion-based	Huge component selection	⭐⭐⭐⭐½
-Uiverse	Community-created buttons, inputs, cards, loaders and CSS effects	Quick visual ideas	⭐⭐⭐⭐
-HeroUI	Complete React component system with polished interactive components	Full application UI	⭐⭐⭐⭐½
-Radix UI	Accessible unstyled primitives: dialogs, menus, popovers, tooltips, etc.	Accessible foundations	⭐⭐⭐⭐⭐
-DaisyUI	Tailwind-based buttons, cards, forms, navigation and themes	Fast Tailwind development	⭐⭐⭐⭐
-HyperUI	Free Tailwind components and sections	Fast copy/paste layouts	⭐⭐⭐⭐
-Animata	Small animated UI effects and components	Micro-interactions	⭐⭐⭐⭐
-Cult UI	Creative React components and animated UI	Experimental/creative interfaces	⭐⭐⭐⭐
-PrimeReact	Large enterprise component set, tables, forms, dialogs, data-heavy UI	Admin dashboards	⭐⭐⭐⭐½
-🏆 For your Websmith project
+### Implementation Rules for Next.js `<Image>`
+Whenever rendering `wordmark.png` (`2172x724`), the `width` and `height` properties passed to `<Image>` must strictly preserve the **3:1** aspect ratio to prevent browser console warnings:
+```tsx
+<Image
+  src="/images/wordmark1.png"
+  alt="Websmith Digital"
+  width={132}
+  height={44}
+  style={{ height: "44px", width: "auto", objectFit: "contain" }}
+  priority
+/>
+```
 
-I'd use a combination, not one library:
+---
 
-1. shadcn/ui → foundation
-Forms, dialogs, dropdowns, navigation, settings, admin-style UI.
+## Header Navigation Hierarchy (`PublicSiteNav.tsx`)
 
-2. React Bits → animation layer
-This is especially strong for the type of things you're currently building: floating elements, animated backgrounds, text effects, particles, orbit effects, etc. Its current library advertises 140+ components and multiple animation/background categories.
+The public header provides desktop mega-menus and a responsive slide-out mobile drawer:
 
-3. Aceternity UI → premium visual effects
-Best when you want a section to have a strong "wow" effect—3D cards, spotlights, animated backgrounds, beams, etc. Its 2026 guide specifically positions it strongly for animated landing pages.
+1. **Brand Identity**: Circular logo shell (`icon.png`) + responsive wordmark (`wordmark.png`).
+2. **Services Dropdown**: Interactive interactive grid linking to dynamic CMS capability tabs (`web-engineering`, `mobile-development`, `business-software`, `creative-branding`, `cloud-growth`).
+3. **Industries Dropdown**: Links to industry vertical showcases (`fintech`, `healthcare`, `ecommerce`, `logistics`, `real-estate`).
+4. **Portfolio**: Direct link to `/portfolio`.
+5. **Company Dropdown (`DropdownCompany.tsx`)**:
+   - About WebSmith (`/about`)
+   - Careers & Culture (`/careers`) — with live "Hiring" badge
+   - Core Team & Developers (`/about#team`)
+   - Engineering Blog (`/blog`)
+   - Documentation Center (`/documentation`)
+   - **Privacy Policy** (`/privacy`) — data governance and compliance
+   - **Terms of Service** (`/terms`) — platform licensing and usage agreements
+6. **Software Storefront**: Direct link to `/software-store` with embedded search query engine.
+7. **Contact Us & CTA**: Contact link (`/contact`) and high-conversion "Get Started" modal trigger.
 
-4. Magic UI → polished marketing sections
-Very useful for hero sections, marquees, bento layouts, glowing elements and marketing animations.
+---
 
-5. Lerpa UI → when you need something very specific
-Its current registry has 1,318 components, with copy-paste/source ownership and shadcn compatibility.
+## Modernized Public Footer (`PublicFooter.tsx`)
 
-My overall choice
+A 3-column architecture synchronized with the master CMS configuration in [core/config/publicSite.ts](file:///f:/Projects/WSD/websmith/core/config/publicSite.ts):
 
-🥇 React Bits — best for the kind of highly animated Websmith UI you're building.
+### 1. Brand & Direct Contact Column
+- WebSmith Digital identity with 1:1 crest and 3:1 wordmark.
+- Mission tagline: *"Building high-performance web ecosystems, enterprise ERP platforms, and universal software licensing infrastructure."*
+- Click-to-email: `mailto:support@websmithdigital.com`
+- Click-to-call: `tel:+18154269572`
+- Headquarters: Kolkata Regional Hub
+- Live system status pulse badge: *"All Systems Operational"* (animated emerald beacon).
+- Social links: GitHub, LinkedIn, X (Twitter), Discord, YouTube.
 
-🥈 Aceternity UI — best for premium cinematic effects.
+### 2. Services Column
+- Web Engineering & Redesign (`/services?tab=web-engineering`)
+- Mobile & App Development (`/services?tab=mobile-development`)
+- Business Software & CRM/ERP (`/services?tab=business-software`)
+- Creative, Design & Branding (`/services?tab=creative-branding`)
+- Cloud, Performance & SLA (`/services?tab=cloud-growth`)
+- All Capabilities (`/services`)
 
-🥉 shadcn/ui — best core foundation.
+### 3. Company Column
+- About WebSmith (`/about`)
+- Industry Verticals (`/industries`)
+- **Portfolio** (`/portfolio`)
+- Careers & Culture (`/careers`)
+- Engineering Blog (`/blog`)
+- Book Consultation (`/lead-form`)
 
-So for Websmith I would build:
+### 4. Products & Support Column
+- Software Storefront (`/software-store`)
+- Universal Licensing (ULP) (`/license`)
+- Documentation & APIs (`/documentation`)
+- Help & Support Center (`/support`)
+- Contact Engineering (`/contact`)
+- **Privacy Policy** (`/privacy`)
+- **Terms of Service** (`/terms`)
 
-shadcn/ui + React Bits + selected Aceternity UI + selected Magic UI
+### 5. Centered Copyright Bottom Bar
+- Clean, focused copyright notice without legal links clutter:
+  `© 2026 WebSmith Digital. All Rights Reserved. Engineered for Scale & Performance.`
 
-rather than installing 15–20 libraries. This keeps the project more controllable and avoids unnecessary dependencies.
+---
+
+## Dynamic URL Routing & Tab Aliases
+
+[app/services/page.tsx](file:///f:/Projects/WSD/websmith/app/services/page.tsx) automatically normalizes shorthand query parameters to official CMS slugs:
+- `?tab=engineering` → `web-engineering`
+- `?tab=mobile` → `mobile-development`
+- `?tab=erp` → `business-software`
+- `?tab=design` → `creative-branding`
+- `?tab=cloud` → `cloud-growth`
