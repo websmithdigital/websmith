@@ -249,7 +249,7 @@ export default function Sidebar({
         </div>
         <div className="logo-text-hover sidebar-wordmark" style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "4px" }}>
           <Image
-            src="/images/wordmark1.png"
+            src="/images/wordmark.png"
             alt="Websmith Digital"
             width={126}
             height={42}

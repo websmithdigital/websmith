@@ -39,7 +39,7 @@ import { getPublicIndustries, getPublicServiceCategories } from "../../lib/cms/c
 import type { CmsIndustry, CmsServiceCategory } from "../../lib/cms/types";
 
 const brandLogo = "/images/icon.png";
-const brandWordmark = "/images/wordmark1.png";
+const brandWordmark = "/images/wordmark.png";
 
 type PublicSiteNavProps = {
   /** Minimal bar (logo + Home + CTA) for sign-in pages — avoids the full marketing menu on /login */

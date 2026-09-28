@@ -87,7 +87,7 @@ export default function PublicFooter() {
               />
             </span>
             <Image
-              src="/images/wordmark1.png"
+              src="/images/wordmark.png"
               alt={publicFooterConfig.brand.name}
               width={138}
               height={46}

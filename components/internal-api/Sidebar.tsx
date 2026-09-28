@@ -434,7 +434,7 @@ export default function Sidebar() {
           <div>
             <div className="flex items-center gap-1.5">
               <Image
-                src="/images/wordmark1.png"
+                src="/images/wordmark.png"
                 alt="Websmith Digital"
                 width={78}
                 height={26}

@@ -11,7 +11,7 @@ All brand imagery strictly maintains physical aspect ratio constraints to elimin
 | Asset | Source File | Dimensions | Aspect Ratio | Primary Role |
 | :--- | :--- | :--- | :--- | :--- |
 | **Brand Crest** | `public/images/icon.png` | 1254 × 1254 px | **1:1** | High-contrast circular header icon, admin sidebars, auth badges, and mobile app avatars. |
-| **Typographic Wordmark** | `public/images/wordmark.png` | 2172 × 724 px | **3:1** | Horizontal logotype with geometric emblem and typography. (Also duplicated as `wordmark1.png`). |
+| **Typographic Wordmark** | `public/images/wordmark.png` | 2172 × 724 px | **3:1** | Horizontal logotype with geometric emblem and typography. |
 | **Browser Tab Favicon** | `public/favicon.ico` | 16/32/48 px | **1:1** | Multi-resolution ICO generated directly from `icon.png` (replaces legacy black banners). |
 | **High-DPI Tab Favicon** | `public/images/favicon-32x32.png` | 32 × 32 px | **1:1** | Desktop tab favicon. |
 | **Apple Touch Icon** | `public/images/apple-touch-icon.png` | 180 × 180 px | **1:1** | iOS home-screen icon and safari pinned tab. |
@@ -22,7 +22,7 @@ All brand imagery strictly maintains physical aspect ratio constraints to elimin
 Whenever rendering `wordmark.png` (`2172x724`), the `width` and `height` properties passed to `<Image>` must strictly preserve the **3:1** aspect ratio to prevent browser console warnings:
 ```tsx
 <Image
-  src="/images/wordmark1.png"
+  src="/images/wordmark.png"
   alt="Websmith Digital"
   width={132}
   height={44}

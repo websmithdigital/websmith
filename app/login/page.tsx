@@ -105,7 +105,7 @@ function LoginPageContent() {
             </div>
             <div className="logo-text-hover" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Image
-                src="/images/wordmark1.png"
+                src="/images/wordmark.png"
                 alt="Websmith Digital"
                 width={150}
                 height={50}

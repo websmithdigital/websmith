@@ -38,7 +38,7 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
               />
             </span>
             <Image
-              src="/images/wordmark1.png"
+              src="/images/wordmark.png"
               alt="Websmith Digital"
               width={126}
               height={42}
