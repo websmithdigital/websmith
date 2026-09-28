@@ -240,7 +240,7 @@ export default function RegisterPage() {
             <Image
               src="/images/wordmark1.png"
               alt="Websmith Digital"
-              width={240}
+              width={150}
               height={50}
               style={{ height: "50px", width: "auto", objectFit: "contain" }}
               priority

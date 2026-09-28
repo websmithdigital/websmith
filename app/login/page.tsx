@@ -107,7 +107,7 @@ function LoginPageContent() {
               <Image
                 src="/images/wordmark1.png"
                 alt="Websmith Digital"
-                width={240}
+                width={150}
                 height={50}
                 className="auth-wordmark-img"
                 style={{ height: "50px", width: "auto", objectFit: "contain" }}

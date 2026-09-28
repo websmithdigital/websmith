@@ -89,7 +89,7 @@ export default function PublicFooter() {
             <Image
               src="/images/wordmark1.png"
               alt={publicFooterConfig.brand.name}
-              width={220}
+              width={138}
               height={46}
               className="public-footer-wordmark"
               style={{ height: "46px", width: "auto", objectFit: "contain" }}
