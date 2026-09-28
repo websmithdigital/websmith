@@ -1102,19 +1102,31 @@ export default function LandingPage() {
 
   // Manage Page (contact_info) is the source of truth. Derive complete
   // collections so EVERY configured email / phone / social account renders
-  // (never first-item-only), with empties excluded and no invented values.
-  const contactEmails: string[] = [
-    contactInfo.email,
-    contactInfo.sales_email,
-    contactInfo.no_reply_email,
-    contactInfo.hr_email,
-  ].filter((value: string) => Boolean(value && value.trim()));
+  // Normalize contacts into deduplicated arrays with clean string trimming
+  const contactEmails: string[] = Array.from(
+    new Set(
+      [
+        contactInfo.email,
+        contactInfo.sales_email,
+        contactInfo.no_reply_email,
+        contactInfo.hr_email,
+      ]
+        .map((value: string) => String(value || "").trim())
+        .filter(Boolean)
+    )
+  );
 
-  const contactPhones: string[] = [
-    contactInfo.phone,
-    contactInfo.mobile_number,
-    contactInfo.landline_number,
-  ].filter((value: string) => Boolean(value && value.trim()));
+  const contactPhones: string[] = Array.from(
+    new Set(
+      [
+        contactInfo.phone,
+        contactInfo.mobile_number,
+        contactInfo.landline_number,
+      ]
+        .map((value: string) => String(value || "").trim())
+        .filter(Boolean)
+    )
+  );
 
   const contactSocials = SOCIAL_PLATFORM_META.map((platform) => ({
     ...platform,
@@ -1702,7 +1714,7 @@ export default function LandingPage() {
                     <div style={styles.infoValueRow} className="landing-contact-info-value-row">
                       {contactEmails.length > 0 ? (
                         contactEmails.map((email, index) => (
-                          <span key={email} style={styles.infoValueRowItem}>
+                          <span key={`email-${email}-${index}`} style={styles.infoValueRowItem}>
                             {index > 0 && <span className="landing-info-separator" style={styles.infoValueSeparator}>|</span>}
                             <a href={`mailto:${email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{email}</a>
                           </span>
@@ -1722,7 +1734,7 @@ export default function LandingPage() {
                     <div style={styles.infoValueRow} className="landing-contact-info-value-row">
                       {contactPhones.length > 0 ? (
                         contactPhones.map((phone, index) => (
-                          <span key={phone} style={styles.infoValueRowItem}>
+                          <span key={`phone-${phone}-${index}`} style={styles.infoValueRowItem}>
                             {index > 0 && <span className="landing-info-separator" style={styles.infoValueSeparator}>|</span>}
                             <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} style={{ color: 'inherit', textDecoration: 'none' }}>{phone}</a>
                           </span>
