@@ -46,6 +46,15 @@ temp/
 
 # Misc
 *.local
-
+.next-local*
+scratch/
+build-*.txt
+ts-errors*.txt
+tsc-*.txt
+debug*.txt
+diff*.txt
+log*.txt
+temp1.txt
+dir*.txt
 
 STOREROOM

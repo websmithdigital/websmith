@@ -49,10 +49,31 @@ export default function PortfolioPage() {
     };
   }, []);
 
-  // Dynamically derive category pills from database projects
+  // Defined target category order (Startups & SMBs -> Logistics)
+  const TARGET_CATEGORY_ORDER = [
+    "Startups & SMBs",
+    "Healthcare",
+    "Real Estate",
+    "Education",
+    "E-Commerce & Retail",
+    "Restaurants & Hospitality",
+    "Professional Services",
+    "Logistics",
+  ];
+
+  // Dynamically derive category pills from database projects with prioritized ordering
   const uniqueCategories = Array.from(
     new Set(projects.map((p) => p.category?.trim()).filter(Boolean))
   ) as string[];
+
+  uniqueCategories.sort((a, b) => {
+    const indexA = TARGET_CATEGORY_ORDER.indexOf(a);
+    const indexB = TARGET_CATEGORY_ORDER.indexOf(b);
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    return a.localeCompare(b);
+  });
 
   const categories = ["All", ...uniqueCategories];
 

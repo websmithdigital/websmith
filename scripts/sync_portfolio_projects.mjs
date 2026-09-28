@@ -1,3 +1,6 @@
+// scripts/sync_portfolio_projects.mjs
+// Synchronizes 16 modernized industry showcase projects with clean, professional names into Neon PostgreSQL (portal_projects)
+
 import pg from 'pg';
 import fs from 'fs';
 import path from 'path';
@@ -23,31 +26,14 @@ if (!connectionString && envContent) {
   }
 }
 
+if (!connectionString) {
+  console.error("No DATABASE_URL found in environment or .env files.");
+  process.exit(1);
+}
+
 const pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false } });
 
-const SEED_CLIENTS = [
-  { name: "Logix Global Supply Chain", company: "Enterprise Logistics", address: "Global freight tracking and inventory architecture across 8 international fulfillment hubs.", description: "Global freight tracking and inventory architecture across 8 international fulfillment hubs.", email: "contact@logixglobal.com" },
-  { name: "Aura Capital Partners", company: "FinTech & Wealth Management", address: "Real-time algorithmic trading and risk analytics interface with sub-50ms market execution.", description: "Real-time algorithmic trading and risk analytics interface with sub-50ms market execution.", email: "info@auracapital.com" },
-  { name: "MedCare Health Network", company: "Healthcare & Telemedicine", address: "HIPAA-compliant encrypted telemedicine portals and real-time doctor consult scheduling.", description: "HIPAA-compliant encrypted telemedicine portals and real-time doctor consult scheduling.", email: "contact@medcarenetwork.com" },
-  { name: "TransLogix Express", company: "Transportation & Fleet", address: "Automated telemetry dispatch, driver routing, and live geospatial vehicle tracking.", description: "Automated telemetry dispatch, driver routing, and live geospatial vehicle tracking.", email: "dispatch@translogix.com" },
-  { name: "Nordic Retail Labs", company: "eCommerce Solutions", address: "Modern B2B marketplace infrastructure with automated invoicing and multi-currency tax reporting.", description: "Modern B2B marketplace infrastructure with automated invoicing and multi-currency tax reporting.", email: "partner@nordicretail.com" },
-  { name: "Vanguard Cloud Systems", company: "Cloud Infrastructure", address: "Distributed license key authentication gate serving multi-region SaaS vendors.", description: "Distributed license key authentication gate serving multi-region SaaS vendors.", email: "support@vanguardcloud.com" },
-  { name: "Apex Mobility", company: "Urban Transit & IoT", address: "Connected IoT asset tracking platform with sub-second device status synchronization.", description: "Connected IoT asset tracking platform with sub-second device status synchronization.", email: "ops@apexmobility.io" },
-  { name: "Solaris Energy Tech", company: "Renewable Energy Analytics", address: "High-resolution telemetry dashboard for smart solar grid performance monitoring.", description: "High-resolution telemetry dashboard for smart solar grid performance monitoring.", email: "grid@solarisenergy.com" },
-  { name: "Quantum Digital Assets", company: "Institutional Digital Custody", address: "Hardware-security-backed key management and cryptographic authorization gateways.", description: "Hardware-security-backed key management and cryptographic authorization gateways.", email: "custody@quantumdigital.io" },
-  { name: "Horizon EdTech", company: "Adaptive Learning Systems", address: "Interactive classroom streaming platform with automated grading and student analytics.", description: "Interactive classroom streaming platform with automated grading and student analytics.", email: "hello@horizonedtech.org" },
-];
-
-const SEED_DEVELOPERS = [
-  { name: "Alex Rivera", role: "Principal Cloud Architect", headline: "Principal Cloud Architect", skills: ["AWS", "Kubernetes", "Go", "PostgreSQL"], experienceYears: 10, bio: "Designs ultra-reliable, high-throughput cloud infrastructure and distributed microservices.", email: "alex.rivera@websmithdigital.com" },
-  { name: "Sophia Chen", role: "Lead Full-Stack Engineer", headline: "Lead Full-Stack Engineer", skills: ["Next.js", "React 19", "TypeScript", "Node.js"], experienceYears: 8, bio: "Specializes in modern React architecture, complex interactive dashboards, and design systems.", email: "sophia.chen@websmithdigital.com" },
-  { name: "Marcus Vance", role: "Enterprise Systems Architect", headline: "Enterprise Systems Architect", skills: ["Java", "Spring Boot", "PostgreSQL", "Docker"], experienceYears: 12, bio: "Architects mission-critical ERP systems, high-compliance APIs, and enterprise data sync pipelines.", email: "marcus.vance@websmithdigital.com" },
-  { name: "Elena Rostova", role: "Senior Mobile & Web Engineer", headline: "Senior Mobile & Web Engineer", skills: ["React Native", "Flutter", "iOS", "TypeScript"], experienceYears: 7, bio: "Crafts silky-smooth cross-platform mobile experiences with strict offline-first resilience.", email: "elena.rostova@websmithdigital.com" },
-  { name: "David Kim", role: "Senior Security & Backend Engineer", headline: "Senior Security & Backend Engineer", skills: ["Python", "FastAPI", "Redis", "Cryptography"], experienceYears: 9, bio: "Expert in AES-256 encryption, HMAC API security gates, and ultra-low-latency backend services.", email: "david.kim@websmithdigital.com" },
-  { name: "Priya Sharma", role: "Lead UI/UX Engineer", headline: "Lead UI/UX Engineer", skills: ["Tailwind CSS", "Next.js", "Figma", "Design Systems"], experienceYears: 6, bio: "Obsessed with micro-interactions, responsive typography, and enterprise-grade design systems.", email: "priya.sharma@websmithdigital.com" },
-];
-
-const SEED_PROJECTS = [
+export const MODERN_PROJECTS = [
   // 1. STARTUPS & SMBS (2 Projects)
   {
     name: "VentureCraft Studio",
@@ -561,112 +547,46 @@ const SEED_PROJECTS = [
   },
 ];
 
-async function run() {
+async function sync() {
   const client = await pool.connect();
   try {
-    console.log("Seeding CMS defaults into database...");
+    console.log("Connected to PostgreSQL database.");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS portal_projects (
+        _id TEXT PRIMARY KEY,
+        data JSONB NOT NULL
+      )
+    `);
 
-    // 1. Seed 10 Clients into portal_users (role: 'client', published: true)
-    let clientsAdded = 0;
-    for (let i = 0; i < SEED_CLIENTS.length; i++) {
-      const c = SEED_CLIENTS[i];
-      const existing = await client.query(
-        `SELECT _id FROM portal_users WHERE data->>'email' = $1 OR data->>'name' = $2`,
-        [c.email, c.name]
-      );
-      if (existing.rows.length === 0) {
-        const _id = crypto.randomBytes(12).toString("hex");
-        const customId = `CL-${String(i + 101).padStart(4, "0")}`;
-        const doc = {
-          _id,
-          ...c,
-          role: "client",
-          status: "active",
-          published: true,
-          customId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        await client.query(`INSERT INTO portal_users (_id, data) VALUES ($1, $2)`, [_id, JSON.stringify(doc)]);
-        clientsAdded++;
-      } else {
-        const rowId = existing.rows[0]._id;
-        await client.query(
-          `UPDATE portal_users SET data = jsonb_set(data, '{published}', 'true') WHERE _id = $1`,
-          [rowId]
-        );
-      }
-    }
-    console.log(`Clients processed: ${clientsAdded} newly added.`);
+    // Clear old projects and re-seed with all 16 modernized showcase projects
+    await client.query(`DELETE FROM portal_projects`);
+    console.log("Cleared existing portal_projects records.");
 
-    // 2. Seed 6 Developers into portal_users (role: 'developer', published: true)
-    let devsAdded = 0;
-    for (let i = 0; i < SEED_DEVELOPERS.length; i++) {
-      const d = SEED_DEVELOPERS[i];
-      const existing = await client.query(
-        `SELECT _id FROM portal_users WHERE data->>'email' = $1 OR data->>'name' = $2`,
-        [d.email, d.name]
-      );
-      if (existing.rows.length === 0) {
-        const _id = crypto.randomBytes(12).toString("hex");
-        const customId = `DEV-${String(i + 101).padStart(4, "0")}`;
-        const doc = {
-          _id,
-          ...d,
-          role: "developer",
-          status: "active",
-          published: true,
-          customId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        await client.query(`INSERT INTO portal_users (_id, data) VALUES ($1, $2)`, [_id, JSON.stringify(doc)]);
-        devsAdded++;
-      } else {
-        const rowId = existing.rows[0]._id;
-        await client.query(
-          `UPDATE portal_users SET data = jsonb_set(data, '{published}', 'true') WHERE _id = $1`,
-          [rowId]
-        );
-      }
-    }
-    console.log(`Developers processed: ${devsAdded} newly added.`);
-
-    // 3. Seed 16 Projects into portal_projects (published: true, with testimonials)
-    let projectsAdded = 0;
+    let inserted = 0;
     const baseTime = Date.now();
-    for (let i = 0; i < SEED_PROJECTS.length; i++) {
-      const p = SEED_PROJECTS[i];
-      const existing = await client.query(
-        `SELECT _id FROM portal_projects WHERE data->>'name' = $1`,
-        [p.name]
-      );
-      const createdAt = new Date(baseTime + (SEED_PROJECTS.length - i) * 60000).toISOString();
-      if (existing.rows.length === 0) {
-        const _id = crypto.randomBytes(12).toString("hex");
-        const doc = {
-          _id,
-          ...p,
-          createdAt,
-          updatedAt: createdAt,
-        };
-        await client.query(`INSERT INTO portal_projects (_id, data) VALUES ($1, $2)`, [_id, JSON.stringify(doc)]);
-        projectsAdded++;
-      } else {
-        const rowId = existing.rows[0]._id;
-        await client.query(
-          `UPDATE portal_projects SET data = jsonb_set(jsonb_set(data, '{published}', 'true'), '{feedback}', $2::jsonb) WHERE _id = $1`,
-          [rowId, JSON.stringify(p.feedback)]
-        );
-      }
+    for (let i = 0; i < MODERN_PROJECTS.length; i++) {
+      const p = MODERN_PROJECTS[i];
+      const _id = crypto.randomBytes(12).toString("hex");
+      // Stagger createdAt so Startups & SMBs (at index 0) is newest, down to Logistics at the end
+      const createdAt = new Date(baseTime + (MODERN_PROJECTS.length - i) * 60000).toISOString();
+      const doc = {
+        _id,
+        ...p,
+        createdAt,
+        updatedAt: createdAt,
+      };
+      await client.query(`INSERT INTO portal_projects (_id, data) VALUES ($1, $2)`, [_id, JSON.stringify(doc)]);
+      inserted++;
     }
-    console.log(`Projects processed: ${projectsAdded} newly added.`);
 
-    console.log("Seeding complete!");
+    console.log(`Successfully synced ${inserted} modernized portfolio projects (with proper names and correct order) into portal_projects.`);
   } finally {
     client.release();
     await pool.end();
   }
 }
 
-run().catch(console.error);
+sync().catch((err) => {
+  console.error("Sync error:", err);
+  process.exit(1);
+});

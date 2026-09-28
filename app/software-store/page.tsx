@@ -11,6 +11,7 @@
 
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, ShoppingCart, Heart, X, Check, Clock, ChevronRight,
@@ -794,6 +795,30 @@ export default function SoftwareStorePage() {
           >
             Discover production-ready software solutions for your business
           </motion.p>
+
+          {/* Direct Link to Universal Licensing Platform (ULP) */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.35 }}
+            className="mt-5 inline-flex flex-wrap items-center justify-center gap-2.5 px-4 py-2 rounded-2xl border backdrop-blur-xl transition-all"
+            style={{
+              backgroundColor: isDark ? "rgba(15, 23, 42, 0.65)" : "rgba(255, 255, 255, 0.8)",
+              borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.2)",
+              boxShadow: isDark ? "0 4px 20px -2px rgba(0, 118, 255, 0.15)" : "0 4px 16px -2px rgba(0, 118, 255, 0.08)",
+            }}
+          >
+            <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+            <span className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+              Looking to activate, renew, or manage your device node locks?
+            </span>
+            <Link
+              href="/license"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-blue-500 hover:text-cyan-400 transition-colors underline underline-offset-4"
+            >
+              Open Universal Licensing Platform (ULP) <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </motion.div>
         </div>
       </div>
 
@@ -813,6 +838,21 @@ export default function SoftwareStorePage() {
               <Filter className={`w-3.5 h-3.5 ${isDark ? "text-blue-300" : "text-blue-600"}`} />
               {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
             </span>
+
+            {/* Quick Link to Universal Licensing Platform */}
+            <Link
+              href="/license"
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-xl px-3 py-1.5 border transition-all ${
+                isDark
+                  ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400/50"
+                  : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+              }`}
+              title="Open Universal Licensing Platform (ULP) to activate or renew keys"
+            >
+              <Monitor className="w-3.5 h-3.5 text-cyan-400" />
+              <span>ULP License Portal</span>
+              <ArrowUpRight className="w-3 h-3 opacity-75" />
+            </Link>
 
             <div className="flex-1" />
 

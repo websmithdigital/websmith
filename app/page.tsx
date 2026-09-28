@@ -60,13 +60,20 @@ const defaultContactInfo = {
 
 const CONTACT_SUBJECT_OPTIONS = [
   "Project Inquiry",
-  "Web Development",
+  "Website & Landing Page Development",
+  "Website Redesign & Modernization",
+  "Custom Web Applications",
+  "E-commerce Development",
   "Mobile App Development",
-  "Custom Software Development",
-  "Software Store & Licensing",
-  "Technical Support & Maintenance",
+  "CRM / ERP / Business Software",
+  "Booking & Appointment Systems",
+  "API & Payment Integrations",
+  "UI/UX Design & Prototyping",
+  "Logo & Brand Identity Design",
+  "Cloud & Deployment",
+  "Maintenance & Support (24/7 SLA)",
+  "SEO & Performance Optimization",
   "Consulting & Architecture",
-  "Partnership & Collaboration",
   "Other",
 ] as const;
 

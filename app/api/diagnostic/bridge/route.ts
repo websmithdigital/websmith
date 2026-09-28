@@ -1,12 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/backend-db';
 
 /**
  * DIAGNOSTIC ENDPOINT ONLY
- * Checks if PostgreSQL has received any customer emails
- * This helps verify Phase 2: Bridge is processing emails
+ * Blocked in production to prevent customer data and internal state exposure.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+    }
+
+    const authHeader = request.headers.get('authorization');
+    const secretKey = process.env.DIAGNOSTIC_SECRET || process.env.JWT_SECRET;
+    if (secretKey && authHeader !== `Bearer ${secretKey}`) {
+        return NextResponse.json({ error: 'Unauthorized diagnostic access' }, { status: 401 });
+    }
+
     try {
         const pool = await getDb();
 

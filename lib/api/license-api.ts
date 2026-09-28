@@ -125,20 +125,20 @@ export interface ApiResponse<T = any> {
 
 // ========== PRODUCTION CONFIGURATION ==========
 function getApiBaseUrl(): string {
-  const url = process.env.NEXT_PUBLIC_API_URL;
-  if (!url) throw new Error('NEXT_PUBLIC_API_URL environment variable is required');
-  return url;
+  if (typeof window !== "undefined") {
+    // In client browser, use relative paths to avoid CORS or misconfigured environment variables
+    return "";
+  }
+  const url = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_APP_URL;
+  return (url || "http://localhost:3000").replace(/\/$/, "");
 }
 
-const ADMIN_API_KEY = process.env.NEXT_PUBLIC_ADMIN_API_KEY || "";
+// Server-only admin key; never bundle or expose admin secrets to the client
+const ADMIN_API_KEY = typeof window === "undefined" ? (process.env.ADMIN_API_KEY || "") : "";
 
 class LicenseApiClient {
-  private baseUrl: string;
-  private adminKey: string;
-
-  constructor() {
-    this.baseUrl = getApiBaseUrl();
-    this.adminKey = ADMIN_API_KEY;
+  private getBaseUrl(): string {
+    return getApiBaseUrl();
   }
 
   private async request<T>(
@@ -146,13 +146,13 @@ class LicenseApiClient {
     path: string,
     body?: any
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${path}`;
+    const url = `${this.getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
     const headers: HeadersInit = {
       "Content-Type": "application/json",
     };
 
-    if (this.adminKey) {
-      headers["X-Admin-Key"] = this.adminKey;
+    if (ADMIN_API_KEY) {
+      headers["X-Admin-Key"] = ADMIN_API_KEY;
     }
 
     const startTime = Date.now();
@@ -161,6 +161,7 @@ class LicenseApiClient {
       const response = await fetch(url, {
         method,
         headers,
+        credentials: "include",
         body: body ? JSON.stringify(body) : undefined,
       });
 

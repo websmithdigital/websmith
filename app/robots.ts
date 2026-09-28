@@ -8,6 +8,19 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: [
+        "/admin/",
+        "/internal/",
+        "/client/",
+        "/clients/",
+        "/dashboard/",
+        "/developer/",
+        "/api/",
+        "/settings/",
+        "/invoices/",
+        "/payments/",
+        "/tasks/",
+      ],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };

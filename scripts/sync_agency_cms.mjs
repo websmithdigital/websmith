@@ -1,69 +1,36 @@
-// FILE: lib/cms/types.ts
-// PURPOSE: Unified CMS data types and seed fixtures for Industries, Services, Portfolio, Clients, Developers, and Testimonials.
+import pg from 'pg';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
-export interface CmsIndustry {
-  _id?: string;
-  name: string;
-  slug: string;
-  icon: string;
-  shortDescription: string;
-  badge?: string;
-  headline?: string;
-  description?: string;
-  stats?: Array<{ label: string; value: string }>;
-  challenges?: Array<{ problem: string; solution: string }>;
-  architecture?: string[];
-  techStack?: string[];
-  caseStudy?: {
-    client: string;
-    metrics: string;
-    summary: string;
-  };
-  displayOrder: number;
-  isActive: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+let envContent = '';
+try {
+  envContent = fs.readFileSync(path.resolve('.env.local'), 'utf-8');
+} catch {
+  try {
+    envContent = fs.readFileSync(path.resolve('.env'), 'utf-8');
+  } catch {}
 }
 
-export interface CmsServiceCategory {
-  _id?: string;
-  name: string;
-  title?: string;
-  slug: string;
-  icon: string;
-  description: string;
-  badge?: string;
-  displayOrder: number;
-  isActive: boolean;
-  services?: CmsServiceItem[];
-  createdAt?: string;
-  updatedAt?: string;
+let connectionString = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
+if (!connectionString && envContent) {
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('DATABASE_URL=') || trimmed.startsWith('NEON_DATABASE_URL=')) {
+      connectionString = trimmed.split('=')[1]?.replace(/^["']|["']$/g, '');
+      break;
+    }
+  }
 }
 
-export interface CmsServiceItem {
-  _id?: string;
-  categoryId?: string;
-  categoryName?: string;
-  name: string;
-  title?: string;
-  slug: string;
-  icon: string;
-  shortDescription: string;
-  description?: string;
-  deliverables?: string[];
-  techStack?: string[];
-  displayOrder: number;
-  isActive: boolean;
-  showInMenu: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+if (!connectionString) {
+  console.error("No DATABASE_URL found in environment or .env file.");
+  process.exit(1);
 }
 
-// ============================================================================
-// DEFAULT SEED FIXTURES (Extracted from existing hardcoded frontends)
-// ============================================================================
+const pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false } });
 
-export const SEED_INDUSTRIES: Omit<CmsIndustry, "_id">[] = [
+const SEED_INDUSTRIES = [
   {
     name: "Startups & SMBs",
     slug: "startups-smbs",
@@ -410,7 +377,7 @@ export const SEED_INDUSTRIES: Omit<CmsIndustry, "_id">[] = [
   },
 ];
 
-export const SEED_SERVICE_CATEGORIES = [
+const SEED_SERVICE_CATEGORIES = [
   {
     id: "web-engineering",
     name: "Web Engineering & Redesign",
@@ -707,3 +674,123 @@ export const SEED_SERVICE_CATEGORIES = [
   },
 ];
 
+async function sync() {
+  const client = await pool.connect();
+  try {
+    console.log("=== Starting Agency CMS Synchronization ===");
+
+    // 1. Ensure collections/tables exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS portal_cms_industries (
+        _id VARCHAR(64) PRIMARY KEY,
+        data JSONB NOT NULL
+      );
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS portal_cms_service_categories (
+        _id VARCHAR(64) PRIMARY KEY,
+        data JSONB NOT NULL
+      );
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS portal_cms_services (
+        _id VARCHAR(64) PRIMARY KEY,
+        data JSONB NOT NULL
+      );
+    `);
+
+    // 2. Clear old data to prevent orphan or legacy categories
+    console.log("Cleaning old industries and services tables...");
+    await client.query(`TRUNCATE TABLE portal_cms_industries;`);
+    await client.query(`TRUNCATE TABLE portal_cms_service_categories;`);
+    await client.query(`TRUNCATE TABLE portal_cms_services;`);
+
+    // 3. Populate 8 Target Industries
+    console.log(`Seeding ${SEED_INDUSTRIES.length} Target Industries...`);
+    for (const ind of SEED_INDUSTRIES) {
+      const _id = crypto.randomBytes(12).toString("hex");
+      const doc = {
+        _id,
+        ...ind,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await client.query(
+        `INSERT INTO portal_cms_industries (_id, data) VALUES ($1, $2)`,
+        [_id, JSON.stringify(doc)]
+      );
+    }
+    console.log(`-> Successfully seeded ${SEED_INDUSTRIES.length} industries.`);
+
+    // 4. Populate 5 Suites and 13 Core Services
+    let totalServices = 0;
+    console.log(`Seeding ${SEED_SERVICE_CATEGORIES.length} Service Suites & Services...`);
+    for (const cat of SEED_SERVICE_CATEGORIES) {
+      const catId = crypto.randomBytes(12).toString("hex");
+      const catDoc = {
+        _id: catId,
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        icon: cat.icon,
+        description: cat.description,
+        badge: cat.badge,
+        displayOrder: cat.displayOrder,
+        isActive: cat.isActive,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await client.query(
+        `INSERT INTO portal_cms_service_categories (_id, data) VALUES ($1, $2)`,
+        [catId, JSON.stringify(catDoc)]
+      );
+
+      for (const svc of cat.services) {
+        const svcId = crypto.randomBytes(12).toString("hex");
+        const svcDoc = {
+          _id: svcId,
+          categoryId: catId,
+          categoryName: cat.name,
+          categorySlug: cat.slug,
+          name: svc.name,
+          slug: svc.slug,
+          icon: svc.icon,
+          shortDescription: svc.shortDescription,
+          description: svc.description,
+          deliverables: svc.deliverables,
+          techStack: svc.techStack,
+          displayOrder: svc.displayOrder,
+          isActive: svc.isActive,
+          showInMenu: svc.showInMenu,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await client.query(
+          `INSERT INTO portal_cms_services (_id, data) VALUES ($1, $2)`,
+          [svcId, JSON.stringify(svcDoc)]
+        );
+        totalServices++;
+      }
+    }
+    console.log(`-> Successfully seeded ${SEED_SERVICE_CATEGORIES.length} categories and ${totalServices} services.`);
+
+    // 5. Verify counts
+    const indCountRes = await client.query(`SELECT COUNT(*) FROM portal_cms_industries;`);
+    const catCountRes = await client.query(`SELECT COUNT(*) FROM portal_cms_service_categories;`);
+    const svcCountRes = await client.query(`SELECT COUNT(*) FROM portal_cms_services;`);
+
+    console.log("=== Verification Summary ===");
+    console.log(`portal_cms_industries: ${indCountRes.rows[0].count} rows`);
+    console.log(`portal_cms_service_categories: ${catCountRes.rows[0].count} rows`);
+    console.log(`portal_cms_services: ${svcCountRes.rows[0].count} rows`);
+    console.log("=== Sync Completed Successfully ===");
+  } catch (err) {
+    console.error("Sync error:", err);
+    process.exit(1);
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+sync();
