@@ -1,4 +1,4 @@
-﻿import { apiHandler, jsonBody, json, forbidden, notFound, parseObjectId } from "@/lib/server/api";
+import { apiHandler, jsonBody, json, forbidden, notFound, parseObjectId } from "@/lib/server/api";
 
 const canViewProject = (user: any, project: any) =>
   user.role === "admin" ||
@@ -18,16 +18,31 @@ export const PUT = apiHandler(async ({ db, request, user, params }) => {
   const id = parseObjectId(params.id);
   const body = await jsonBody(request);
   const allowed = [
-    "name", "description", "client", "clientEmail", "clientCompany", "publicUrl", "previewImage",
-    "clientId", "assignedDevId", "assignedDeveloperName", "status", "priority", "startDate", "endDate",
-    "expectedCompletionDate", "budget", "customClientId", "progress", "published", "sharedFiles",
-    "tasks", "statusUpdates", "feedback", "customization",
+    "name", "slug", "category", "description", "client", "clientEmail", "clientPhone", "clientCompany",
+    "publicUrl", "previewImage", "clientId", "assignedDevId", "assignedDeveloperName", "status",
+    "priority", "startDate", "endDate", "expectedCompletionDate", "budget", "customClientId",
+    "progress", "published", "metrics", "techStack", "challenge", "solution", "features",
+    "isFeatured", "sharedFiles", "tasks", "statusUpdates", "feedback", "customization",
   ];
   const update: any = { updatedAt: new Date() };
   for (const key of allowed) {
     if (body[key] !== undefined) update[key] = body[key];
   }
   if (update.progress !== undefined) update.progress = Math.min(100, Math.max(0, Number(update.progress)));
+  if (update.techStack !== undefined) {
+    update.techStack = Array.isArray(update.techStack)
+      ? update.techStack.map(String).map((t: string) => t.trim()).filter(Boolean)
+      : typeof update.techStack === "string" && update.techStack.trim()
+      ? update.techStack.split(",").map((t: string) => t.trim()).filter(Boolean)
+      : [];
+  }
+  if (update.features !== undefined) {
+    update.features = Array.isArray(update.features)
+      ? update.features.map(String).map((f: string) => f.trim()).filter(Boolean)
+      : typeof update.features === "string" && update.features.trim()
+      ? update.features.split("\n").map((f: string) => f.trim()).filter(Boolean)
+      : [];
+  }
   const result = await db.collection("projects").findOneAndUpdate({ _id: id }, { $set: update }, { returnDocument: "after" });
   if (!result) throw notFound("Project not found");
   return json({ data: { ...result, _id: result._id.toString() } });

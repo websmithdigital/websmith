@@ -218,11 +218,10 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Project name is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (!formData.clientId.trim()) newErrors.clientId = 'Client selection is required';
-    if (!formData.customClientId.trim()) newErrors.customClientId = 'Client ID (e.g. CL-0001) is required';
+    if (!formData.client.trim() && !formData.clientId.trim()) newErrors.client = 'Client or project owner name is required';
     if (!formData.startDate) newErrors.startDate = 'Start date is required';
     if (formData.publicUrl && !/^https?:\/\/.+/i.test(formData.publicUrl)) newErrors.publicUrl = 'Hosted URL must start with http:// or https://';
-    if (formData.previewImage && !/^https?:\/\/.+/i.test(formData.previewImage)) newErrors.previewImage = 'Preview image URL must start with http:// or https://';
+    if (formData.previewImage && !/^(https?:\/\/|\/).+/i.test(formData.previewImage)) newErrors.previewImage = 'Preview image URL must start with http://, https://, or /';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -233,6 +232,8 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
 
     const submitData = {
       ...formData,
+      client: formData.client.trim() || 'Client',
+      customClientId: formData.customClientId.trim() || (formData.clientId ? undefined : 'PORTFOLIO'),
       budget: formData.budget ? parseFloat(formData.budget) : undefined,
       techStack: formData.techStack ? formData.techStack.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
     };
@@ -253,11 +254,11 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
     setFormData((prev) => ({
       ...prev,
       clientId: id,
-      customClientId: selectedClient?.customId || '',
-      client: selectedClient?.name || '',
-      clientEmail: selectedClient?.email || '',
-      clientPhone: selectedClient?.phone || '',
-      clientCompany: selectedClient?.company || '',
+      customClientId: selectedClient?.customId || prev.customClientId,
+      client: selectedClient?.name || prev.client,
+      clientEmail: selectedClient?.email || prev.clientEmail,
+      clientPhone: selectedClient?.phone || prev.clientPhone,
+      clientCompany: selectedClient?.company || prev.clientCompany,
     }));
     if (errors.clientId || errors.client) {
       setErrors((prev) => ({ ...prev, clientId: '', client: '' }));
@@ -301,52 +302,69 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
 
           <div style={styles.row} className="wsd-form-row">
             <div style={styles.formGroup}>
-              <label style={styles.label}>Client Selection *</label>
+              <label style={styles.label}>Registered Client (Optional)</label>
               <select
                 value={formData.clientId}
                 onChange={(e) => handleClientChange(e.target.value)}
-                style={{ ...styles.select, ...(errors.clientId ? styles.inputError : {}) }}
+                style={styles.select}
               >
-                <option value="">Select client</option>
+                <option value="">-- No registered client (Custom / Showcase) --</option>
                 {clients.map((client) => (
                   <option key={client._id} value={client._id}>
                     {client.customId ? `[${client.customId}] ` : ''}{client.name}{client.company ? ` • ${client.company}` : ''}
                   </option>
                 ))}
               </select>
-              {errors.clientId && <p style={styles.errorText}>{errors.clientId}</p>}
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Client ID *</label>
+              <label style={styles.label}>Client / Brand Name *</label>
               <input
                 type="text"
-                value={formData.customClientId}
-                onChange={(e) => updateField('customClientId', e.target.value)}
-                placeholder="e.g., CL-0001"
-                style={{ ...styles.input, ...(errors.customClientId ? styles.inputError : {}) }}
+                value={formData.client}
+                onChange={(e) => updateField('client', e.target.value)}
+                placeholder="e.g., Niyaj Enterprise or MZH Resin Art"
+                style={{ ...styles.input, ...(errors.client ? styles.inputError : {}) }}
               />
-              {errors.customClientId && <p style={styles.errorText}>{errors.customClientId}</p>}
+              {errors.client && <p style={styles.errorText}>{errors.client}</p>}
             </div>
           </div>
 
           <div style={styles.clientSnapshot}>
             <div style={styles.clientSnapshotHeader}>
               <h3 style={styles.clientSnapshotTitle}>Client details</h3>
-              <p style={styles.clientSnapshotHint}>Auto-populated from the selected client to reduce manual entry.</p>
+              <p style={styles.clientSnapshotHint}>Auto-populated from selected client or enter manually for portfolio items.</p>
             </div>
             <div style={styles.row} className="wsd-form-row">
               <div style={styles.formGroup}>
+                <label style={styles.label}>Client ID</label>
+                <input
+                  type="text"
+                  value={formData.customClientId}
+                  onChange={(e) => updateField('customClientId', e.target.value)}
+                  placeholder="e.g., CL-0001 or PORTFOLIO"
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Company / Sector</label>
+                <input
+                  type="text"
+                  value={formData.clientCompany}
+                  onChange={(e) => updateField('clientCompany', e.target.value)}
+                  placeholder="e.g., Artisan Luxury Leather Goods"
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.formGroup}>
                 <label style={styles.label}>Client Email</label>
-                <input type="email" value={formData.clientEmail} readOnly style={{ ...styles.input, ...styles.readOnlyInput }} />
-              </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Client Phone</label>
-                <input type="text" value={formData.clientPhone} readOnly style={{ ...styles.input, ...styles.readOnlyInput }} />
-              </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Company</label>
-                <input type="text" value={formData.clientCompany} readOnly style={{ ...styles.input, ...styles.readOnlyInput }} />
+                <input
+                  type="email"
+                  value={formData.clientEmail}
+                  onChange={(e) => updateField('clientEmail', e.target.value)}
+                  placeholder="contact@client.com"
+                  style={styles.input}
+                />
               </div>
             </div>
           </div>
@@ -454,11 +472,11 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
           <div style={styles.formGroup}>
             <label style={styles.label}>Project Preview Image URL</label>
             <input
-              type="url"
+              type="text"
               value={formData.previewImage}
               onChange={(e) => updateField('previewImage', e.target.value)}
               style={{ ...styles.input, ...(errors.previewImage ? styles.inputError : {}) }}
-              placeholder="https://images.example.com/project-cover.jpg"
+              placeholder="/images/portfolio/marketplace_mockup.jpg or https://..."
             />
             {errors.previewImage && <p style={styles.errorText}>{errors.previewImage}</p>}
           </div>
@@ -477,12 +495,19 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
                   onChange={(e) => updateField('category', e.target.value)}
                   style={styles.select}
                 >
+                  <option value="Startups & SMBs">Startups & SMBs</option>
+                  <option value="E-Commerce & Retail">E-Commerce & Retail</option>
+                  <option value="Real Estate">Real Estate</option>
+                  <option value="Education">Education</option>
+                  <option value="Logistics">Logistics</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Restaurants & Hospitality">Restaurants & Hospitality</option>
+                  <option value="Professional Services">Professional Services</option>
                   <option value="Web Apps">Web Apps</option>
-                  <option value="Enterprise ERP">Enterprise ERP</option>
                   <option value="Mobile Apps">Mobile Apps</option>
+                  <option value="Enterprise ERP">Enterprise ERP</option>
                   <option value="Cloud & APIs">Cloud & APIs</option>
                   <option value="FinTech">FinTech</option>
-                  <option value="Healthcare">Healthcare</option>
                   <option value="AI">AI</option>
                   <option value="SaaS">SaaS</option>
                 </select>
