@@ -139,12 +139,12 @@ export default function LiveWebsiteCardBanner({
           >
             <span
               style={{
-                width: "5px",
-                height: "5px",
+                width: "5.5px",
+                height: "5.5px",
                 borderRadius: "50%",
-                backgroundColor: effectiveMode === "live" ? "#22c55e" : "#94a3b8",
+                backgroundColor: iframeLoaded ? "#22c55e" : "#38bdf8",
                 display: "inline-block",
-                boxShadow: effectiveMode === "live" ? "0 0 6px #22c55e" : "none",
+                boxShadow: iframeLoaded ? "0 0 6px #22c55e" : "0 0 4px #38bdf8",
               }}
             />
             {domain}
@@ -160,7 +160,7 @@ export default function LiveWebsiteCardBanner({
                 e.stopPropagation();
                 setViewMode(viewMode === "live" ? "snapshot" : "live");
               }}
-              title={viewMode === "live" ? "Switch to live website snapshot" : "Switch to live website iframe"}
+              title={viewMode === "live" ? "Switch to high-res snapshot" : "Switch to live website iframe"}
               style={{
                 fontSize: "9px",
                 fontWeight: 700,
@@ -179,7 +179,7 @@ export default function LiveWebsiteCardBanner({
             >
               {viewMode === "live" ? (
                 <>
-                  <Globe size={10} /> LIVE
+                  <Globe size={10} /> {iframeLoaded ? "LIVE WEB" : "CONNECTING..."}
                 </>
               ) : (
                 <>
@@ -222,44 +222,42 @@ export default function LiveWebsiteCardBanner({
           backgroundColor: "#0b1120",
         }}
       >
-        {effectiveMode === "live" && hasLiveUrl && cleanUrl ? (
+        {/* Baseline Website Snapshot (Instant Zero-Wait Visual) */}
+        <img
+          src={liveSnapshotSrc}
+          alt={name}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+            zIndex: 1,
+          }}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = "/images/websmith_original.jpg";
+          }}
+        />
+
+        {/* Live Interactive Iframe (Fades in over snapshot once ready) */}
+        {effectiveMode === "live" && hasLiveUrl && cleanUrl && (
           <div
             style={{
-              position: "relative",
+              position: "absolute",
+              inset: 0,
               width: "100%",
               height: "100%",
               overflow: "hidden",
-              backgroundColor: "#ffffff",
+              zIndex: 2,
+              opacity: iframeLoaded ? 1 : 0,
+              transition: "opacity 0.4s ease",
             }}
           >
-            {/* Shimmer loading placeholder while iframe establishes connection */}
-            {!iframeLoaded && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  backgroundColor: isDark ? "#0f172a" : "#1e293b",
-                  color: "#94a3b8",
-                  fontSize: "11px",
-                  zIndex: 2,
-                }}
-              >
-                <RefreshCw size={15} style={{ animation: "spin 1.2s linear infinite", color: "#3b82f6" }} />
-                <span>Streaming live website...</span>
-              </div>
-            )}
-
-            {/* Scaled Desktop Viewport Iframe */}
             <iframe
               src={cleanUrl}
               title={`Live preview of ${name}`}
               loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               onLoad={() => setIframeLoaded(true)}
               onError={() => setIframeError(true)}
               style={{
@@ -276,7 +274,7 @@ export default function LiveWebsiteCardBanner({
               }}
             />
 
-            {/* Overlay to intercept clicks when not in active interaction mode */}
+            {/* Click to interact overlay */}
             {!isInteracting && (
               <div
                 onClick={() => setIsInteracting(true)}
@@ -340,23 +338,6 @@ export default function LiveWebsiteCardBanner({
                 Lock Preview
               </button>
             )}
-          </div>
-        ) : (
-          /* Live Snapshot Image View */
-          <div style={{ position: "relative", width: "100%", height: "100%" }}>
-            <img
-              src={liveSnapshotSrc}
-              alt={name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/images/websmith_original.jpg";
-              }}
-            />
           </div>
         )}
 
