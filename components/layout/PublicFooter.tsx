@@ -363,7 +363,7 @@ export default function PublicFooter() {
 
 const styles: Record<string, CSSProperties> = {
   footer: {
-    padding: "56px 0 28px",
+    padding: "24px 0 16px",
     width: "100%",
   },
   content: {
@@ -374,7 +374,7 @@ const styles: Record<string, CSSProperties> = {
     maxWidth: "100%",
     margin: 0,
     padding: "0 clamp(16px, 4vw, 48px)",
-    marginBottom: "40px",
+    marginBottom: "16px",
   },
   brandCol: {
     display: "flex",
@@ -466,7 +466,7 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: "24px",
+    paddingTop: "14px",
     margin: "0 clamp(16px, 4vw, 48px)",
   },
   bottomText: {
