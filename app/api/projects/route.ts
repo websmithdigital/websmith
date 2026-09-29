@@ -41,7 +41,12 @@ export const POST = apiHandler(async ({ db, request, user }) => {
     clientPhone: String(body.clientPhone ?? "").trim(),
     clientCompany: String(body.clientCompany ?? "").trim(),
     publicUrl: body.publicUrl ? String(body.publicUrl).trim() : "",
-    previewImage: body.previewImage ? String(body.previewImage).trim() : "",
+    previewImage:
+      body.previewImage && String(body.previewImage).trim()
+        ? String(body.previewImage).trim()
+        : body.publicUrl && /^https?:\/\//i.test(String(body.publicUrl).trim())
+        ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(String(body.publicUrl).trim())}?w=1280&h=800`
+        : "",
     metrics: body.metrics ? String(body.metrics).trim() : "",
     techStack,
     challenge: body.challenge ? String(body.challenge).trim() : "",

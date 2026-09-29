@@ -5,7 +5,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Sparkles, Globe, ExternalLink, Image as ImageIcon, RotateCw, CheckCircle2 } from 'lucide-react';
 import { Project } from '../services/projectService';
 import { getUsersByRole, RoleUser } from '../../../core/services/userService';
 import { getStoredUser } from '../../../lib/auth';
@@ -90,6 +90,14 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [clients, setClients] = useState<RoleUser[]>([]);
   const [developers, setDevelopers] = useState<RoleUser[]>([]);
+  const [isFetchingPreview, setIsFetchingPreview] = useState(false);
+  const [previewNotice, setPreviewNotice] = useState<string>('');
+  const [previewMeta, setPreviewMeta] = useState<{
+    ogImage: string | null;
+    screenshotUrl: string | null;
+    title: string;
+    description: string;
+  } | null>(null);
 
   useEffect(() => {
     const currentUser = getStoredUser();
@@ -143,6 +151,8 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
         solution: (project as any).solution || '',
         isFeatured: Boolean((project as any).isFeatured),
       });
+      setPreviewNotice('');
+      setPreviewMeta(null);
     } else {
       setFormData({
         name: '',
@@ -220,18 +230,71 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (!formData.client.trim() && !formData.clientId.trim()) newErrors.client = 'Client or project owner name is required';
     if (!formData.startDate) newErrors.startDate = 'Start date is required';
-    if (formData.publicUrl && !/^https?:\/\/.+/i.test(formData.publicUrl)) newErrors.publicUrl = 'Hosted URL must start with http:// or https://';
+    if (formData.publicUrl && !/^https?:\/\/.+/i.test(formData.publicUrl)) {
+      if (/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(formData.publicUrl.trim())) {
+        formData.publicUrl = `https://${formData.publicUrl.trim()}`;
+      } else {
+        newErrors.publicUrl = 'Hosted URL must start with http:// or https://';
+      }
+    }
     if (formData.previewImage && !/^(https?:\/\/|\/).+/i.test(formData.previewImage)) newErrors.previewImage = 'Preview image URL must start with http://, https://, or /';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFetchWebsitePreview = async (inputUrl?: string) => {
+    let raw = (inputUrl || formData.publicUrl).trim();
+    if (!raw) return;
+    if (!/^https?:\/\//i.test(raw)) {
+      raw = `https://${raw}`;
+      updateField('publicUrl', raw);
+    }
+
+    setIsFetchingPreview(true);
+    setPreviewNotice('');
+    try {
+      const res = await fetch(`/api/projects/preview?url=${encodeURIComponent(raw)}`);
+      const data = await res.json();
+      if (data.success) {
+        setPreviewMeta({
+          ogImage: data.ogImage || null,
+          screenshotUrl: data.screenshotUrl || null,
+          title: data.title || '',
+          description: data.description || '',
+        });
+        const chosenImage = data.previewImage || data.screenshotUrl;
+        if (chosenImage) {
+          updateField('previewImage', chosenImage);
+        }
+        setPreviewNotice(data.ogImage ? 'Captured website social preview banner!' : 'Captured live website screenshot!');
+      } else {
+        const fallbackShot = `https://s0.wp.com/mshots/v1/${encodeURIComponent(raw)}?w=1280&h=800`;
+        updateField('previewImage', fallbackShot);
+        setPreviewNotice('Generated live website screenshot thumbnail!');
+      }
+    } catch {
+      const fallbackShot = `https://s0.wp.com/mshots/v1/${encodeURIComponent(raw)}?w=1280&h=800`;
+      updateField('previewImage', fallbackShot);
+      setPreviewNotice('Generated live website screenshot thumbnail!');
+    } finally {
+      setIsFetchingPreview(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
+    let finalPreview = formData.previewImage.trim();
+    if (!finalPreview && formData.publicUrl.trim()) {
+      let norm = formData.publicUrl.trim();
+      if (!/^https?:\/\//i.test(norm)) norm = `https://${norm}`;
+      finalPreview = `https://s0.wp.com/mshots/v1/${encodeURIComponent(norm)}?w=1280&h=800`;
+    }
+
     const submitData = {
       ...formData,
+      previewImage: finalPreview,
       client: formData.client.trim() || 'Client',
       customClientId: formData.customClientId.trim() || (formData.clientId ? undefined : 'PORTFOLIO'),
       budget: formData.budget ? parseFloat(formData.budget) : undefined,
@@ -457,28 +520,200 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
             </div>
           </div>
 
+          {/* Hosted URL & Automated Preview */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Hosted Project URL</label>
-            <input
-              type="url"
-              value={formData.publicUrl}
-              onChange={(e) => updateField('publicUrl', e.target.value)}
-              style={styles.input}
-              placeholder="https://example.com"
-            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ ...styles.label, marginBottom: 0 }}>Hosted Project URL</label>
+              {formData.publicUrl && (
+                <button
+                  type="button"
+                  onClick={() => handleFetchWebsitePreview()}
+                  disabled={isFetchingPreview}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                    color: '#3b82f6',
+                    border: '1px solid rgba(37, 99, 235, 0.3)',
+                    cursor: isFetchingPreview ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <Sparkles size={12} style={{ animation: isFetchingPreview ? 'spin 1s linear infinite' : 'none' }} />
+                  {isFetchingPreview ? 'Fetching Preview...' : 'Auto-Capture Preview'}
+                </button>
+              )}
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="url"
+                value={formData.publicUrl}
+                onChange={(e) => updateField('publicUrl', e.target.value)}
+                onBlur={() => {
+                  if (formData.publicUrl && !formData.previewImage) {
+                    handleFetchWebsitePreview();
+                  }
+                }}
+                style={styles.input}
+                placeholder="https://example.com"
+              />
+            </div>
             {errors.publicUrl && <p style={styles.errorText}>{errors.publicUrl}</p>}
+            {previewNotice && (
+              <p style={{ margin: '6px 0 0 0', fontSize: '11.5px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <CheckCircle2 size={13} /> {previewNotice}
+              </p>
+            )}
           </div>
 
+          {/* Preview Image & Live Preview Card */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Project Preview Image URL</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ ...styles.label, marginBottom: 0 }}>Project Preview Image URL</label>
+              {formData.previewImage && (
+                <button
+                  type="button"
+                  onClick={() => updateField('previewImage', '')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '11px',
+                    color: '#ef4444',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Clear preview
+                </button>
+              )}
+            </div>
             <input
               type="text"
               value={formData.previewImage}
               onChange={(e) => updateField('previewImage', e.target.value)}
               style={{ ...styles.input, ...(errors.previewImage ? styles.inputError : {}) }}
-              placeholder="/images/portfolio/marketplace_mockup.jpg or https://..."
+              placeholder="/images/portfolio/marketplace_mockup.jpg or auto-generated screenshot"
             />
             {errors.previewImage && <p style={styles.errorText}>{errors.previewImage}</p>}
+
+            {/* Visual Preview Card Box */}
+            {formData.previewImage && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <ImageIcon size={13} /> Card Visual Preview:
+                  </span>
+                  {formData.previewImage.includes('s0.wp.com') ? (
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 700 }}>
+                      LIVE SCREENSHOT
+                    </span>
+                  ) : formData.previewImage.startsWith('http') ? (
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', fontWeight: 700 }}>
+                      WEB BANNER
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', fontWeight: 700 }}>
+                      LOCAL MOCKUP
+                    </span>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '170px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    backgroundColor: '#0f172a',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <img
+                    src={formData.previewImage}
+                    alt="Project card preview"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/images/websmith_original.jpg';
+                    }}
+                  />
+                </div>
+
+                {/* Switcher & Autofill Options */}
+                {previewMeta && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    {previewMeta.screenshotUrl && formData.previewImage !== previewMeta.screenshotUrl && (
+                      <button
+                        type="button"
+                        onClick={() => updateField('previewImage', previewMeta.screenshotUrl!)}
+                        style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                          color: '#e2e8f0',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Switch to Screenshot
+                      </button>
+                    )}
+                    {previewMeta.ogImage && formData.previewImage !== previewMeta.ogImage && (
+                      <button
+                        type="button"
+                        onClick={() => updateField('previewImage', previewMeta.ogImage!)}
+                        style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                          color: '#e2e8f0',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Switch to Website Banner
+                      </button>
+                    )}
+                    {previewMeta.title && (!formData.name || formData.name === 'New Project') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateField('name', previewMeta.title);
+                          if (previewMeta.description && !formData.description) {
+                            updateField('description', previewMeta.description);
+                          }
+                        }}
+                        style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                          color: '#60a5fa',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Apply Title &amp; Description
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Portfolio & Showcase Details */}

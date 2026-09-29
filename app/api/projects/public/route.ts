@@ -557,7 +557,12 @@ export const GET = apiHandler(async ({ db, request }) => {
       slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       description: p.description || "",
       publicUrl: p.publicUrl || "",
-      previewImage: p.previewImage || "/images/websmith_original.jpg",
+      previewImage:
+        p.previewImage && p.previewImage.trim()
+          ? p.previewImage.trim()
+          : p.publicUrl && /^https?:\/\//i.test(p.publicUrl.trim())
+          ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(p.publicUrl.trim())}?w=1280&h=800`
+          : "/images/websmith_original.jpg",
       client: p.client || p.clientCompany || "Enterprise Client",
       clientCompany: p.clientCompany || p.client || "Client Company",
       category: p.category || p.projectType || "Web Apps",

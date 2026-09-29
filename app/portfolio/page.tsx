@@ -348,7 +348,13 @@ export default function PortfolioPage() {
                   }}
                 >
                   <Image
-                    src={project.previewImage && (project.previewImage.startsWith("/") || project.previewImage.startsWith("http")) ? project.previewImage : "/images/websmith_original.jpg"}
+                    src={
+                      project.previewImage && (project.previewImage.startsWith("/") || project.previewImage.startsWith("http"))
+                        ? project.previewImage
+                        : project.publicUrl && /^https?:\/\//i.test(project.publicUrl.trim())
+                        ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(project.publicUrl.trim())}?w=1280&h=800`
+                        : "/images/websmith_original.jpg"
+                    }
                     alt={project.name}
                     fill
                     unoptimized

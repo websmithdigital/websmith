@@ -1436,9 +1436,15 @@ export default function LandingPage() {
             scale={1}
             renderItem={(project: any) => (
               <div style={{ ...styles.horizontalCardSurface, ...styles.sliderCard, width: "100%", maxWidth: "100%" }} className="feature-card landing-project-card">
-                {project.previewImage ? (
+                {project.previewImage || project.publicUrl ? (
                   <img 
-                    src={project.previewImage} 
+                    src={
+                      project.previewImage && (project.previewImage.startsWith("/") || project.previewImage.startsWith("http"))
+                        ? project.previewImage
+                        : project.publicUrl && /^https?:\/\//i.test(project.publicUrl.trim())
+                        ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(project.publicUrl.trim())}?w=1280&h=800`
+                        : "/images/portfolio/apexflow_mockup.jpg"
+                    } 
                     alt={project.name} 
                     style={styles.projectPreviewImage} 
                     className="landing-project-img"
