@@ -120,7 +120,7 @@ export default function PublicFooter() {
               <Phone size={15} color="#10b981" />
               <span>{contact.phone}</span>
             </a>
-            <div style={styles.contactItem} className="public-footer-contact-text">
+            <div style={styles.contactItem} className="public-footer-contact-text public-footer-address">
               <MapPin size={15} color="#a855f7" style={{ flexShrink: 0 }} />
               <span>{contact.headquarters}</span>
             </div>
@@ -153,20 +153,6 @@ export default function PublicFooter() {
               })}
             </div>
           )}
-
-          {/* Status Indicator Badge */}
-          <div
-            style={{
-              ...styles.statusBadge,
-              backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "rgba(16, 185, 129, 0.08)",
-              border: isDark ? "1px solid rgba(16, 185, 129, 0.25)" : "1px solid rgba(16, 185, 129, 0.2)",
-            }}
-          >
-            <span style={styles.statusDot} />
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "#10b981" }}>
-              All Systems Operational
-            </span>
-          </div>
         </div>
 
         {/* Links Grid */}
@@ -239,39 +225,135 @@ export default function PublicFooter() {
           transform: translateY(-2px);
           box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
         }
-        @keyframes statusPulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.4; transform: scale(1.15); }
-        }
-        .public-footer-status-dot {
-          animation: statusPulse 2.4s ease-in-out infinite;
-        }
+
         @media (max-width: 900px) {
           .landing-footer-content {
             flex-direction: column !important;
-            gap: 32px !important;
+            gap: 20px !important;
           }
           .public-footer-links-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            gap: 24px !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 16px !important;
           }
           .public-footer-bottom-bar {
             flex-direction: column !important;
-            gap: 12px !important;
+            gap: 8px !important;
             text-align: center !important;
           }
         }
-        @media (max-width: 600px) {
-          .public-footer-links-grid {
-            grid-template-columns: 1fr !important;
-            gap: 20px !important;
+
+        /* Mobile View: Compact footprint occupying ~40% of mobile screen */
+        @media (max-width: 768px) {
+          .public-footer-root {
+            min-height: 38vh !important;
+            padding: 20px 0 12px !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+          }
+          .landing-footer-content {
+            flex-direction: column !important;
+            gap: 14px !important;
+            margin-bottom: 10px !important;
+            padding: 0 16px !important;
+            flex: 1 !important;
+          }
+          .public-footer-brand {
+            max-width: 100% !important;
+            gap: 8px !important;
+            flex: none !important;
           }
           .public-footer-brand-row {
-            gap: 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: fit-content !important;
+            gap: 8px !important;
           }
           .public-footer-logo-shell {
-            width: 36px !important;
-            height: 36px !important;
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 7px !important;
+            padding: 2px !important;
+          }
+          .public-footer-wordmark {
+            height: 24px !important;
+            width: auto !important;
+          }
+          .public-footer-tagline {
+            display: none !important;
+          }
+          .public-footer-address {
+            display: none !important;
+          }
+
+          .public-footer-contact-list {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            gap: 14px !important;
+            margin-top: 0 !important;
+          }
+          .public-footer-contact-link {
+            font-size: 11px !important;
+            gap: 6px !important;
+          }
+          .public-footer-contact-link svg {
+            width: 13px !important;
+            height: 13px !important;
+          }
+          .public-footer-social-row {
+            margin-top: 0 !important;
+            gap: 8px !important;
+          }
+          .public-footer-social {
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 7px !important;
+          }
+          .public-footer-social svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          .public-footer-links-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+            margin-top: 4px !important;
+          }
+          .public-footer-nav-col {
+            gap: 4px !important;
+          }
+          .public-footer-col-title {
+            font-size: 10.5px !important;
+            margin-bottom: 4px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.04em !important;
+            font-weight: 700 !important;
+          }
+          .public-footer-link-list {
+            gap: 4px !important;
+          }
+          .public-footer-link {
+            font-size: 10.5px !important;
+            line-height: 1.35 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
+          }
+          /* Allow top 5 links per column on mobile to fit the 40% height comfortably */
+          .public-footer-link-list a:nth-child(n+6) {
+            display: none !important;
+          }
+          .public-footer-bottom-bar {
+            padding-top: 8px !important;
+            margin: 0 16px !important;
+          }
+          .public-footer-bottom-text {
+            font-size: 9.5px !important;
+            line-height: 1.25 !important;
           }
         }
       `}</style>
@@ -361,23 +443,7 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "center",
     textDecoration: "none",
   },
-  statusBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "5px 12px",
-    borderRadius: "999px",
-    width: "fit-content",
-    marginTop: "4px",
-  },
-  statusDot: {
-    width: "7px",
-    height: "7px",
-    borderRadius: "50%",
-    backgroundColor: "#10b981",
-    boxShadow: "0 0 8px #10b981",
-    display: "inline-block",
-  },
+
   navCol: {
     display: "flex",
     flexDirection: "column",
