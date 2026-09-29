@@ -77,6 +77,7 @@ function PurchaseEnquiryForm() {
     country: "",
     requirements: "",
   });
+  const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -87,6 +88,10 @@ function PurchaseEnquiryForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!consent) {
+      setError("Please accept the privacy policy consent to proceed.");
+      return;
+    }
     setSubmitting(true);
     setError("");
 
@@ -189,6 +194,54 @@ function PurchaseEnquiryForm() {
           <div style={{ ...styles.fieldGroup, gridColumn: "1 / -1" }}>
             <label style={styles.label}>Requirements / Message</label>
             <textarea name="requirements" value={formData.requirements} onChange={handleChange} rows={3} placeholder="Tell us about your specific requirements..." style={{ ...styles.input, resize: "vertical", minHeight: "80px" }} />
+          </div>
+          <div style={{ ...styles.fieldGroup, gridColumn: "1 / -1", marginTop: "2px" }}>
+            <label
+              htmlFor="purchase-enquiry-consent"
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "8px",
+                cursor: "pointer",
+                userSelect: "none",
+                fontSize: "12.5px",
+                lineHeight: 1.45,
+                color: "var(--text-secondary)",
+              }}
+            >
+              <input
+                type="checkbox"
+                id="purchase-enquiry-consent"
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked);
+                  if (e.target.checked && error?.includes("privacy policy")) {
+                    setError("");
+                  }
+                }}
+                required
+                style={{
+                  cursor: "pointer",
+                  width: "16px",
+                  height: "16px",
+                  accentColor: "#007AFF",
+                  flexShrink: 0,
+                  marginTop: "2px",
+                }}
+              />
+              <span>
+                I consent to WebSmith Digital collecting and processing my contact details to respond to my enquiry in accordance with the{" "}
+                <Link href="/privacy" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
+            {error && error.includes("privacy policy") && (
+              <p role="alert" style={{ margin: "4px 0 0 0", color: "#FF3B30", fontSize: "12px", fontWeight: 500 }}>
+                {error}
+              </p>
+            )}
           </div>
         </div>
         <button type="submit" disabled={submitting} style={{ ...styles.submitBtn, opacity: submitting ? 0.6 : 1 }}>
@@ -611,28 +664,40 @@ function ExactGetInTouchContactForm() {
 
       {/* Row 6: Consent Checkbox */}
       <div style={styles.consentRow} className="exact-consent-row">
-        <input
-          type="checkbox"
-          id="exact-contact-consent"
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-          required
-          style={{
-            cursor: "pointer",
-            width: "16px",
-            height: "16px",
-            accentColor: "#007AFF",
-            flexShrink: 0,
-            marginTop: "2px",
-          }}
-        />
         <label htmlFor="exact-contact-consent" style={styles.consentLabel} className="exact-consent-label">
-          I consent to WebSmith Digital collecting and processing my contact details to respond to my inquiry in accordance with the{" "}
-          <Link href="/privacy" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
-            Privacy Policy
-          </Link>
-          .
+          <input
+            type="checkbox"
+            id="exact-contact-consent"
+            checked={consent}
+            onChange={(e) => {
+              setConsent(e.target.checked);
+              if (e.target.checked && error?.includes("privacy policy")) {
+                setError(null);
+              }
+            }}
+            required
+            style={{
+              cursor: "pointer",
+              width: "16px",
+              height: "16px",
+              accentColor: "#007AFF",
+              flexShrink: 0,
+              marginTop: "2px",
+            }}
+          />
+          <span>
+            I consent to WebSmith Digital collecting and processing my contact details to respond to my inquiry in accordance with the{" "}
+            <Link href="/privacy" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
+              Privacy Policy
+            </Link>
+            .
+          </span>
         </label>
+        {error && error.includes("privacy policy") && (
+          <p role="alert" style={{ margin: "2px 0 0 0", color: "#FF3B30", fontSize: "12px", fontWeight: 500 }}>
+            {error}
+          </p>
+        )}
       </div>
 
       {/* Row 7: Full Width Send Message Button */}
@@ -1426,19 +1491,22 @@ export default function ContactPage() {
           }
 
           .exact-consent-row {
-            gap: 6px !important;
-            margin-top: 1px !important;
+            gap: 4px !important;
+            margin-top: 4px !important;
           }
 
           .exact-consent-row input {
-            width: 12px !important;
-            height: 12px !important;
-            margin-top: 1px !important;
+            width: 16px !important;
+            height: 16px !important;
+            margin-top: 2px !important;
           }
 
           .exact-consent-label {
-            font-size: 9.5px !important;
-            line-height: 1.3 !important;
+            font-size: 11.5px !important;
+            line-height: 1.4 !important;
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
           }
 
           .exact-submit-button {
@@ -1819,15 +1887,19 @@ const styles: Record<string, CSSProperties> = {
   },
   consentRow: {
     display: "flex",
-    alignItems: "flex-start",
-    gap: "10px",
+    flexDirection: "column",
+    gap: "4px",
     marginTop: "2px",
   },
   consentLabel: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "10px",
     fontSize: "12.5px",
     color: "var(--text-secondary)",
     lineHeight: 1.45,
     cursor: "pointer",
+    userSelect: "none",
   },
   exactSubmitBtn: {
     width: "100%",

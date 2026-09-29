@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, Phone, MessageSquare, Globe, Clock, ChevronDown } from "lucide-react";
 import Card from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
@@ -44,6 +45,7 @@ interface FormState {
   notes: string;
   cmsRequirement: string;
   appPlatform: "" | "iOS" | "Android" | "Both";
+  consent: boolean;
 }
 
 const initialState: FormState = {
@@ -65,6 +67,7 @@ const initialState: FormState = {
   notes: "",
   cmsRequirement: "",
   appPlatform: "",
+  consent: false,
 };
 
 const timelineOptions = [
@@ -213,6 +216,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
     if (selectedServices.length === 0) nextErrors.services = "Choose at least one service";
     if (needsPlatform && !form.appPlatform) nextErrors.appPlatform = "Select a platform";
     if (needsCms && !form.cmsRequirement?.trim()) nextErrors.cmsRequirement = "CMS requirement is required";
+    if (!form.consent) nextErrors.consent = "Please agree to the privacy policy before submitting";
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -667,6 +671,59 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
               placeholder="Goals, deadlines, integrations, or any context you'd like to share."
               rows={isWizard ? 2 : 4}
             />
+          </div>
+
+          {/* Privacy Consent Checkbox */}
+          <div style={{ marginTop: isWizard ? "10px" : "14px" }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "8px",
+                cursor: "pointer",
+                userSelect: "none",
+                fontSize: isWizard ? "11.5px" : "12.5px",
+                lineHeight: 1.45,
+                color: "var(--text-secondary)",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={form.consent}
+                onChange={(e) => {
+                  setField("consent", e.target.checked);
+                  if (e.target.checked) {
+                    setErrors((prev) => ({ ...prev, consent: "" }));
+                  }
+                }}
+                style={{
+                  cursor: "pointer",
+                  width: "16px",
+                  height: "16px",
+                  accentColor: "#007AFF",
+                  flexShrink: 0,
+                  marginTop: "2px",
+                }}
+              />
+              <span>
+                I consent to WebSmith Digital collecting and processing my contact details to respond to my consultation request in accordance with the{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#007AFF", textDecoration: "underline" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
+            {errors.consent && (
+              <p role="alert" style={{ ...styles.error, marginTop: "4px" }}>
+                {errors.consent}
+              </p>
+            )}
           </div>
 
           {errors.services && <p style={styles.error}>{errors.services}</p>}
