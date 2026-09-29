@@ -113,14 +113,15 @@ export default function LiveWebsiteCardBanner({
       >
         {/* macOS traffic light dots */}
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-          <span style={{ width: "7.5px", height: "7.5px", borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block" }} />
-          <span style={{ width: "7.5px", height: "7.5px", borderRadius: "50%", backgroundColor: "#eab308", display: "inline-block" }} />
-          <span style={{ width: "7.5px", height: "7.5px", borderRadius: "50%", backgroundColor: "#22c55e", display: "inline-block" }} />
+          <span className="wsd-browser-dot" style={{ width: "7.5px", height: "7.5px", borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block" }} />
+          <span className="wsd-browser-dot" style={{ width: "7.5px", height: "7.5px", borderRadius: "50%", backgroundColor: "#eab308", display: "inline-block" }} />
+          <span className="wsd-browser-dot" style={{ width: "7.5px", height: "7.5px", borderRadius: "50%", backgroundColor: "#22c55e", display: "inline-block" }} />
         </div>
 
         {/* URL Pill & Status */}
         {hasLiveUrl && (
           <div
+            className="wsd-browser-domain"
             style={{
               fontSize: "10.5px",
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
@@ -156,6 +157,7 @@ export default function LiveWebsiteCardBanner({
           {hasLiveUrl && !iframeError && (
             <button
               type="button"
+              className="wsd-browser-mode-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 setViewMode(viewMode === "live" ? "snapshot" : "live");
@@ -347,11 +349,19 @@ export default function LiveWebsiteCardBanner({
             className="portfolio-card-tag"
             style={{
               position: "absolute",
-              bottom: "10px",
-              left: "10px",
-              padding: "3px 8px",
-              borderRadius: "6px",
-              fontSize: "10px",
+              bottom: "8px",
+              left: "8px",
+              top: "auto",
+              right: "auto",
+              height: "auto",
+              width: "fit-content",
+              maxWidth: "85%",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              padding: "2.5px 7px",
+              borderRadius: "5px",
+              fontSize: "9.5px",
               fontWeight: 700,
               letterSpacing: "0.03em",
               backgroundColor: isDark ? "rgba(0, 0, 0, 0.75)" : "rgba(255, 255, 255, 0.9)",
@@ -369,6 +379,41 @@ export default function LiveWebsiteCardBanner({
       <style>{`
         .portfolio-card-banner:hover .interactive-hint {
           opacity: 1 !important;
+        }
+
+        @media (max-width: 768px) {
+          .wsd-browser-chrome {
+            height: 24px !important;
+            padding: 0 6px !important;
+          }
+          .wsd-browser-dot {
+            width: 5px !important;
+            height: 5px !important;
+          }
+          .wsd-browser-domain {
+            font-size: 8px !important;
+            max-width: 65px !important;
+            padding: 1px 4px !important;
+          }
+          .wsd-browser-mode-btn {
+            font-size: 7.5px !important;
+            padding: 1.5px 4px !important;
+          }
+          .portfolio-card-tag {
+            top: auto !important;
+            bottom: 6px !important;
+            left: 6px !important;
+            right: auto !important;
+            height: auto !important;
+            width: fit-content !important;
+            max-width: 85% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            padding: 2px 6px !important;
+            font-size: 8px !important;
+            border-radius: 4px !important;
+          }
         }
       `}</style>
     </div>

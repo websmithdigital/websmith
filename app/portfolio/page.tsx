@@ -768,11 +768,19 @@ export default function PortfolioPage() {
           }
 
           .portfolio-grid.mobile-layout-grid .portfolio-card-tag {
-            top: 8px !important;
-            left: 8px !important;
-            padding: 2.5px 7px !important;
-            font-size: 9px !important;
-            border-radius: 5px !important;
+            top: auto !important;
+            bottom: 6px !important;
+            left: 6px !important;
+            right: auto !important;
+            height: auto !important;
+            width: fit-content !important;
+            max-width: 85% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            padding: 2px 6px !important;
+            font-size: 8.5px !important;
+            border-radius: 4px !important;
           }
 
           .portfolio-grid.mobile-layout-grid .portfolio-card-content {
@@ -872,8 +880,16 @@ export default function PortfolioPage() {
           }
 
           .portfolio-grid.mobile-layout-list .portfolio-card-tag {
-            top: 4px !important;
+            top: auto !important;
+            bottom: 4px !important;
             left: 4px !important;
+            right: auto !important;
+            height: auto !important;
+            width: fit-content !important;
+            max-width: 85% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
             padding: 1.5px 5px !important;
             font-size: 7.5px !important;
             border-radius: 4px !important;
