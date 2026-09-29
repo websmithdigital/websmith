@@ -73,10 +73,10 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
 
   return (
     <div style={wrapperStyle}>
-      <div style={isModal ? { ...styles.heroCard, ...styles.heroCardModal } : styles.heroCard}>
-        <p style={isModal ? { ...styles.eyebrow, ...styles.eyebrowModal } : styles.eyebrow}>Step 1 of 3</p>
-        <h1 style={isModal ? { ...styles.title, ...styles.titleModal } : styles.title}>Choose the services you want help with</h1>
-        <p style={isModal ? { ...styles.subtitle, ...styles.subtitleModal } : styles.subtitle}>
+      <div className={isModal ? "lead-modal-hero-card" : undefined} style={isModal ? { ...styles.heroCard, ...styles.heroCardModal } : styles.heroCard}>
+        <p className={isModal ? "lead-modal-eyebrow" : undefined} style={isModal ? { ...styles.eyebrow, ...styles.eyebrowModal } : styles.eyebrow}>Step 1 of 3</p>
+        <h1 className={isModal ? "lead-modal-title" : undefined} style={isModal ? { ...styles.title, ...styles.titleModal } : styles.title}>Choose the services you want help with</h1>
+        <p className={isModal ? "lead-modal-subtitle" : undefined} style={isModal ? { ...styles.subtitle, ...styles.subtitleModal } : styles.subtitle}>
           Select one or more services. We&apos;ll use them to personalize the next step and qualify your lead properly.
         </p>
       </div>
@@ -102,7 +102,7 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
 
       {!loading && !error && services.length > 0 && (
         <>
-          <div style={isModal ? { ...styles.grid, ...styles.gridModal } : styles.grid}>
+          <div className={isModal ? "lead-modal-grid" : undefined} style={isModal ? { ...styles.grid, ...styles.gridModal } : styles.grid}>
             {services.map((service) => {
               const selected = selectedServices.some(
                 (item) => item.id === service.id || item.name.toLowerCase() === service.name.toLowerCase()
@@ -112,6 +112,7 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                 <button
                   key={service.id}
                   type="button"
+                  className="lead-modal-service-btn"
                   onClick={() => toggleService({ id: service.id, name: service.name })}
                   style={{
                     ...styles.serviceButton,
@@ -134,24 +135,25 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                       textAlign: "left",
                     }}
                   >
-                    <div style={isModal ? { ...styles.cardTop, marginBottom: "8px" } : styles.cardTop}>
-                      <div style={{
+                    <div className="lead-modal-card-top" style={isModal ? { ...styles.cardTop, marginBottom: "8px" } : styles.cardTop}>
+                      <div className="lead-modal-icon-wrap" style={{
                         ...(isModal ? styles.iconWrapModal : styles.iconWrap),
                         background: selected ? "linear-gradient(135deg, #007AFF 0%, #34C759 100%)" : "var(--bg-secondary)",
                         border: selected ? "none" : "1px solid var(--border-color)"
                       }}>
                         <Layers3 size={isModal ? 15 : 18} color={selected ? "#FFFFFF" : "#007AFF"} />
                       </div>
-                      <CheckCircle2 size={isModal ? 18 : 20} color={selected ? "#34C759" : "var(--border-color)"} fill={selected ? "#34C75922" : "transparent"} />
+                      <CheckCircle2 className="lead-modal-check-icon" size={isModal ? 18 : 20} color={selected ? "#34C759" : "var(--border-color)"} fill={selected ? "#34C75922" : "transparent"} />
                     </div>
-                    <h3 style={isModal ? { ...styles.serviceTitle, fontSize: "14.5px", marginBottom: "4px" } : styles.serviceTitle}>{service.name}</h3>
-                    <p style={isModal ? { ...styles.serviceDescription, fontSize: "12px", lineHeight: 1.35, minHeight: "32px" } : styles.serviceDescription}>{service.description}</p>
+                    <h3 className="lead-modal-service-title" style={isModal ? { ...styles.serviceTitle, fontSize: "14.5px", marginBottom: "4px" } : styles.serviceTitle}>{service.name}</h3>
+                    <p className="lead-modal-service-desc" style={isModal ? { ...styles.serviceDescription, fontSize: "12px", lineHeight: 1.35, minHeight: "32px" } : styles.serviceDescription}>{service.description}</p>
 
                     {service.subServices && service.subServices.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: isModal ? "8px" : "12px" }}>
+                      <div className="lead-modal-subservices-wrap" style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: isModal ? "8px" : "12px" }}>
                         {service.subServices.slice(0, 3).map((sub, sIdx) => (
                           <span
                             key={sub.id || sIdx}
+                            className="lead-modal-subservice-pill"
                             style={{
                               fontSize: isModal ? "10px" : "11px",
                               fontWeight: 600,
@@ -167,6 +169,7 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
                         ))}
                         {service.subServices.length > 3 && (
                           <span
+                            className="lead-modal-subservice-pill-more"
                             style={{
                               fontSize: "10px",
                               fontWeight: 600,
@@ -185,22 +188,23 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
             })}
           </div>
 
-          <div style={isModal ? { ...styles.footerCard, ...styles.footerCardModal } : styles.footerCard}>
-            <div style={styles.footerInfo}>
-              <p style={isModal ? { ...styles.footerLabel, margin: "0 0 6px", fontSize: "11px" } : styles.footerLabel}>Selected Services</p>
-              <div style={styles.selectedList}>
+          <div className={isModal ? "lead-modal-footer-card" : undefined} style={isModal ? { ...styles.footerCard, ...styles.footerCardModal } : styles.footerCard}>
+            <div style={styles.footerInfo} className="lead-modal-footer-info">
+              <p className="lead-modal-footer-label" style={isModal ? { ...styles.footerLabel, margin: "0 0 6px", fontSize: "11px" } : styles.footerLabel}>Selected Services</p>
+              <div style={styles.selectedList} className="lead-modal-selected-list">
                 {selectedServices.length > 0 ? (
                   selectedServices.map((service) => (
-                    <span key={service.id} style={isModal ? { ...styles.selectedChip, padding: "5px 12px", fontSize: "12px", borderRadius: "10px" } : styles.selectedChip}>{service.name}</span>
+                    <span key={service.id} className="lead-modal-selected-chip" style={isModal ? { ...styles.selectedChip, padding: "5px 12px", fontSize: "12px", borderRadius: "10px" } : styles.selectedChip}>{service.name}</span>
                   ))
                 ) : (
-                  <span style={styles.emptyText}>Select one or more services to proceed to the next step.</span>
+                  <span style={styles.emptyText} className="lead-modal-empty-text">Select one or more services to proceed to the next step.</span>
                 )}
               </div>
             </div>
 
             <Button
               size={isModal ? "md" : "lg"}
+              className="lead-modal-continue-btn"
               onClick={() => {
                 if (selectedServices.length === 0) return;
                 if (variant === "wizard" && onWizardContinue) {
@@ -222,6 +226,155 @@ export default function ServiceSelectionClient(props?: ServiceSelectionClientPro
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 640px) {
+          .lead-modal-hero-card {
+            padding: 8px 10px !important;
+            border-radius: 10px !important;
+            margin-bottom: 6px !important;
+          }
+          .lead-modal-eyebrow {
+            font-size: 9.5px !important;
+            margin-bottom: 2px !important;
+            letter-spacing: 0.08em !important;
+          }
+          .lead-modal-title {
+            font-size: 13.5px !important;
+            line-height: 1.25 !important;
+            margin-bottom: 2px !important;
+          }
+          .lead-modal-subtitle {
+            font-size: 10.5px !important;
+            line-height: 1.3 !important;
+          }
+          .lead-modal-grid {
+            gap: 6px !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+          .lead-modal-service-btn {
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .lead-modal-compact-card {
+            padding: 8px 8px !important;
+            border-radius: 10px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            height: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .lead-modal-card-top {
+            margin-bottom: 3px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .lead-modal-icon-wrap {
+            width: 22px !important;
+            height: 22px !important;
+            border-radius: 5px !important;
+            flex-shrink: 0 !important;
+          }
+          .lead-modal-icon-wrap svg {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .lead-modal-check-icon {
+            width: 15px !important;
+            height: 15px !important;
+            flex-shrink: 0 !important;
+          }
+          .lead-modal-service-title {
+            font-size: 11.5px !important;
+            line-height: 1.25 !important;
+            margin-bottom: 2px !important;
+            font-weight: 600 !important;
+            min-height: 28px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+          .lead-modal-service-desc {
+            font-size: 9.5px !important;
+            line-height: 1.25 !important;
+            min-height: auto !important;
+            margin-bottom: 3px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+          .lead-modal-subservices-wrap {
+            gap: 2px !important;
+            margin-top: 3px !important;
+          }
+          .lead-modal-subservice-pill {
+            font-size: 8px !important;
+            padding: 1px 4px !important;
+            border-radius: 3px !important;
+            line-height: 1.15 !important;
+            max-width: 100% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: inline-block !important;
+          }
+          .lead-modal-subservice-pill-more {
+            font-size: 8px !important;
+            padding: 1px 2px !important;
+          }
+          @media (max-width: 400px) {
+            .lead-modal-grid {
+              gap: 4px !important;
+            }
+            .lead-modal-compact-card {
+              padding: 7px 6px !important;
+            }
+            .lead-modal-service-title {
+              font-size: 11px !important;
+            }
+            .lead-modal-service-desc {
+              font-size: 9px !important;
+            }
+          }
+          .lead-modal-footer-card {
+            padding: 8px 10px !important;
+            gap: 8px !important;
+            border-radius: 10px !important;
+            margin-top: 6px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .lead-modal-footer-info {
+            min-width: 0 !important;
+          }
+          .lead-modal-footer-label {
+            font-size: 9.5px !important;
+            margin-bottom: 3px !important;
+          }
+          .lead-modal-selected-list {
+            gap: 4px !important;
+          }
+          .lead-modal-selected-chip {
+            padding: 2px 7px !important;
+            font-size: 10.5px !important;
+            border-radius: 6px !important;
+          }
+          .lead-modal-empty-text {
+            font-size: 11px !important;
+          }
+          .lead-modal-continue-btn {
+            height: 36px !important;
+            font-size: 13px !important;
+            padding: 0 16px !important;
+            border-radius: 8px !important;
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
       `}</style>
     </div>
   );

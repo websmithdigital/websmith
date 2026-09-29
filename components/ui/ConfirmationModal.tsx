@@ -124,7 +124,7 @@ const styles: any = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
+    zIndex: 9999,
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   modal: {

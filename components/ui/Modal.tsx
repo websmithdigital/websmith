@@ -53,6 +53,7 @@ export default function Modal({
 
   return createPortal(
     <div
+      className="wsd-modal-overlay"
       style={{
         position: "fixed",
         top: 0,
@@ -64,7 +65,7 @@ export default function Modal({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 1000,
+        zIndex: 9999,
         padding: "20px",
       }}
       onClick={onClose}
@@ -80,7 +81,7 @@ export default function Modal({
           boxShadow: "var(--card-shadow, 0 20px 40px rgba(0, 0, 0, 0.15))",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "90vh",
+          maxHeight: "min(90vh, calc(100dvh - 24px))",
           overflow: "hidden",
           color: "var(--text-primary)",
           animation: "modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -90,6 +91,7 @@ export default function Modal({
       >
         {/* Header */}
         <div
+          className="wsd-modal-header"
           style={{
             padding: "16px 24px",
             borderBottom: "1px solid var(--border-color)",
@@ -100,6 +102,7 @@ export default function Modal({
           }}
         >
           <h2
+            className="wsd-modal-title"
             style={{
               fontSize: "18px",
               fontWeight: 600,
@@ -135,6 +138,7 @@ export default function Modal({
 
         {/* Content */}
         <div
+          className="wsd-modal-content"
           style={{
             padding: "24px",
             overflowY: "auto",
@@ -147,6 +151,7 @@ export default function Modal({
         {/* Footer */}
         {footer && (
           <div
+            className="wsd-modal-footer"
             style={{
               padding: "20px 24px",
               borderTop: "1px solid var(--border-color)",
@@ -173,14 +178,55 @@ export default function Modal({
           color: var(--text-primary) !important;
           border-color: var(--text-secondary) !important;
         }
+        .wsd-modal-overlay {
+          z-index: 9999 !important;
+        }
         @media (max-width: 640px) {
+          .wsd-modal-overlay {
+            z-index: 9999 !important;
+            padding: max(8px, env(safe-area-inset-top, 8px)) 6px max(8px, env(safe-area-inset-bottom, 8px)) 6px !important;
+          }
           .wsd-responsive-modal {
-            border-radius: 20px !important;
+            border-radius: 16px !important;
+            max-height: min(94vh, calc(100dvh - 16px)) !important;
+          }
+          .wsd-modal-header {
+            padding: 10px 14px !important;
+          }
+          .wsd-modal-title {
+            font-size: 15px !important;
+          }
+          .wsd-modal-content {
+            padding: 10px 8px !important;
+          }
+          .wsd-modal-footer {
+            padding: 10px 12px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .wsd-modal-overlay {
+            padding: max(6px, env(safe-area-inset-top, 6px)) 4px max(6px, env(safe-area-inset-bottom, 6px)) 4px !important;
+          }
+          .wsd-responsive-modal {
+            border-radius: 14px !important;
+            max-height: min(96vh, calc(100dvh - 12px)) !important;
+          }
+          .wsd-modal-header {
+            padding: 9px 12px !important;
+          }
+          .wsd-modal-title {
+            font-size: 14.5px !important;
+          }
+          .wsd-modal-content {
+            padding: 8px 6px !important;
           }
         }
         @media (max-width: 520px) {
           .wsd-modal-back-text {
             display: none !important;
+          }
+          .wsd-modal-back-btn {
+            padding: 4px 8px !important;
           }
         }
       `}</style>

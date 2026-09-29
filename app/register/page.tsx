@@ -6,6 +6,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
@@ -451,7 +452,7 @@ export default function RegisterPage() {
                   setAgreeTerms(e.target.checked);
                   if (validationErrors.terms) setValidationErrors(prev => ({ ...prev, terms: '' }));
                 }} style={styles.checkbox} />
-                <span>I agree to the <a href="#" style={styles.link}>Terms of Service</a> and <a href="#" style={styles.link}>Privacy Policy</a></span>
+                <span>I agree to the <Link href="/terms" target="_blank" style={styles.link}>Terms of Service</Link> and <Link href="/privacy" target="_blank" style={styles.link}>Privacy Policy</Link></span>
               </label>
               {validationErrors.terms && <p style={styles.validationError}>{validationErrors.terms}</p>}
             </div>

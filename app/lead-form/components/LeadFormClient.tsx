@@ -330,24 +330,24 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           </Button>
         </div>
       )}
-      <div style={isWizard ? { ...styles.header, ...styles.headerWizard } : styles.header}>
-        <p style={isWizard ? { ...styles.eyebrow, ...styles.eyebrowWizard } : styles.eyebrow}>Step 2 of 3</p>
-        <h1 style={isWizard ? { ...styles.title, ...styles.titleWizard } : styles.title}>Share a few details and we&apos;ll take it from there</h1>
-        <p style={isWizard ? { ...styles.subtitle, ...styles.subtitleWizard } : styles.subtitle}>
+      <div className={isWizard ? "lead-wizard-header" : undefined} style={isWizard ? { ...styles.header, ...styles.headerWizard } : styles.header}>
+        <p className={isWizard ? "lead-wizard-eyebrow" : undefined} style={isWizard ? { ...styles.eyebrow, ...styles.eyebrowWizard } : styles.eyebrow}>Step 2 of 3</p>
+        <h1 className={isWizard ? "lead-wizard-title" : undefined} style={isWizard ? { ...styles.title, ...styles.titleWizard } : styles.title}>Share a few details and we&apos;ll take it from there</h1>
+        <p className={isWizard ? "lead-wizard-subtitle" : undefined} style={isWizard ? { ...styles.subtitle, ...styles.subtitleWizard } : styles.subtitle}>
           Your answers help our sales team respond with the right scope, timeline, and consultation scheduling.
         </p>
       </div>
 
       <div style={isWizard ? styles.formCardWizard : styles.formCard} className="lead-form-clean-container">
-        <div style={isWizard ? { ...styles.selectedWrap, marginBottom: "12px", gap: "6px" } : styles.selectedWrap}>
+        <div className={isWizard ? "lead-wizard-selected-wrap" : undefined} style={isWizard ? { ...styles.selectedWrap, marginBottom: "12px", gap: "6px" } : styles.selectedWrap}>
           {selectedServices.map((service) => (
-            <span key={service.id} style={isWizard ? { ...styles.selectedChip, padding: "4px 10px", fontSize: "12px" } : styles.selectedChip}>{service.name}</span>
+            <span key={service.id} className={isWizard ? "lead-wizard-selected-chip" : undefined} style={isWizard ? { ...styles.selectedChip, padding: "4px 10px", fontSize: "12px" } : styles.selectedChip}>{service.name}</span>
           ))}
         </div>
 
         <form onSubmit={handleSubmit} className={isWizard ? "lead-form-compact-inputs" : undefined}>
           {/* Name, Email, Company */}
-          <div style={isWizard ? styles.gridWizard : styles.grid}>
+          <div className={isWizard ? "lead-form-grid-name-email" : undefined} style={isWizard ? styles.gridWizard : styles.grid}>
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <label style={isWizard ? styles.labelWizard : styles.label}>Full Name *</label>
               <input
@@ -370,7 +370,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
               />
               {errors.email && <p style={styles.error}>{errors.email}</p>}
             </div>
-            <div style={isWizard ? styles.fieldWizard : styles.field}>
+            <div className={isWizard ? "lead-form-col-full" : undefined} style={isWizard ? styles.fieldWizard : styles.field}>
               <label style={isWizard ? styles.labelWizard : styles.label}>Company Name</label>
               <input
                 type="text"
@@ -383,7 +383,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           </div>
 
           {/* Dual Phone: Calling Number & WhatsApp Number */}
-          <div style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
+          <div className={isWizard ? "lead-form-grid-phones" : undefined} style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <label style={isWizard ? styles.labelWizard : styles.label}>Calling Number *</label>
               <PhoneInputWithCountry
@@ -446,7 +446,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           </div>
 
           {/* Consultation Scheduling: Date, Time Slot & Timezone */}
-          <div style={{ ...(isWizard ? styles.grid3Wizard : styles.grid3), marginTop: isWizard ? "10px" : "16px" }}>
+          <div className={isWizard ? "lead-form-grid-schedule" : undefined} style={{ ...(isWizard ? styles.grid3Wizard : styles.grid3), marginTop: isWizard ? "10px" : "16px" }}>
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: isWizard ? "4px" : "8px" }}>
                 <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Preferred Date *</label>
@@ -505,7 +505,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
               {errors.preferredContactTime && <p style={styles.error}>{errors.preferredContactTime}</p>}
             </div>
 
-            <div style={isWizard ? styles.fieldWizard : styles.field}>
+            <div className={isWizard ? "lead-form-col-full" : undefined} style={isWizard ? styles.fieldWizard : styles.field}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", minHeight: isWizard ? "18px" : "22px", marginBottom: isWizard ? "4px" : "8px" }}>
                 <label style={isWizard ? { ...styles.labelWizard, marginBottom: 0 } : { ...styles.label, marginBottom: 0 }}>Your Timezone *</label>
                 {userTimeZoneInfo.badge && (
@@ -564,6 +564,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           {/* Dual-Time IST Preview Banner */}
           {calculatedISTRange && (
             <div
+              className={isWizard ? "lead-form-dual-time-banner" : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -587,7 +588,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           )}
 
           {/* Budget & Timeline */}
-          <div style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
+          <div className={isWizard ? "lead-form-grid-budget" : undefined} style={{ ...(isWizard ? styles.gridWizard : styles.grid), marginTop: isWizard ? "10px" : "16px" }}>
             <div style={isWizard ? styles.fieldWizard : styles.field}>
               <label style={isWizard ? styles.labelWizard : styles.label}>Estimated Budget ($) *</label>
               <input
@@ -662,7 +663,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
             </div>
           )}
 
-          <div style={{ ...(isWizard ? styles.fieldWizard : styles.field), marginTop: isWizard ? "10px" : "16px" }}>
+          <div className={isWizard ? "lead-form-grid-notes" : undefined} style={{ ...(isWizard ? styles.fieldWizard : styles.field), marginTop: isWizard ? "10px" : "16px" }}>
             <label style={isWizard ? styles.labelWizard : styles.label}>Project Scope & Additional Notes</label>
             <textarea
               value={form.notes}
@@ -674,7 +675,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           </div>
 
           {/* Privacy Consent Checkbox */}
-          <div style={{ marginTop: isWizard ? "10px" : "14px" }}>
+          <div className={isWizard ? "lead-form-consent-wrap" : undefined} style={{ marginTop: isWizard ? "10px" : "14px" }}>
             <label
               style={{
                 display: "flex",
@@ -706,7 +707,17 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
                 }}
               />
               <span>
-                I consent to WebSmith Digital collecting and processing my contact details to respond to my consultation request in accordance with the{" "}
+                I agree to the{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#007AFF", textDecoration: "underline" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Terms of Service
+                </Link>{" "}
+                and consent to WebSmith Digital collecting and processing my details in accordance with the{" "}
                 <Link
                   href="/privacy"
                   target="_blank"
@@ -729,7 +740,7 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           {errors.services && <p style={styles.error}>{errors.services}</p>}
           {submitError && <p style={{ ...styles.error, marginBottom: "16px" }}>{submitError}</p>}
 
-          <div style={isWizard ? { ...styles.footer, marginTop: "12px", paddingTop: "12px" } : styles.footer}>
+          <div className={isWizard ? "lead-wizard-footer" : undefined} style={isWizard ? { ...styles.footer, marginTop: "12px", paddingTop: "12px" } : styles.footer}>
             <p style={isWizard ? { ...styles.footerText, fontSize: "12px" } : styles.footerText}>
               Your consultation schedule and inquiry will be dispatched immediately to our agency team.
             </p>
@@ -739,6 +750,145 @@ export default function LeadFormClient({ variant = "page", onBack, onSuccess }: 
           </div>
         </form>
       </div>
+
+      {isWizard && (
+        <style>{`
+          @media (max-width: 640px) {
+            .lead-wizard-header {
+              padding: 6px 8px !important;
+              margin-bottom: 4px !important;
+            }
+            .lead-wizard-eyebrow {
+              font-size: 8.5px !important;
+              margin-bottom: 1px !important;
+            }
+            .lead-wizard-title {
+              font-size: 12px !important;
+              line-height: 1.2 !important;
+              margin-bottom: 1px !important;
+            }
+            .lead-wizard-subtitle {
+              display: none !important;
+            }
+            .lead-wizard-selected-wrap {
+              margin-bottom: 4px !important;
+              gap: 3px !important;
+            }
+            .lead-wizard-selected-chip {
+              padding: 1px 6px !important;
+              font-size: 9.5px !important;
+            }
+            .lead-form-clean-container {
+              padding: 6px 8px !important;
+              border-radius: 10px !important;
+            }
+            .lead-form-grid-name-email {
+              display: grid !important;
+              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+              gap: 5px !important;
+              margin-top: 2px !important;
+            }
+            .lead-form-col-full {
+              grid-column: span 2 !important;
+            }
+            .lead-form-grid-phones {
+              display: grid !important;
+              grid-template-columns: 1fr !important;
+              gap: 4px !important;
+              margin-top: 4px !important;
+            }
+            .lead-form-grid-schedule {
+              display: grid !important;
+              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+              gap: 5px !important;
+              margin-top: 4px !important;
+            }
+            .lead-form-grid-budget {
+              display: grid !important;
+              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+              gap: 5px !important;
+              margin-top: 4px !important;
+            }
+            .lead-form-grid-notes {
+              margin-top: 4px !important;
+            }
+            .lead-form-dual-time-banner {
+              padding: 3px 6px !important;
+              font-size: 10px !important;
+              margin-top: 3px !important;
+              margin-bottom: 4px !important;
+            }
+            .lead-form-compact-inputs input:not([type="checkbox"]),
+            .lead-form-compact-inputs select {
+              font-size: 11px !important;
+              padding: 2px 7px !important;
+              height: 29px !important;
+              min-height: 29px !important;
+              border-radius: 6px !important;
+              box-sizing: border-box !important;
+            }
+            .lead-form-compact-inputs textarea {
+              font-size: 10.5px !important;
+              padding: 3px 6px !important;
+              min-height: 36px !important;
+              height: 36px !important;
+              border-radius: 6px !important;
+              box-sizing: border-box !important;
+              resize: none !important;
+            }
+            .lead-form-compact-inputs label {
+              font-size: 10px !important;
+              font-weight: 600 !important;
+              margin-bottom: 1.5px !important;
+              line-height: 1.15 !important;
+            }
+            .lead-form-compact-inputs .phone-input-root {
+              height: 29px !important;
+              min-height: 29px !important;
+              border-radius: 6px !important;
+            }
+            .lead-form-compact-inputs .phone-country-btn {
+              height: 27px !important;
+              font-size: 10px !important;
+              padding: 1px 5px !important;
+            }
+            .lead-form-compact-inputs .phone-number-input {
+              height: 27px !important;
+              font-size: 11px !important;
+              padding: 1px 6px !important;
+            }
+            .lead-form-consent-wrap {
+              margin-top: 5px !important;
+            }
+            .lead-form-consent-wrap label {
+              font-size: 9.5px !important;
+              line-height: 1.25 !important;
+              gap: 6px !important;
+            }
+            .lead-form-consent-wrap input[type="checkbox"] {
+              width: 14px !important;
+              height: 14px !important;
+              margin-top: 1px !important;
+            }
+            .lead-wizard-footer {
+              margin-top: 6px !important;
+              padding-top: 6px !important;
+              gap: 6px !important;
+            }
+            .lead-wizard-footer p {
+              font-size: 9.5px !important;
+              line-height: 1.2 !important;
+            }
+            .lead-wizard-footer button {
+              height: 34px !important;
+              font-size: 12.5px !important;
+              border-radius: 7px !important;
+              width: 100% !important;
+              justify-content: center !important;
+            }
+          }
+        `}</style>
+      )}
     </div>
   );
 }

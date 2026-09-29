@@ -89,7 +89,7 @@ function PurchaseEnquiryForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consent) {
-      setError("Please accept the privacy policy consent to proceed.");
+      setError("Please accept the Terms of Service and Privacy Policy consent to proceed.");
       return;
     }
     setSubmitting(true);
@@ -230,14 +230,18 @@ function PurchaseEnquiryForm() {
                 }}
               />
               <span>
-                I consent to WebSmith Digital collecting and processing my contact details to respond to my enquiry in accordance with the{" "}
+                I agree to the{" "}
+                <Link href="/terms" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
+                  Terms of Service
+                </Link>{" "}
+                and consent to WebSmith Digital collecting and processing my contact details to respond to my enquiry in accordance with the{" "}
                 <Link href="/privacy" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
                   Privacy Policy
                 </Link>
                 .
               </span>
             </label>
-            {error && error.includes("privacy policy") && (
+            {error && (error.includes("privacy policy") || error.includes("Terms")) && (
               <p role="alert" style={{ margin: "4px 0 0 0", color: "#FF3B30", fontSize: "12px", fontWeight: 500 }}>
                 {error}
               </p>
@@ -671,7 +675,7 @@ function ExactGetInTouchContactForm() {
             checked={consent}
             onChange={(e) => {
               setConsent(e.target.checked);
-              if (e.target.checked && error?.includes("privacy policy")) {
+              if (e.target.checked && error && (error.includes("privacy policy") || error.includes("Terms"))) {
                 setError(null);
               }
             }}
@@ -686,14 +690,18 @@ function ExactGetInTouchContactForm() {
             }}
           />
           <span>
-            I consent to WebSmith Digital collecting and processing my contact details to respond to my inquiry in accordance with the{" "}
+            I agree to the{" "}
+            <Link href="/terms" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
+              Terms of Service
+            </Link>{" "}
+            and consent to WebSmith Digital collecting and processing my contact details to respond to my inquiry in accordance with the{" "}
             <Link href="/privacy" style={{ color: "#007AFF", textDecoration: "underline" }} target="_blank">
               Privacy Policy
             </Link>
             .
           </span>
         </label>
-        {error && error.includes("privacy policy") && (
+        {error && (error.includes("privacy policy") || error.includes("Terms")) && (
           <p role="alert" style={{ margin: "2px 0 0 0", color: "#FF3B30", fontSize: "12px", fontWeight: 500 }}>
             {error}
           </p>
