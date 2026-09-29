@@ -16,6 +16,7 @@ import {
 import { getPublishedProjects, Project } from "../projects/services/projectService";
 import { usePublicTheme } from "../providers/PublicThemeProvider";
 import { useLeadFunnel } from "../providers/LeadFunnelProvider";
+import LiveWebsiteCardBanner from "./components/LiveWebsiteCardBanner";
 
 export default function PortfolioPage() {
   const { publicTheme } = usePublicTheme();
@@ -335,54 +336,14 @@ export default function PortfolioPage() {
                 }}
                 className="wsd-portfolio-card wsd-unified-card portfolio-card"
               >
-                {/* Visual Banner */}
-                <div
-                  className="portfolio-card-banner"
-                  style={{
-                    position: "relative",
-                    height: "235px",
-                    width: "100%",
-                    backgroundColor: isDark ? "#0f172a" : "#e2e8f0",
-                    overflow: "hidden",
-                    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                  }}
-                >
-                  <Image
-                    src={
-                      project.previewImage && (project.previewImage.startsWith("/") || project.previewImage.startsWith("http"))
-                        ? project.previewImage
-                        : project.publicUrl && /^https?:\/\//i.test(project.publicUrl.trim())
-                        ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(project.publicUrl.trim())}?w=1280&h=800`
-                        : "/images/websmith_original.jpg"
-                    }
-                    alt={project.name}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
-                    style={{ objectFit: "cover" }}
-                  />
-                  {project.category && (
-                    <div
-                      className="portfolio-card-tag"
-                      style={{
-                        position: "absolute",
-                        top: "12px",
-                        left: "12px",
-                        padding: "4px 10px",
-                        borderRadius: "8px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        letterSpacing: "0.03em",
-                        backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.9)",
-                        backdropFilter: "blur(8px)",
-                        color: "#3b82f6",
-                        border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
-                      }}
-                    >
-                      {project.category}
-                    </div>
-                  )}
-                </div>
+                {/* Visual Live Website Banner */}
+                <LiveWebsiteCardBanner
+                  publicUrl={project.publicUrl}
+                  previewImage={project.previewImage}
+                  name={project.name}
+                  category={project.category}
+                  isDark={isDark}
+                />
 
                 {/* Card Content */}
                 <div className="portfolio-card-content" style={{ padding: "24px 24px 22px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
