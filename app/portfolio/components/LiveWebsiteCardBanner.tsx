@@ -20,7 +20,7 @@ export default function LiveWebsiteCardBanner({
 }: LiveWebsiteCardBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(380);
-  const [viewMode, setViewMode] = useState<"live" | "snapshot">("live");
+  const [viewMode, setViewMode] = useState<"live" | "snapshot">("snapshot");
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -181,11 +181,11 @@ export default function LiveWebsiteCardBanner({
             >
               {viewMode === "live" ? (
                 <>
-                  <Globe size={10} /> {iframeLoaded ? "LIVE WEB" : "CONNECTING..."}
+                  <Camera size={10} /> SNAPSHOT
                 </>
               ) : (
                 <>
-                  <Camera size={10} /> SNAPSHOT
+                  <Globe size={10} /> RUN LIVE
                 </>
               )}
             </button>
@@ -241,6 +241,49 @@ export default function LiveWebsiteCardBanner({
             (e.currentTarget as HTMLImageElement).src = "/images/websmith_original.jpg";
           }}
         />
+
+        {/* Click to launch interactive live mode from snapshot */}
+        {effectiveMode === "snapshot" && hasLiveUrl && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode("live");
+            }}
+            title="Click to launch interactive live website"
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 3,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "flex-end",
+              padding: "8px",
+              background: "transparent",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "9px",
+                fontWeight: 600,
+                padding: "3px 8px",
+                borderRadius: "6px",
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
+                backdropFilter: "blur(6px)",
+                color: "#38bdf8",
+                border: "1px solid rgba(56, 189, 248, 0.3)",
+                opacity: 0,
+                transition: "opacity 0.2s ease",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+              className="interactive-hint"
+            >
+              <Globe size={10} /> Click to Run Live
+            </span>
+          </div>
+        )}
 
         {/* Live Interactive Iframe (Fades in over snapshot once ready) */}
         {effectiveMode === "live" && hasLiveUrl && cleanUrl && (
