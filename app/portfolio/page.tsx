@@ -50,16 +50,17 @@ export default function PortfolioPage() {
     };
   }, []);
 
-  // Defined target category order (Startups & SMBs -> Logistics)
+  // Defined target category order (Home & Commercial Services -> Logistics)
   const TARGET_CATEGORY_ORDER = [
-    "Startups & SMBs",
-    "Healthcare",
+    "Home & Commercial Services",
     "Real Estate",
     "Education",
     "E-Commerce & Retail",
-    "Restaurants & Hospitality",
     "Professional Services",
     "Logistics",
+    "Startups & SMBs",
+    "Healthcare",
+    "Restaurants & Hospitality",
   ];
 
   // Dynamically derive category pills from database projects with prioritized ordering

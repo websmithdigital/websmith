@@ -730,6 +730,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, project }: Proje
                   onChange={(e) => updateField('category', e.target.value)}
                   style={styles.select}
                 >
+                  <option value="Home & Commercial Services">Home & Commercial Services</option>
                   <option value="Startups & SMBs">Startups & SMBs</option>
                   <option value="E-Commerce & Retail">E-Commerce & Retail</option>
                   <option value="Real Estate">Real Estate</option>
