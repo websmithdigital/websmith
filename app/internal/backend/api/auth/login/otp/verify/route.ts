@@ -110,9 +110,9 @@ export async function POST(request: Request) {
     client.release();
 
     // 5. Generate JWT Token
-    const JWT_SECRET = process.env.API_CENTER_JWT_SECRET;
+    const JWT_SECRET = process.env.API_CENTER_JWT_SECRET || process.env.JWT_SECRET;
     if (!JWT_SECRET) {
-      console.error("❌ API_CENTER_JWT_SECRET is not set");
+      console.error("❌ Neither API_CENTER_JWT_SECRET nor JWT_SECRET is set");
       return NextResponse.json(
         { success: false, error: "Server configuration error" },
         { status: 500 }

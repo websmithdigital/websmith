@@ -19,10 +19,10 @@ export async function GET(request: Request) {
     }
 
     const token = authHeader.split(" ")[1];
-    const JWT_SECRET = process.env.API_CENTER_JWT_SECRET;
+    const JWT_SECRET = process.env.API_CENTER_JWT_SECRET || process.env.JWT_SECRET;
 
     if (!JWT_SECRET) {
-      console.error("API_CENTER_JWT_SECRET is not set");
+      console.error("Neither API_CENTER_JWT_SECRET nor JWT_SECRET is set");
       return NextResponse.json({ valid: false, error: "Server configuration error" }, { status: 500 });
     }
 

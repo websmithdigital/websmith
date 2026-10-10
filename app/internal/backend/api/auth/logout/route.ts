@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     
     if (token) {
       try {
-        const JWT_SECRET = process.env.API_CENTER_JWT_SECRET;
+        const JWT_SECRET = process.env.API_CENTER_JWT_SECRET || process.env.JWT_SECRET;
         if (JWT_SECRET) {
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           userId = decoded.id;

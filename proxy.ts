@@ -165,7 +165,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
       return pleaseLoginFirstResponse(request);
     }
 
-    const JWT_SECRET = process.env.API_CENTER_JWT_SECRET;
+    const JWT_SECRET = process.env.API_CENTER_JWT_SECRET || process.env.JWT_SECRET;
     if (!JWT_SECRET) {
       return pleaseLoginFirstResponse(request);
     }
