@@ -1239,10 +1239,8 @@ export default function LandingPage() {
         className="enterprise-trust-wrapper"
         style={{
           width: "100%",
-          padding: "14px 0",
           backgroundColor: isDark ? "#161617" : "#f5f5f7",
           borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #d2d2d7",
-          fontSize: "12px",
           fontWeight: 500,
           letterSpacing: "-0.01em",
           color: isDark ? "#a1a1a6" : "#424245",
@@ -2373,23 +2371,33 @@ export default function LandingPage() {
 
 
       <style>{`
-        /* Enterprise Trust Strip (Row on desktop, continuous single row marquee on mobile) */
+        /* Enterprise Trust Strip (Continuous infinite marquee across all devices) */
         .enterprise-trust-wrapper {
           position: relative;
           width: 100%;
+          overflow: hidden;
+          padding: 12px 0;
+          font-size: 12px;
+          mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
         }
         .enterprise-trust-track {
           display: flex;
           align-items: center;
-          justifyContent: center;
-          width: 100%;
+          width: max-content;
+          animation: trustStripMarquee 28s linear infinite;
+          will-change: transform;
+        }
+        .enterprise-trust-track:hover,
+        .enterprise-trust-track:active {
+          animation-play-state: paused;
         }
         .enterprise-trust-group {
           display: flex;
           align-items: center;
-          justifyContent: center;
-          gap: clamp(16px, 3vw, 40px);
-          flex-wrap: wrap;
+          flex-shrink: 0;
+          gap: clamp(24px, 3.5vw, 48px);
+          padding-right: clamp(24px, 3.5vw, 48px);
         }
         .enterprise-trust-item {
           display: inline-flex;
@@ -2399,36 +2407,7 @@ export default function LandingPage() {
           flex-shrink: 0;
         }
         .enterprise-trust-group-duplicate {
-          display: none;
-        }
-
-        @media (max-width: 900px) {
-          .enterprise-trust-wrapper {
-            mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-          }
-          .enterprise-trust-track {
-            display: flex;
-            align-items: center;
-            justifyContent: flex-start;
-            width: max-content;
-            animation: trustStripMarquee 22s linear infinite;
-            will-change: transform;
-          }
-          .enterprise-trust-track:hover,
-          .enterprise-trust-track:active {
-            animation-play-state: paused;
-          }
-          .enterprise-trust-group {
-            display: flex;
-            align-items: center;
-            flex-wrap: nowrap !important;
-            gap: 28px !important;
-            padding-right: 28px;
-          }
-          .enterprise-trust-group-duplicate {
-            display: flex !important;
-          }
+          display: flex;
         }
 
         @keyframes trustStripMarquee {
@@ -2440,15 +2419,48 @@ export default function LandingPage() {
           }
         }
 
-        @media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+        @media (max-width: 768px) {
+          .enterprise-trust-wrapper {
+            padding: 7px 0 !important;
+            font-size: 10.5px !important;
+          }
+          .enterprise-trust-group {
+            gap: 18px !important;
+            padding-right: 18px !important;
+          }
+          .enterprise-trust-item {
+            gap: 5px !important;
+          }
+          .enterprise-trust-item span:first-child {
+            font-size: 11px !important;
+            line-height: 1 !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .enterprise-trust-wrapper {
+            padding: 5px 0 !important;
+            font-size: 9.5px !important;
+          }
+          .enterprise-trust-group {
+            gap: 14px !important;
+            padding-right: 14px !important;
+          }
+          .enterprise-trust-item {
+            gap: 4px !important;
+          }
+          .enterprise-trust-item span:first-child {
+            font-size: 10px !important;
+            line-height: 1 !important;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
           .enterprise-trust-track {
             animation: none !important;
             overflow-x: auto;
             width: 100%;
             scrollbar-width: none;
-          }
-          .enterprise-trust-group-duplicate {
-            display: none !important;
           }
         }
 

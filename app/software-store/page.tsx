@@ -47,25 +47,25 @@ function Shimmer() {
 
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl animate-pulse shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-      <div className="relative h-40 bg-white/[0.04] overflow-hidden">
+    <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl animate-pulse shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <div className="relative h-28 sm:h-40 bg-white/[0.04] overflow-hidden">
         <Shimmer />
       </div>
-      <div className="relative p-5 space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/[0.06]" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 w-3/4 rounded bg-white/[0.06]" />
-            <div className="h-3 w-1/2 rounded bg-white/[0.06]" />
+      <div className="relative p-2.5 sm:p-5 space-y-2 sm:space-y-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/[0.06]" />
+          <div className="flex-1 space-y-1.5 sm:space-y-2">
+            <div className="h-3.5 sm:h-4 w-3/4 rounded bg-white/[0.06]" />
+            <div className="h-2.5 sm:h-3 w-1/2 rounded bg-white/[0.06]" />
           </div>
         </div>
-        <div className="h-3 w-full rounded bg-white/[0.06]" />
-        <div className="h-3 w-2/3 rounded bg-white/[0.06]" />
-        <div className="flex gap-2">
-          <div className="h-5 w-16 rounded-full bg-white/[0.06]" />
-          <div className="h-5 w-14 rounded-full bg-white/[0.06]" />
+        <div className="h-2.5 sm:h-3 w-full rounded bg-white/[0.06]" />
+        <div className="h-2.5 sm:h-3 w-2/3 rounded bg-white/[0.06]" />
+        <div className="flex gap-1.5 sm:gap-2">
+          <div className="h-4 sm:h-5 w-12 sm:w-16 rounded-full bg-white/[0.06]" />
+          <div className="h-4 sm:h-5 w-10 sm:w-14 rounded-full bg-white/[0.06]" />
         </div>
-        <div className="h-10 rounded-xl bg-white/[0.06]" />
+        <div className="h-8 sm:h-10 rounded-xl bg-white/[0.06]" />
       </div>
     </div>
   );
@@ -396,7 +396,7 @@ function ProductCard({ product, cheapestPrice, planCount, hasTrial, inCart, onOp
       </div>
 
       <div
-        className={`relative flex h-full flex-1 flex-col overflow-hidden rounded-3xl border transition-all duration-500 focus-visible:ring-2 focus-visible:ring-blue-400/50 wsd-unified-card ${
+        className={`relative flex h-full flex-1 flex-col overflow-hidden rounded-2xl sm:rounded-3xl border transition-all duration-500 focus-visible:ring-2 focus-visible:ring-blue-400/50 wsd-unified-card ${
           isDark
             ? "border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_20px_50px_-20px_rgba(0,0,0,0.7)] group-hover:border-blue-400/30 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(59,130,246,0.18),0_30px_80px_-20px_rgba(59,130,246,0.4)]"
             : "border-slate-200 bg-white/70 backdrop-blur-xl shadow-sm hover:shadow-xl hover:border-blue-400/40"
@@ -420,7 +420,7 @@ function ProductCard({ product, cheapestPrice, planCount, hasTrial, inCart, onOp
         )}
 
         {/* icon header */}
-        <div className="relative h-40 shrink-0 overflow-hidden">
+        <div className="relative h-28 sm:h-40 shrink-0 overflow-hidden">
           <div className={`absolute inset-0 ${isDark ? "bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.25),rgba(6,182,212,0.12)_45%,transparent_75%)]" : "bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.12),transparent_75%)]"}`} />
           <motion.div
             className="absolute -inset-x-1/4 -inset-y-1/2 opacity-60"
@@ -433,27 +433,27 @@ function ProductCard({ product, cheapestPrice, planCount, hasTrial, inCart, onOp
           <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? "from-[#0f172a]/90" : "from-white/90"} via-transparent to-transparent`} />
 
           {/* status badges */}
-          <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5">
+          <div className="absolute top-2 sm:top-3.5 right-2 sm:right-3.5 z-10 flex items-center gap-1 sm:gap-1.5">
             {product.featured && (
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border backdrop-blur-sm ${
+              <span className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border backdrop-blur-sm ${
                 isDark ? "bg-cyan-400/15 text-cyan-300 border-cyan-400/25" : "bg-cyan-50 text-cyan-800 border-cyan-200"
               }`}>
-                <Star className="w-3 h-3 fill-current" /> Featured
+                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" /> <span className="hidden xs:inline">Featured</span>
               </span>
             )}
             {hasTrial && (
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border backdrop-blur-sm ${
+              <span className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold border backdrop-blur-sm ${
                 isDark ? "bg-emerald-400/15 text-emerald-300 border-emerald-400/25" : "bg-emerald-100 text-emerald-800 border-emerald-200"
               }`}>
-                <Sparkles className="w-3 h-3" /> Trial
+                <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Trial
               </span>
             )}
           </div>
 
           {/* floating icon */}
-          <div className="absolute bottom-4 left-5 right-5 flex items-end gap-4">
+          <div className="absolute bottom-2 sm:bottom-4 left-2.5 sm:left-5 right-2.5 sm:right-5 flex items-end gap-2 sm:gap-4">
             <motion.div
-              className={`relative w-16 h-16 rounded-2xl flex items-center justify-center border shrink-0 ${
+              className={`relative w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 ${
                 isDark
                   ? "bg-[#0f172a]/85 backdrop-blur-md border-white/10 shadow-[0_8px_30px_-6px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] text-white"
                   : "bg-white/90 border-slate-200 shadow-md text-slate-900"
@@ -461,23 +461,23 @@ function ProductCard({ product, cheapestPrice, planCount, hasTrial, inCart, onOp
               animate={{ y: [0, -5, 0], rotate: [0, 1.5, 0] }}
               transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
             >
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/25 to-cyan-400/20 opacity-80" />
-              <span className="relative text-2xl font-bold">
+              <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/25 to-cyan-400/20 opacity-80" />
+              <span className="relative text-base sm:text-2xl font-bold">
                 {product.logo_url ? (
-                  <img src={product.logo_url} alt={product.name} className="w-10 h-10 rounded-xl object-contain" />
+                  <img src={product.logo_url} alt={product.name} className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl object-contain" />
                 ) : (
                   product.name.charAt(0).toUpperCase()
                 )}
               </span>
             </motion.div>
             <div className="min-w-0 flex-1 pb-0.5">
-              <h3 className={`font-bold text-base truncate transition-colors duration-300 ${
+              <h3 className={`font-bold text-xs sm:text-base truncate transition-colors duration-300 ${
                 isDark ? "text-white group-hover:text-blue-300" : "text-slate-900 group-hover:text-blue-600"
               }`}>{product.name}</h3>
-              <div className="flex items-center gap-2 mt-0.5">
-                {product.company_name && <p className={`text-[11px] truncate ${isDark ? "text-slate-400" : "text-slate-500"}`}>{product.company_name}</p>}
+              <div className="flex items-center gap-1.5 mt-0.5">
+                {product.company_name && <p className={`text-[10px] sm:text-[11px] truncate ${isDark ? "text-slate-400" : "text-slate-500"}`}>{product.company_name}</p>}
                 {product.version && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium border shrink-0 ${
+                  <span className={`text-[8.5px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded-md font-medium border shrink-0 ${
                     isDark ? "bg-white/10 text-slate-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200"
                   }`}>v{product.version}</span>
                 )}
@@ -487,90 +487,96 @@ function ProductCard({ product, cheapestPrice, planCount, hasTrial, inCart, onOp
         </div>
 
         {/* body */}
-        <div className="flex flex-1 flex-col p-5 pt-4 space-y-3">
-          <p className={`text-xs leading-relaxed line-clamp-2 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-            {product.short_description || product.description || "No description available."}
-          </p>
+        <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-5 pt-2 sm:pt-4">
+          {/* upper content */}
+          <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-3">
+            <p className={`text-[10.5px] sm:text-xs leading-relaxed line-clamp-2 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+              {product.short_description || product.description || "No description available."}
+            </p>
 
-          {/* chips */}
-          <div className="flex flex-wrap gap-1.5">
-            {product.product_type && (
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                isDark ? "bg-blue-500/10 text-blue-300 border-blue-500/20" : "bg-blue-50 text-blue-700 border-blue-200"
-              }`}>
-                <Tag className="w-2.5 h-2.5" />{product.product_type}
-              </span>
-            )}
-            {product.platform && (
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
-              }`}>
-                <Monitor className="w-2.5 h-2.5" />{product.platform}
-              </span>
-            )}
-            {(product.tags || []).slice(0, 2).map((t) => (
-              <span key={t} className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                isDark ? "bg-white/5 text-slate-400 border-white/10" : "bg-slate-100 text-slate-600 border-slate-200"
-              }`}>{t}</span>
-            ))}
+            {/* chips */}
+            <div className="flex flex-wrap gap-1 sm:gap-1.5">
+              {product.product_type && (
+                <span className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium border ${
+                  isDark ? "bg-blue-500/10 text-blue-300 border-blue-500/20" : "bg-blue-50 text-blue-700 border-blue-200"
+                }`}>
+                  <Tag className="w-2.5 h-2.5" />{product.product_type}
+                </span>
+              )}
+              {product.platform && (
+                <span className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium border ${
+                  isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                }`}>
+                  <Monitor className="w-2.5 h-2.5" />{product.platform}
+                </span>
+              )}
+              {(product.tags || []).slice(0, 1).map((t) => (
+                <span key={t} className={`hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                  isDark ? "bg-white/5 text-slate-400 border-white/10" : "bg-slate-100 text-slate-600 border-slate-200"
+                }`}>{t}</span>
+              ))}
+            </div>
           </div>
 
-          {/* rating + updated */}
-          <div className="flex items-center justify-between">
-            <StarRating />
-            <span className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-500"}`}>
-              <Clock className="w-2.5 h-2.5 inline mr-0.5" />
-              {formatDate((product as any).updated_at) || formatDate((product as any).created_at) || "Recently"}
-            </span>
-          </div>
-
-          {/* pricing */}
-          {planCount > 0 && cheapestPrice !== null && (
-            <div className={`flex items-center justify-between pt-3 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}>
-              <span className={`flex items-center gap-1 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                <Layers className="w-3 h-3" /> {planCount} plan{planCount !== 1 ? "s" : ""}
-              </span>
-              <span className={`text-lg font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
-                {cheapestPrice === 0 ? "Free" : `${formatPrice(cheapestPrice)}+`}
+          {/* bottom section: rating, pricing, actions */}
+          <div className="shrink-0 space-y-1.5 sm:space-y-2.5">
+            {/* rating + updated */}
+            <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
+              <StarRating />
+              <span className={`${isDark ? "text-slate-500" : "text-slate-500"}`}>
+                <Clock className="w-2.5 h-2.5 inline mr-0.5" />
+                {formatDate((product as any).updated_at) || formatDate((product as any).created_at) || "Recently"}
               </span>
             </div>
-          )}
 
-          {/* actions — Add to Cart, View Details, Free Trial only */}
-          <div className="mt-auto pt-2 space-y-2.5">
-            {hasTrial && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onOpen(); }}
-                className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-400/25 bg-emerald-500/[0.07] text-emerald-400 text-xs font-semibold hover:bg-emerald-500/15 hover:border-emerald-400/40 active:scale-[0.98] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50"
-              >
-                <Sparkles className="w-3 h-3" /> Free Trial
-              </button>
+            {/* pricing */}
+            {planCount > 0 && cheapestPrice !== null && (
+              <div className={`flex items-center justify-between py-1.5 sm:py-2 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}>
+                <span className={`flex items-center gap-1 text-[10px] sm:text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {planCount} plan{planCount !== 1 ? "s" : ""}
+                </span>
+                <span className={`text-sm sm:text-base font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
+                  {cheapestPrice === 0 ? "Free" : `${formatPrice(cheapestPrice)}+`}
+                </span>
+              </div>
             )}
-            <div className="flex gap-2">
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={(e) => { e.stopPropagation(); onAddToCart(); }}
-                aria-label={`Add ${product.name} to cart`}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl text-xs font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
-                  inCart
-                    ? "bg-emerald-500/15 border border-emerald-400/30 text-emerald-400 hover:bg-emerald-500/25"
-                    : "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:brightness-110"
-                }`}
-              >
-                {inCart ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
-                {inCart ? "In Cart" : "Add to Cart"}
-              </motion.button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onOpen(); }}
-                className={`group/btn flex-1 flex items-center justify-center gap-1 px-3 py-3 rounded-xl border text-xs font-semibold active:scale-[0.97] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
-                  isDark
-                    ? "border-white/10 bg-white/[0.04] text-slate-200 hover:border-blue-400/40 hover:bg-white/[0.08] hover:text-white"
-                    : "border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-200 hover:border-slate-300"
-                }`}
-              >
-                View Details
-                <ChevronRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
-              </button>
+
+            {/* actions — Free Trial on top, In Cart and Details side-by-side */}
+            <div className="space-y-1.5 sm:space-y-2">
+              {hasTrial && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onOpen(); }}
+                  className="w-full flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl border border-emerald-400/25 bg-emerald-500/[0.07] text-emerald-400 text-[10.5px] sm:text-xs font-semibold hover:bg-emerald-500/15 hover:border-emerald-400/40 active:scale-[0.98] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50"
+                >
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Free Trial
+                </button>
+              )}
+              <div className="flex gap-1.5 sm:gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={(e) => { e.stopPropagation(); onAddToCart(); }}
+                  aria-label={`Add ${product.name} to cart`}
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-3 rounded-xl text-[10.5px] sm:text-xs font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
+                    inCart
+                      ? "bg-emerald-500/15 border border-emerald-400/30 text-emerald-400 hover:bg-emerald-500/25"
+                      : "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:brightness-110"
+                  }`}
+                >
+                  {inCart ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" /> : <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />}
+                  <span className="truncate">{inCart ? "In Cart" : "Add to Cart"}</span>
+                </motion.button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onOpen(); }}
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-3 rounded-xl border text-[10.5px] sm:text-xs font-semibold active:scale-[0.97] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
+                    isDark
+                      ? "border-white/10 bg-white/[0.04] text-slate-200 hover:border-blue-400/40 hover:bg-white/[0.08] hover:text-white"
+                      : "border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <span className="truncate">Details</span>
+                  <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-300" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -778,9 +784,9 @@ export default function SoftwareStorePage() {
               animate={{ y: [0, -18, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
           </>
         )}
-        <div className="relative max-w-7xl mx-auto px-6 pt-10 pb-8 md:pt-12 md:pb-10 text-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-5 sm:pt-24 sm:pb-6 md:pt-12 md:pb-10 text-center">
           <motion.h1
-            className={`text-3xl md:text-5xl font-extrabold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}
+            className={`text-2xl sm:text-3xl md:text-5xl font-extrabold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring" as const, stiffness: 260, damping: 24 }}
@@ -788,7 +794,7 @@ export default function SoftwareStorePage() {
             Software <span className="bg-gradient-to-r from-blue-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">Store</span>
           </motion.h1>
           <motion.p
-            className={`text-base md:text-lg max-w-xl mx-auto mt-2.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}
+            className={`text-xs sm:text-base md:text-lg max-w-xl mx-auto mt-1 sm:mt-2.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.35 }}
@@ -801,22 +807,22 @@ export default function SoftwareStorePage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.35 }}
-            className="mt-5 inline-flex flex-wrap items-center justify-center gap-2.5 px-4 py-2 rounded-2xl border backdrop-blur-xl transition-all"
+            className="mt-3 sm:mt-5 inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border backdrop-blur-xl transition-all"
             style={{
               backgroundColor: isDark ? "rgba(15, 23, 42, 0.65)" : "rgba(255, 255, 255, 0.8)",
               borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.2)",
               boxShadow: isDark ? "0 4px 20px -2px rgba(0, 118, 255, 0.15)" : "0 4px 16px -2px rgba(0, 118, 255, 0.08)",
             }}
           >
-            <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
-            <span className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
+            <span className={`text-[11px] sm:text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"}`}>
               Looking to activate, renew, or manage your device node locks?
             </span>
             <Link
               href="/license"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-blue-500 hover:text-cyan-400 transition-colors underline underline-offset-4"
+              className="inline-flex items-center gap-1 text-[11px] sm:text-sm font-semibold text-blue-500 hover:text-cyan-400 transition-colors underline underline-offset-4"
             >
-              Open Universal Licensing Platform (ULP) <ArrowUpRight className="w-3.5 h-3.5" />
+              Open Universal Licensing Platform (ULP) <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Link>
           </motion.div>
         </div>
@@ -828,8 +834,8 @@ export default function SoftwareStorePage() {
           ? "bg-[#0f172a]/70 border-white/[0.08]"
           : "bg-white/70 border-slate-200 shadow-sm"
       }`}>
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 backdrop-blur-sm ${
               isDark
                 ? "text-slate-300 bg-white/[0.04] border border-white/10"
@@ -932,9 +938,9 @@ export default function SoftwareStorePage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
         {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-6 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <SkeletonCard />
@@ -991,7 +997,7 @@ export default function SoftwareStorePage() {
             </motion.button>
           </motion.div>
         ) : viewMode === "grid" ? (
-          <motion.div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch" variants={containerVariants} initial="hidden" animate="show">
+          <motion.div className="grid grid-cols-2 gap-2.5 sm:gap-6 lg:grid-cols-3 items-stretch" variants={containerVariants} initial="hidden" animate="show">
             {filteredProducts.map((product) => {
               const hasTrial = product.has_trial || product.plans?.some((p) => p.is_trial_plan);
               const cheapestPrice = product.plans && product.plans.length > 0

@@ -26,6 +26,7 @@ import {
   StoreToast, CartPanel, WishlistPanel, CompareModal, CompareTray,
 } from "../../components/store-panels";
 import { usePublicTheme } from "@/app/providers/PublicThemeProvider";
+import { useStoreUI } from "../../StoreUIContext";
 
 export default function ProductDetailPage() {
   const { publicTheme } = usePublicTheme();
@@ -43,6 +44,17 @@ export default function ProductDetailPage() {
   const cart = useCart();
   const wishlist = useWishlist();
   const compare = useCompare();
+  const storeUI = useStoreUI();
+
+  useEffect(() => {
+    if (!storeUI) return;
+    storeUI.setDrawerHandlers({
+      openCart: () => setShowCart(true),
+      openWishlist: () => setShowWishlist(true),
+      openHistory: () => router.push("/software-store?tab=history"),
+      openEmailCenter: () => {},
+    });
+  }, [storeUI, router]);
 
   const id = params?.id as string;
 
@@ -173,14 +185,12 @@ export default function ProductDetailPage() {
     <div className={`min-h-screen bg-transparent transition-colors duration-200 ${isDark ? "text-slate-100" : "text-slate-900"}`}>
       <StoreToast toast={toast} />
 
-      {/* Focused product header — Back to Store + Cart/Wishlist/Compare */}
-      <header className={`sticky top-[65px] z-30 backdrop-blur-2xl border-b transition-colors duration-200 ${
-        isDark ? "bg-[#0f172a]/70 border-white/[0.08]" : "bg-white/70 border-slate-200 shadow-sm"
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8">
+        {/* Navigation Breadcrumb */}
+        <div className="mb-4 sm:mb-6">
           <button
             onClick={() => router.push("/software-store")}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-sm font-semibold active:scale-[0.97] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold active:scale-[0.97] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
               isDark
                 ? "border-white/10 bg-white/[0.03] text-slate-200 hover:border-blue-400/40 hover:text-white hover:bg-white/[0.06]"
                 : "border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:text-slate-900 shadow-xs"
@@ -188,63 +198,7 @@ export default function ProductDetailPage() {
           >
             <ChevronLeft className="w-4 h-4" /> Back to Store
           </button>
-
-          <div className="flex items-center gap-2">
-            <motion.button
-              onClick={() => setShowCompare(true)}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              aria-label={`Compare (${compare.items.length} items)`}
-              className={`relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all ${
-                isDark
-                  ? "border-white/10 bg-white/[0.03] text-cyan-300 hover:bg-white/[0.07] hover:border-cyan-400/40"
-                  : "border-slate-200 bg-white text-cyan-600 hover:border-cyan-400 shadow-xs"
-              }`}
-            >
-              <Scale className="w-4 h-4" />
-              {compare.items.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-cyan-500 text-white text-[9px] font-bold flex items-center justify-center leading-none shadow-[0_0_12px_rgba(6,182,212,0.6)]">
-                  {compare.items.length}
-                </span>
-              )}
-            </motion.button>
-            <motion.button
-              onClick={() => setShowWishlist(true)}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              aria-label={`Wishlist (${wishlist.items.length} items)`}
-              className={`relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all ${
-                isDark
-                  ? "border-white/10 bg-white/[0.03] text-rose-300 hover:bg-white/[0.07] hover:border-rose-400/40"
-                  : "border-slate-200 bg-white text-rose-600 hover:border-rose-400 shadow-xs"
-              }`}
-            >
-              <Heart className="w-4 h-4" />
-              {wishlist.items.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center leading-none shadow-[0_0_12px_rgba(244,63,94,0.6)]">
-                  {wishlist.items.length}
-                </span>
-              )}
-            </motion.button>
-            <motion.button
-              onClick={() => setShowCart(true)}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              aria-label={`Cart (${cart.totalItems} items)`}
-              className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.6)] hover:brightness-110 transition-all"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              {cart.totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-400 text-emerald-950 text-[9px] font-bold flex items-center justify-center leading-none shadow-[0_0_12px_rgba(52,211,153,0.7)]">
-                  {cart.totalItems}
-                </span>
-              )}
-            </motion.button>
-          </div>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
         {/* Large Product Hero */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
